@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff check and format
+        entry: make lint
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: gitleaks
+        name: gitleaks, bandit and pip-audit
+        entry: make audit
+        language: system
+        pass_filenames: false
+        always_run: true

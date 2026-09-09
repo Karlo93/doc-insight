@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Scan our sources, excluding installed dependencies and generated caches."
+paths = ['''(^|[/\\])(\.venv|__pycache__|\.[^/\\]*_cache)([/\\]|$)''']
