@@ -1,7 +1,6 @@
 # Phase 0 CI
 
-Every pull request and push to `main` runs three independent jobs.
-Superseded runs on the same PR or branch are cancelled.
+Every PR and push to `main` runs three independent jobs; superseded runs are cancelled.
 
 ```mermaid
 flowchart LR
@@ -32,8 +31,8 @@ Use `uv run --locked pre-commit run --all-files` to verify the hooks manually.
 Gitleaks uses a pinned upstream Go module and scans current files, including staged edits;
 it excludes dependencies/caches, and does not scan deleted secrets in Git history.
 pip-audit skips editable workspace stubs; their installed third-party dependencies are audited.
-M1 tests cover extraction, actual OCR, format signatures, settings and CLI output;
-the original smoke test still verifies all eight workspace imports.
+Tests cover extraction/OCR, structure, provider contracts and CLI output; Python socket access is blocked.
+Lingua/spaCy models install with dependencies; runtime downloads run separately with `make test-models`, outside CI.
 Local `make test` needs Tesseract with `eng` and `hrv`, as described in [pipeline setup](pipeline.md).
 
 ## Protect main by hand
@@ -45,9 +44,8 @@ Settings → Branches → Add classic branch protection rule → branch name pat
 - [ ] Leave **Allow force pushes** unchecked.
 - [ ] Enable **Do not allow bypassing the above settings** (includes administrators).
 Until this rule is active, failed checks do not prevent a merge.
-GitHub only offers branch protection on public repositories or paid plans,
-so this rule cannot be added while the repository is private on the free plan;
-add it at the phase that makes the repository public.
+GitHub offers branch protection on public repositories or paid plans;
+while this repository is private on the free plan, defer it until publication.
 
 ## Not in phase 0 on purpose
 
@@ -59,5 +57,4 @@ add it at the phase that makes the repository public.
 Only checkout, setup-uv and upload-artifact actions are allowed, with read-only contents permission.
 setup-uv uses `v7`, its last published major tag; v8+ only publish full version tags.
 Dependabot checks actions and Python dependencies weekly, grouping minor/patch changes.
-It uses the `uv` ecosystem, not `pip`, so its pull requests update `uv.lock`,
-the file `make setup` installs from.
+The `uv` ecosystem updates `uv.lock`, the file `make setup` installs from.

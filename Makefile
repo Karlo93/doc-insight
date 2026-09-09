@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test audit check
+.PHONY: setup lint typecheck test test-models audit check
 
 setup:
 	uv sync --locked --all-packages
@@ -12,6 +12,9 @@ typecheck:
 
 test:
 	uv run --locked --all-packages pytest
+
+test-models:
+	uv run --locked --all-packages pytest -m models --no-cov
 
 audit:
 	uv run --locked --all-packages bandit -c pyproject.toml -r apps packages && uv run --locked --all-packages pip-audit --skip-editable

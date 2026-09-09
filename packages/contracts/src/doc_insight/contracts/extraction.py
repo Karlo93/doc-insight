@@ -5,13 +5,15 @@ from typing import Literal
 from pydantic import BaseModel, Field, computed_field
 
 MediaType = Literal["application/pdf", "image/png", "image/jpeg", "image/tiff"]
-PIPELINE_VERSION = "2"
+PIPELINE_VERSION = "4"
 
 
 class Page(BaseModel):
     number: int = Field(ge=1)
     text: str
     source: Literal["text_layer", "ocr"]
+    language: str = "und"
+    confidence: float = Field(default=0, ge=0, le=1)
 
     @computed_field  # type: ignore[prop-decorator]
     @property

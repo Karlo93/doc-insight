@@ -21,7 +21,8 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "apps", "packages"]
-addopts = "--cov --cov-report=term-missing --cov-report=xml --cov-fail-under=70"
+addopts = '--cov --cov-report=term-missing --cov-report=xml --cov-fail-under=70 -m "not models and not integration"'
+markers = ["models: requires runtime model downloads", "integration: requires Postgres"]
 
 [tool.coverage.run]
 source = ["apps", "packages"]
@@ -37,7 +38,7 @@ target-version = "py312"
 python_version = "3.12"
 strict = true
 explicit_package_bases = true
-mypy_path = ["apps/worker/src", "packages/contracts/src"]
+mypy_path = ["apps/worker/src", "packages/contracts/src", "packages/testing/src"]
 
 [[tool.mypy.overrides]]
 module = ["pypdfium2.*", "pytesseract.*"]
