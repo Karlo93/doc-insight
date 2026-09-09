@@ -42,6 +42,9 @@ Settings → Branches → Add classic branch protection rule → branch name pat
 - [ ] Leave **Allow force pushes** unchecked.
 - [ ] Enable **Do not allow bypassing the above settings** (includes administrators).
 Until this rule is active, failed checks do not prevent a merge.
+GitHub only offers branch protection on public repositories or paid plans,
+so this rule cannot be added while the repository is private on the free plan;
+add it at the phase that makes the repository public.
 
 ## Not in phase 0 on purpose
 
@@ -53,3 +56,5 @@ Until this rule is active, failed checks do not prevent a merge.
 Only checkout, setup-uv and upload-artifact actions are allowed, with read-only contents permission.
 setup-uv uses `v7`, its last published major tag; v8+ only publish full version tags.
 Dependabot checks actions and Python dependencies weekly, grouping minor/patch changes.
+It uses the `uv` ecosystem, not `pip`, so its pull requests update `uv.lock`,
+the file `make setup` installs from.
