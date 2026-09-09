@@ -9,6 +9,8 @@ members = ["apps/*", "packages/*"]
 [dependency-groups]
 dev = [
     "bandit[toml]>=1.8",
+    "fonttools>=4.64.0",
+    "fpdf2>=2.8.8",
     "mypy>=1.14",
     "pip-audit>=2.9",
     "pre-commit>=4",
@@ -35,6 +37,11 @@ target-version = "py312"
 python_version = "3.12"
 strict = true
 explicit_package_bases = true
+mypy_path = ["apps/worker/src", "packages/contracts/src"]
+
+[[tool.mypy.overrides]]
+module = ["pypdfium2.*", "pytesseract.*"]
+ignore_missing_imports = true
 
 [tool.bandit]
 exclude_dirs = ["tests", "*/tests/*"]

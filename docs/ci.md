@@ -19,6 +19,7 @@ flowchart LR
 | Setup | Sync every workspace member from uv.lock | Reproduce the same environment | Lockfile, download or installation failed |
 | quality | `make lint` + `make typecheck` | Catch style defects and type errors | Fix the reported code or formatting |
 | test | `make test`; upload coverage.xml for 7 days | Check behavior and enforce 70% coverage | Tests failed, coverage fell below 70%, or upload failed |
+| OCR binary | Install Tesseract and Croatian data in the test job | Exercise actual scan extraction on Ubuntu without model downloads | Installation failed or required language data is unavailable |
 | security | `make audit`: bandit, pip-audit, gitleaks | Catch unsafe Python, vulnerable dependencies and exposed secrets | Review and fix the reported finding or tool failure |
 
 ## Run the same locally
@@ -31,7 +32,9 @@ Use `uv run --locked pre-commit run --all-files` to verify the hooks manually.
 Gitleaks uses a pinned upstream Go module and scans current files, including staged edits;
 it excludes dependencies/caches, and does not scan deleted secrets in Git history.
 pip-audit skips editable workspace stubs; their installed third-party dependencies are audited.
-The import smoke test verifies all eight stubs; its coverage is not evidence of feature tests.
+M1 tests cover extraction, actual OCR, format signatures, settings and CLI output;
+the original smoke test still verifies all eight workspace imports.
+Local `make test` needs Tesseract with `eng` and `hrv`, as described in [pipeline setup](pipeline.md).
 
 ## Protect main by hand
 

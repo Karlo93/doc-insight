@@ -2,6 +2,13 @@
 name = "doc-insight-worker"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
+dependencies = [
+    "doc-insight-contracts",
+    "pillow>=12.3.0",
+    "pydantic-settings>=2.15.0",
+    "pypdfium2>=5.13.0",
+    "pytesseract>=0.3.13",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -9,3 +16,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/doc_insight"]
+
+[project.scripts]
+di = "doc_insight.worker.cli:main"
+
+[tool.uv.sources]
+doc-insight-contracts = { workspace = true }
