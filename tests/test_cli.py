@@ -3,6 +3,8 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from doc_insight.testing.structure import FakeTokenizer
+from doc_insight.worker import cli
 from doc_insight.worker.cli import main
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -54,3 +56,29 @@ def test_cli_requires_a_known_command_and_path(
     with pytest.raises(SystemExit) as error:
         main()
     assert error.value.code == 2
+
+
+@pytest.mark.parametrize("as_json", [False, True])
+def test_analyze_cli_reports_language_entities_and_chunks(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], as_json: bool
+) -> None:
+    monkeypatch.setattr(cli, "HfTokenizer", lambda settings: FakeTokenizer())
+    arguments = ["di", "analyze", str(FIXTURES / "text_hr.pdf")]
+    monkeypatch.setattr("sys.argv", arguments + (["--json"] if as_json else []))
+    main()
+    output = capsys.readouterr().out
+    if as_json:
+        result = json.loads(output)
+        assert result["language"] == "hr"
+        assert result["entities"]
+        for chunk in result["chunks"]:
+            assert (
+                result["pages"][0]["text"][chunk["char_start"] : chunk["char_end"]]
+                == chunk["text"]
+            )
+    else:
+        assert "Language: hr | Pages: 1" in output
+        assert "Page 1 | hr | confidence=" in output
+        assert "Entity | Label | Page | Count" in output
+        assert "Marić" in output
+        assert "Chunks: 1 | Tokens min/max:" in output

@@ -1,7 +1,8 @@
-# Pipeline: M1 extraction
+# Pipeline: extraction and structure
 
 `di extract` is the file-to-text edge of the worker. It reads local PDF, PNG,
 JPEG and TIFF files; it does not contact a service or persist a document.
+`di analyze` adds page languages, named entities and chunks with exact page offsets.
 
 ```mermaid
 flowchart LR
@@ -14,6 +15,10 @@ flowchart LR
     render --> ocr[Tesseract eng + hrv]
     image --> ocr
     ocr --> pages
+    pages --> language[Language per page]
+    language --> ner[NER within document budget]
+    ner --> chunks[Token windows within each page]
+    chunks --> document[Document + entities + chunks]
 ```
 
 `ExtractedDocument` contains `pipeline_version`, `sha256`, `media_type`, `pages`
@@ -37,14 +42,62 @@ setting is process-global. A future queue adapter must respect that constraint.
 | `DI_TESSERACT_CMD` | `tesseract` | Binary on PATH, or its full path |
 
 One cached Pydantic-settings object reads the environment on first use.
-Change environment values before starting `di`. `PIPELINE_VERSION = "2"` lives
-in the extraction contracts; bump it whenever extraction output changes.
+Change environment values before starting `di`. `PIPELINE_VERSION = "3"` lives
+in the extraction contracts; bump it whenever pipeline output changes, including models.
 OCR text may vary across Tesseract/language-data versions; tests assert known
 words, not byte-identical OCR output. Dependencies and fixture tooling use uv.lock.
 Version 2 applies declared EXIF orientation before image OCR and removes the tag;
 the sideways-JPEG regression test checks recovered words, not just nonempty output.
 PDFium applies PDF rotation metadata when rendering. Unmarked sideways scans,
 including images inside PDFs, still need orientation detection, which M1 does not do.
+
+## Structure (M2)
+
+| Model | Fields and meaning |
+| --- | --- |
+| `Document` | Extraction metadata plus `pages`, `entities`, `chunks`; derived `language` requires more than half the pages to agree, otherwise `und` |
+| `Page` | Extraction fields plus `language` and `confidence`; extraction alone leaves these at `und` and `0` |
+| `Chunk` | `text`, one-based `page`, zero-based document-wide `ord`, `char_start`, `char_end`, `token_count` |
+| `Entity` | Original `text`, model's `label`, first occurrence's `page`, `char_start`, `char_end`, and document-wide `count` |
+
+Offsets are zero-based Python character positions, with an exclusive end:
+`page.text[chunk.char_start:chunk.char_end] == chunk.text`. They are not byte offsets.
+Token windows retain the original whitespace between tokens. Chunks never cross pages:
+citations stay unambiguous, at the cost of splitting sentences that continue on another page.
+The last window stops at the page's final token; empty pages produce no chunks.
+
+Lingua considers only configured languages, using a prefix of each page. Confidence below
+the threshold yields `und`; the measured confidence remains available. English and Croatian
+pages use their own spaCy NER model; other languages emit a metadata-only skip log.
+The NER character budget is consumed cumulatively in page order, including unsupported pages;
+only that prefix reaches NER. Language detection and chunking still see every page.
+Entities collapse by Unicode NFKC normalization, case folding, collapsed whitespace and label.
+The first occurrence keeps its original spelling and offsets; repeats increment its count.
+Labels remain model-native (`PERSON` in English, `PER` in Croatian), avoiding a lossy mapping.
+
+| Environment variable | Default | Purpose |
+| --- | --- | --- |
+| `DI_LANGUAGES` | `en,hr,de` | Comma-separated Lingua candidate languages |
+| `DI_LANG_SAMPLE_CHARS` | `4000` | Language detection prefix per page |
+| `DI_LANG_MIN_CONFIDENCE` | `0.5` | Minimum confidence for a language label |
+| `DI_NER_MAX_CHARS` | `100000` | Maximum total page characters considered for NER; zero disables it |
+| `DI_NER_MODELS` | `{"en":"en_core_web_sm","hr":"hr_core_news_sm"}` | JSON map of languages to installed spaCy models |
+| `DI_CHUNK_TOKENS` | `400` | Maximum tokens in a window |
+| `DI_CHUNK_OVERLAP` | `60` | Shared tokens between windows; must be smaller than the window |
+| `DI_EMBED_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Model whose tokenizer defines the windows; embeddings arrive in M3 |
+| `DI_TOKENIZER_REVISION` | `e8f8c211226b894fcb81acc59f3b34ba3efd5f42` | Immutable tokenizer revision; change together with the model and pipeline version |
+| `DI_MODEL_CACHE` | `.cache/models` | Shared, ignored runtime model cache |
+
+`LanguageDetector`, `NerExtractor` and `Tokenizer` are Protocols in contracts, with real
+adapters in worker and fakes in testing. `analyze` composes them without opening files or
+loading models itself. The tokenizer returns character spans, not reconstructed token strings.
+All model loaders are lazy and cached per configuration for the life of the process.
+spaCy's English and Croatian 3.8.0 wheels are exact URLs in the worker's `pyproject.toml`,
+compatible with spaCy 3.8; Lingua's models ship inside its package. `uv.lock` pins dependencies.
+pip-audit reports the two model wheels as unauditable because they are outside PyPI;
+their exact URLs and lockfile hashes fix the artifacts, but do not constitute a vulnerability audit.
+The first `di analyze` downloads the pinned tokenizer into `DI_MODEL_CACHE`; later processes
+reuse it. No embedding weights are needed in M2.
 
 ## Run it: WSL2/Linux
 
@@ -67,8 +120,11 @@ Commands work from the repository root in either shell:
 uv run --locked --all-packages di extract tests/fixtures/mixed.pdf
 uv run --locked --all-packages di extract tests/fixtures/text_hr.pdf --json
 uv run --locked --all-packages di extract "inputs/demo-files/DSJ Europe Engineering Salary Guide.pdf"
+uv run --locked --all-packages di analyze tests/fixtures/text_hr.pdf --json
+uv run --locked --all-packages di analyze "inputs/demo-files/DSJ Europe Engineering Salary Guide.pdf"
 uv run --locked --all-packages python scripts/make_fixtures.py
 make check
+make test-models
 ```
 
 The mixed fixture prints two pages: first `text_layer`, then `ocr`, with counts
@@ -76,6 +132,12 @@ and previews limited to 200 characters per page. JSON includes the full text.
 These are explicitly requested CLI outputs, not log records; no document text
 is logged. Treat redirected output as document data, and keep it under ignored
 `inputs/` or `.cache/`. Missing files, invalid content and OCR failures exit nonzero.
+`di analyze` prints document/page languages, confidence, an entity table and chunk size stats;
+the Croatian fixture reports `hr`. Its JSON includes full pages, entity positions and chunks.
+`make test` uses fakes plus installed Lingua/spaCy models and blocks Python socket connections.
+It checks every fixture's chunk slices, overlap, entity counts and NER limits without downloads.
+`make test-models` separately exercises the real Hugging Face tokenizer; it may download files.
+That small subset disables coverage reporting; the full default suite enforces the 70% floor.
 
 Fixtures use a committed font subset, a fixed PDF creation date and twelve fixed
 topics across six pages; rerunning the generator recreates all five files.
@@ -83,9 +145,8 @@ See [font provenance](../scripts/fonts/readme.md) and [ADR-0001](adr/0001-text-e
 
 ## Not yet
 
-M2 adds language, entities, tokenizer spans and chunks; M3 adds embeddings;
-M4 adds tenant-filtered persistence, transactions and vector search.
+M3 adds embeddings; M4 adds tenant-filtered persistence, transactions and vector search.
 There are no provider stubs for those stages before their first use.
-Extraction has no tenant state or database; its CLI therefore needs no tenant yet.
+Extraction and analysis have no tenant state or database; their CLIs need no tenant yet.
 Multi-frame TIFF traversal, mixed text/image regions within one page, encrypted
 PDF passwords and parallel extraction are not implemented in M1.

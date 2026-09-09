@@ -1,8 +1,10 @@
-"""Process-wide configuration; only settings needed by extraction exist in M1."""
+"""Process-wide configuration for extraction and structured analysis."""
 
 from functools import cache
+from pathlib import Path
+from typing import Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +15,22 @@ class Settings(BaseSettings):
     ocr_dpi: int = Field(default=200, gt=0)
     ocr_langs: str = "eng+hrv"
     tesseract_cmd: str = "tesseract"
+    languages: str = "en,hr,de"
+    lang_sample_chars: int = Field(default=4000, gt=0)
+    lang_min_confidence: float = Field(default=0.5, ge=0, le=1)
+    ner_max_chars: int = Field(default=100_000, ge=0)
+    ner_models: dict[str, str] = {"en": "en_core_web_sm", "hr": "hr_core_news_sm"}
+    chunk_tokens: int = Field(default=400, gt=0)
+    chunk_overlap: int = Field(default=60, ge=0)
+    embed_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    tokenizer_revision: str = "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
+    model_cache: Path = Path(".cache/models")
+
+    @model_validator(mode="after")
+    def valid_overlap(self) -> Self:
+        if self.chunk_overlap >= self.chunk_tokens:
+            raise ValueError("chunk_overlap must be smaller than chunk_tokens")
+        return self
 
 
 @cache
