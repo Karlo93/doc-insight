@@ -20,16 +20,18 @@ class Settings(BaseSettings):
     lang_min_confidence: float = Field(default=0.5, ge=0, le=1)
     ner_max_chars: int = Field(default=100_000, ge=0)
     ner_models: dict[str, str] = {"en": "en_core_web_sm", "hr": "hr_core_news_sm"}
-    chunk_tokens: int = Field(default=400, gt=0)
-    chunk_overlap: int = Field(default=60, ge=0)
+    # MiniLM's 128-token sentence input includes two special tokens.
+    chunk_tokens: int = Field(default=120, gt=0, le=126)
+    chunk_overlap: int = Field(default=24, ge=0)
     embed_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     tokenizer_revision: str = "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
-    model_cache: Path = Path(".cache/models")
+    model_cache: Path = Path.home() / ".cache" / "doc-insight" / "models"
 
     @model_validator(mode="after")
     def valid_overlap(self) -> Self:
         if self.chunk_overlap >= self.chunk_tokens:
             raise ValueError("chunk_overlap must be smaller than chunk_tokens")
+        self.model_cache = self.model_cache.expanduser().resolve()
         return self
 
 

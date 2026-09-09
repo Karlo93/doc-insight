@@ -63,11 +63,11 @@ def test_every_fixture_chunk_is_an_exact_page_slice(filename: str) -> None:
 def test_overlapping_windows_cover_all_tokens_without_redundant_tail() -> None:
     words = [f"word{i}" for i in range(1000)]
     result = with_fakes(document(" ".join(words)))
-    assert [chunk.token_count for chunk in result.chunks] == [400, 400, 320]
-    for chunk, start in zip(result.chunks, [0, 340, 680], strict=True):
-        assert chunk.text.split() == words[start : start + 400]
+    assert [chunk.token_count for chunk in result.chunks] == [120] * 10 + [40]
+    for chunk, start in zip(result.chunks, range(0, 1000, 96), strict=True):
+        assert chunk.text.split() == words[start : start + 120]
     for left, right in zip(result.chunks, result.chunks[1:]):
-        assert left.text.split()[-60:] == right.text.split()[:60]
+        assert left.text.split()[-24:] == right.text.split()[:24]
 
 
 def test_page_boundaries_empty_pages_and_zero_overlap() -> None:
@@ -188,6 +188,7 @@ def test_entity_counts_across_pages() -> None:
     "overrides",
     [
         {"chunk_tokens": 0},
+        {"chunk_tokens": 127},
         {"chunk_overlap": -1},
         {"chunk_tokens": 10, "chunk_overlap": 10},
         {"ner_max_chars": -1},

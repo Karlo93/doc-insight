@@ -82,6 +82,7 @@ class SpacyNerExtractor:
                 char_end=span.end_char,
             )
             for span in _ner_model(model)(page.text).ents
+            if "\n" not in span.text
         ]
 
 

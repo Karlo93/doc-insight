@@ -33,8 +33,11 @@ def print_analysis(document: Document) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(prog="di")
     commands = parser.add_subparsers(dest="command", required=True)
-    for command in ("extract", "analyze"):
-        subcommand = commands.add_parser(command)
+    for command, help_text in {
+        "extract": "Extract text with OCR fallback",
+        "analyze": "Detect language, entities and chunks",
+    }.items():
+        subcommand = commands.add_parser(command, help=help_text)
         subcommand.add_argument("path", type=Path)
         subcommand.add_argument("--json", action="store_true")
     args = parser.parse_args()

@@ -1,5 +1,6 @@
 """Ordered page analysis; adapters are supplied explicitly at the boundary."""
 
+import re
 from unicodedata import normalize
 
 from doc_insight.contracts.extraction import PIPELINE_VERSION, ExtractedDocument, Page
@@ -15,24 +16,42 @@ from doc_insight.worker.settings import Settings
 
 
 def chunk_page(
-    page: Page, spans: list[tuple[int, int]], settings: Settings, start_ord: int
+    page: Page, tokenizer: Tokenizer, settings: Settings, start_ord: int
 ) -> list[Chunk]:
+    words = list(re.finditer(r"\S+", page.text))
     chunks: list[Chunk] = []
-    for index in range(0, len(spans), settings.chunk_tokens - settings.chunk_overlap):
-        window = spans[index : index + settings.chunk_tokens]
-        start, end = window[0][0], window[-1][1]
-        chunks.append(
-            Chunk(
-                text=page.text[start:end],
-                page=page.number,
-                ord=start_ord + len(chunks),
-                char_start=start,
-                char_end=end,
-                token_count=len(window),
+    first = 0
+    while first < len(words):
+        last, count = first, 0
+        start = words[first].start()
+        while last < len(words):
+            size = len(tokenizer.encode(page.text[start : words[last].end()]))
+            if size > settings.chunk_tokens:
+                break
+            last, count = last + 1, size
+        if last == first:
+            raise ValueError(f"A word on page {page.number} exceeds chunk_tokens")
+        end = words[last - 1].end()
+        if not chunks or end > chunks[-1].char_end:
+            chunks.append(
+                Chunk(
+                    text=page.text[start:end],
+                    page=page.number,
+                    ord=start_ord + len(chunks),
+                    char_start=start,
+                    char_end=end,
+                    token_count=count,
+                )
             )
-        )
-        if index + settings.chunk_tokens >= len(spans):
+        if last == len(words):
             break
+        next_first = last
+        while next_first > first + 1:
+            overlap = page.text[words[next_first - 1].start() : end]
+            if len(tokenizer.encode(overlap)) > settings.chunk_overlap:
+                break
+            next_first -= 1
+        first = next_first
     return chunks
 
 
@@ -76,9 +95,7 @@ def analyze(
         if text:
             entities.extend(ner.extract(page.model_copy(update={"text": text})))
         remaining -= len(text)
-        chunks.extend(
-            chunk_page(page, tokenizer.encode(page.text), settings, len(chunks))
-        )
+        chunks.extend(chunk_page(page, tokenizer, settings, len(chunks)))
     metadata = document.model_dump(exclude={"pages", "page_count", "pipeline_version"})
     return Document(
         **metadata,

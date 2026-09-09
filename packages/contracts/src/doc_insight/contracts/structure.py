@@ -37,9 +37,11 @@ class Document(ExtractedDocument):
     @computed_field  # type: ignore[prop-decorator]
     @property
     def language(self) -> str:
-        votes = Counter(page.language for page in self.pages)
+        votes: Counter[str] = Counter()
+        for page in self.pages:
+            votes[page.language] += page.char_count
         return next(
-            (code for code, count in votes.items() if count > len(self.pages) // 2),
+            (code for code, count in votes.items() if count > votes.total() / 2),
             "und",
         )
 
