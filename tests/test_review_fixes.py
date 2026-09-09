@@ -30,13 +30,34 @@ def test_subword_windows_keep_whole_words_and_exact_counts() -> None:
     )
 
 
-def test_one_oversized_word_fails_without_leaking_its_text() -> None:
+class DoubledTokenizer:
+    """Two tokens per character: a budget of one can never hold a token."""
+
+    def encode(self, text: str) -> list[tuple[int, int]]:
+        return [
+            span
+            for match in re.finditer(r"\S", text)
+            for span in [(match.start(), match.end())] * 2
+        ]
+
+
+def test_one_oversized_word_is_cut_between_tokens_instead_of_failing() -> None:
+    page = Page(number=2, text="see confidential now", source="text_layer")
+    chunks = chunk_page(
+        page, CharacterTokenizer(), Settings(chunk_tokens=5, chunk_overlap=0), 0
+    )
+    assert [chunk.text for chunk in chunks] == ["see", "confi", "denti", "al now"]
+    assert [chunk.token_count for chunk in chunks] == [3, 5, 5, 5]
+    assert all(
+        page.text[chunk.char_start : chunk.char_end] == chunk.text for chunk in chunks
+    )
+
+
+def test_a_budget_too_small_for_one_token_fails_without_leaking_text() -> None:
     page = Page(number=2, text="confidential", source="text_layer")
-    with pytest.raises(
-        ValueError, match="A word on page 2 exceeds chunk_tokens"
-    ) as error:
+    with pytest.raises(ValueError, match="page 2") as error:
         chunk_page(
-            page, CharacterTokenizer(), Settings(chunk_tokens=3, chunk_overlap=0), 0
+            page, DoubledTokenizer(), Settings(chunk_tokens=1, chunk_overlap=0), 0
         )
     assert page.text not in str(error.value)
 

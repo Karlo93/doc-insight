@@ -17,7 +17,7 @@ from doc_insight.worker.providers import (
     SpacyNerExtractor,
 )
 from doc_insight.worker.settings import Settings
-from doc_insight.worker.structure import analyze
+from doc_insight.worker.structure import analyze, chunk_page
 from huggingface_hub import hf_hub_download
 from tokenizers import Tokenizer as RustTokenizer
 
@@ -182,3 +182,20 @@ def test_default_chunks_fit_the_pinned_sentence_model_with_special_tokens() -> N
         len(tokenizer.encode(chunk.text).ids) <= config["max_seq_length"]
         for chunk in result.chunks
     )
+
+
+@pytest.mark.models
+def test_a_long_url_is_cut_between_tokens_and_fully_covered() -> None:
+    settings = Settings()
+    tokenizer = HfTokenizer(settings)
+    url = "https://example.com/reports/" + "a1b2c3d4e5f6" * 12 + ".pdf"
+    page = Page(number=1, text=f"See {url} for details.", source="text_layer")
+    assert len(tokenizer.encode(url)) > settings.chunk_tokens
+    chunks = chunk_page(page, tokenizer, settings, 0)
+    assert len(chunks) >= 2
+    for chunk in chunks:
+        assert 0 < chunk.token_count <= settings.chunk_tokens
+        assert chunk.token_count == len(tokenizer.encode(chunk.text))
+        assert page.text[chunk.char_start : chunk.char_end] == chunk.text
+    covered = {i for chunk in chunks for i in range(chunk.char_start, chunk.char_end)}
+    assert all(i in covered for i, char in enumerate(page.text) if not char.isspace())

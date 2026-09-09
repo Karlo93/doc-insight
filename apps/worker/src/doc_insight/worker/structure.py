@@ -15,23 +15,51 @@ from doc_insight.contracts.structure import (
 from doc_insight.worker.settings import Settings
 
 
+def _units(page: Page, tokenizer: Tokenizer, cap: int) -> list[tuple[int, int]]:
+    """Whole words, except that a word longer than the cap is cut between its tokens."""
+    units: list[tuple[int, int]] = []
+    for word in re.finditer(r"\S+", page.text):
+        # Every token covers at least one character, so a short word always fits.
+        offsets = tokenizer.encode(word.group()) if len(word.group()) > cap else []
+        if len(offsets) <= cap:
+            units.append((word.start(), word.end()))
+            continue
+        # A long URL or OCR run has no whitespace to cut at. This is the only place a
+        # chunk boundary may fall inside a word; failing the whole document was rejected.
+        first = 0
+        while first < len(offsets):
+            last = first + 1
+            while last < len(offsets):
+                piece = word.group()[offsets[first][0] : offsets[last][1]]
+                if len(tokenizer.encode(piece)) > cap:
+                    break
+                last += 1
+            units.append(
+                (word.start() + offsets[first][0], word.start() + offsets[last - 1][1])
+            )
+            first = last
+    return units
+
+
 def chunk_page(
     page: Page, tokenizer: Tokenizer, settings: Settings, start_ord: int
 ) -> list[Chunk]:
-    words = list(re.finditer(r"\S+", page.text))
+    units = _units(page, tokenizer, settings.chunk_tokens)
     chunks: list[Chunk] = []
     first = 0
-    while first < len(words):
+    while first < len(units):
         last, count = first, 0
-        start = words[first].start()
-        while last < len(words):
-            size = len(tokenizer.encode(page.text[start : words[last].end()]))
+        start = units[first][0]
+        while last < len(units):
+            size = len(tokenizer.encode(page.text[start : units[last][1]]))
             if size > settings.chunk_tokens:
                 break
             last, count = last + 1, size
         if last == first:
-            raise ValueError(f"A word on page {page.number} exceeds chunk_tokens")
-        end = words[last - 1].end()
+            raise ValueError(
+                f"chunk_tokens cannot hold one token on page {page.number}"
+            )
+        end = units[last - 1][1]
         if not chunks or end > chunks[-1].char_end:
             chunks.append(
                 Chunk(
@@ -43,11 +71,11 @@ def chunk_page(
                     token_count=count,
                 )
             )
-        if last == len(words):
+        if last == len(units):
             break
         next_first = last
         while next_first > first + 1:
-            overlap = page.text[words[next_first - 1].start() : end]
+            overlap = page.text[units[next_first - 1][0] : end]
             if len(tokenizer.encode(overlap)) > settings.chunk_overlap:
                 break
             next_first -= 1

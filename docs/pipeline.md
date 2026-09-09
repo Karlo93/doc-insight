@@ -66,9 +66,10 @@ Chunks use whole whitespace-delimited words and retain the original whitespace b
 citations stay unambiguous, at the cost of splitting sentences that continue on another page.
 The actual chunk text is tokenized before acceptance: `token_count` never exceeds the configured cap.
 Overlap includes as many whole words as fit its budget, so it may be smaller than requested.
-Empty pages produce no chunks. A single word larger than the budget raises a page-only error;
-we do not split a word or silently exceed the model limit. Tiny final chunks remain separate
-when merging would exceed the cap. See [ADR-0002](adr/0002-structured-representation.md).
+Empty pages produce no chunks. A single word larger than the budget, such as a long URL or an
+OCR run, is cut between its own tokens: the only place a boundary can fall inside a word, and
+the model limit is still never exceeded. Tiny final chunks remain separate when merging would
+exceed the cap. See [ADR-0002](adr/0002-structured-representation.md).
 
 Lingua considers only configured languages, using a prefix of each page. Confidence below
 the threshold yields `und`; the measured confidence remains available. Document language uses

@@ -18,7 +18,7 @@ The original 400-token default was inconsistent with that published sentence con
   coupled to tokenization in M2, not a decision that can be postponed until database design.
 - Accumulate whole whitespace-delimited words while the actual candidate token count fits.
   Retokenizing each candidate avoids assuming a word's tokenization is independent of context.
-  Overlap rounds down to whole words; one word exceeding the cap fails with a page-only error.
+  Overlap rounds down to whole words; one word exceeding the cap is cut between its own tokens.
 - Never cross pages. Offsets are half-open Python character positions in extracted page text.
   Exact slicing preserves citation text; tests also require readable boundaries and capped counts.
 - Detect language per page; weight the document's strict majority by character count.
@@ -34,7 +34,8 @@ The original 400-token default was inconsistent with that published sentence con
 - Smaller chunks may lose some local context; overlap and M3 retrieval evaluation measure this trade-off.
 - Snapping outward can exceed the input cap; snapping whole words inside it preserves both guarantees.
 - Tiny tails remain when folding them would exceed the cap; redistribution adds complexity without
-  fixing a correctness problem. Long unbroken text may fail rather than yield broken-word citations.
+  fixing a correctness problem. A long URL or OCR run is cut between its tokens, so a boundary can
+  fall inside that word alone; failing a whole document for one string was rejected.
 - Candidate retokenization does more CPU work than slicing precomputed token windows; the bounded
   120-token window keeps this simple implementation practical for the current document workload.
 - Page boundaries can split a continuing sentence; crossing pages would complicate citation positions.
