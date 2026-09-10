@@ -8,6 +8,7 @@ from pathlib import Path
 import lingua
 import spacy
 from doc_insight.contracts.extraction import Page
+from doc_insight.contracts.settings import EmbeddingSettings
 from doc_insight.contracts.structure import Entity, LanguageGuess
 from doc_insight.worker.settings import Settings
 from huggingface_hub import hf_hub_download
@@ -88,7 +89,7 @@ class SpacyNerExtractor:
 
 @dataclass
 class HfTokenizer:
-    settings: Settings
+    settings: EmbeddingSettings
 
     def encode(self, text: str) -> list[tuple[int, int]]:
         tokenizer = _tokenizer(

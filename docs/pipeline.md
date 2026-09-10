@@ -242,7 +242,8 @@ Standalone child replacement also locks its parent and commits both child sets t
 Search orders tenant-owned chunks by pgvector cosine distance and returns `1 - distance` as
 the score (similarity, not confidence). The HNSW index supports approximate search as data grows;
 Postgres may choose an exact scan for small datasets. Filtered approximate recall needs a larger
-tenant-specific benchmark before tuning. No full-text or hybrid ranking is present.
+tenant-specific benchmark before tuning. The [query service](query.md) adds full-text
+retrieval, RRF fusion and grounded answers; `di search` remains cosine-only.
 `di show` returns metadata, chunks and entities; original files and full page text are not stored.
 Offsets refer to the normalized extracted page, so retain the original file for page reconstruction.
 
@@ -354,10 +355,10 @@ See [font provenance](../scripts/fonts/readme.md) and [ADR-0001](adr/0001-text-e
 
 ## Not yet
 
-Queue, HTTP services, gateway/JWT, LLM answers, hybrid retrieval and application
-containers remain later work. `DOCKER_DEV=no`: only Postgres runs in Docker here.
+Queue, ingest HTTP service, gateway/JWT and application containers remain later work.
+Infrastructure and telemetry have independent Compose profiles.
 M2 performance follow-ups are still pending; the bilingual fixtures and real Croatian smoke
 test do not replace a representative retrieval-quality benchmark.
-Extraction and analysis remain stateless; only index/show/search require a tenant.
+Extraction and analysis remain stateless; index/show/search and the query service require a tenant.
 Multi-frame TIFF traversal, mixed text/image regions within one page, encrypted
 PDF passwords and parallel extraction are not implemented in M1.

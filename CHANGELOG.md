@@ -15,6 +15,9 @@ under a version and an ISO date when a release is cut.
 - Add Croatian retrieval fixtures, bilingual recall gates and English-to-Croatian evaluation reports; pipeline version stays 6.
 - Enforce FORCE row-level security with transaction-local tenant context and separate runtime/migration credentials.
 - Add optional OTLP traces, stage/request duration metrics and document outcome counts.
+
+
+- Add tenant-scoped `POST /query`, PostgreSQL hybrid retrieval, cited extractive answers, optional Mistral fallback handling and heuristic abstention.
 - Persist processed documents, chunks and entities atomically in tenant-scoped Postgres tables.
 - Add `di index`, `di show`, `di search`, database lifecycle targets and integration CI.
 - Add contribution standards, code ownership, PR/issue templates and a security policy.
