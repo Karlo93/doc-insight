@@ -52,6 +52,7 @@ class PostgresRepository(UploadRepository):
         chunks: list[Chunk],
         entities: list[Entity],
     ) -> None:
+        """Replace validated derived rows within the caller-owned document transaction."""
         for chunk in chunks:
             validate_vector(chunk.embedding or [], self.dimension)
         for table, items in ((self.chunks, chunks), (self.entities, entities)):
@@ -61,6 +62,7 @@ class PostgresRepository(UploadRepository):
                 )
             )
             if items:
+                # Stable child IDs make replacement independent of delivery attempts.
                 rows = [
                     dict(
                         item.model_dump(),
@@ -75,6 +77,7 @@ class PostgresRepository(UploadRepository):
     def upsert_document(
         self, tenant_id: str, filename: str, document: Document
     ) -> StoredDocument:
+        """Commit metadata and derived output together, deduplicating by tenant and hash."""
         record = prepare_document(tenant_id, filename, document)
         values = record.model_dump(
             exclude={"chunks", "entities", "size_bytes", "object_key"}
@@ -105,6 +108,7 @@ class PostgresRepository(UploadRepository):
         chunks: list[Chunk],
         entities: list[Entity],
     ) -> None:
+        """Lock the tenant-owned parent before atomically replacing its derived rows."""
         with self.engine.begin() as connection:
             _set_tenant(connection, tenant_id)
             owner = connection.execute(
@@ -118,6 +122,7 @@ class PostgresRepository(UploadRepository):
 
     @contextmanager
     def snapshot(self, tenant_id: str) -> Iterator[QueryReader]:
+        """Keep retrieval and source reads on one tenant-bound repeatable-read snapshot."""
         with self.engine.connect().execution_options(
             isolation_level="REPEATABLE READ"
         ) as connection:

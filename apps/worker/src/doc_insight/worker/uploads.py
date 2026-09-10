@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 
 def set_tenant(connection: Connection, tenant_id: str) -> None:
+    """Bind RLS context to this transaction so pooled connections cannot retain it."""
     connection.execute(
         text("SELECT set_config('app.tenant_id', :tenant, true)"), {"tenant": tenant_id}
     )
@@ -39,6 +40,7 @@ class UploadRepository:
             return [StoredDocument.model_validate(row) for row in rows]
 
     def find_by_sha256(self, tenant_id: str, sha256: str) -> StoredDocument | None:
+        """Look up a duplicate only within the requesting tenant."""
         with self.engine.begin() as connection:
             set_tenant(connection, tenant_id)
             row = (
@@ -59,6 +61,7 @@ class UploadRepository:
         size_bytes: int,
         object_key: str,
     ) -> StoredDocument:
+        """Register uploaded metadata and an outbox event, or return the existing record."""
         record = StoredDocument(
             id=uuid4(),
             tenant_id=tenant_id,
@@ -73,6 +76,7 @@ class UploadRepository:
         return self._register(record)
 
     def _register(self, record: StoredDocument) -> StoredDocument:
+        """Let the tenant/hash constraint choose one winner and enqueue only that insert."""
         statement = (
             insert(self.docs)
             .values(**record.model_dump(exclude={"chunks", "entities"}))
@@ -83,6 +87,7 @@ class UploadRepository:
             set_tenant(connection, record.tenant_id)
             row = connection.execute(statement).mappings().one_or_none()
             if row is None:
+                # Another upload won the unique key; return its ID without a second event.
                 row = (
                     connection.execute(
                         select(self.docs).filter_by(
@@ -97,6 +102,7 @@ class UploadRepository:
             return StoredDocument.model_validate(row)
 
     def _enqueue(self, connection: Connection, record: StoredDocument) -> None:
+        """Persist the event and active trace parent in the document transaction."""
         event = DocumentUploaded(
             tenant_id=record.tenant_id,
             document_id=record.id,
@@ -125,6 +131,7 @@ class UploadRepository:
         status: DocumentStatus,
         error: str | None = None,
     ) -> None:
+        """Update tenant-owned status; retain a sanitized error only for failures."""
         # Callers supply a sanitized error class/summary, never exception text.
         if status not in {"uploaded", "processing", "processed", "failed"}:
             raise ValueError("Invalid document status")

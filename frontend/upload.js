@@ -1,6 +1,8 @@
 import { $ } from "./dom.js";
+/** Resolve when ingestion accepts the file; processing finishes asynchronously. */
 export function uploadFile(file, token, onExpired) {
     return new Promise((resolve, reject) => {
+        // XHR exposes upload progress; fetch does not provide this browser callback.
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/api/ingest");
         xhr.timeout = 120000;
@@ -29,6 +31,7 @@ export function uploadFile(file, token, onExpired) {
                     ),
                 );
         };
+        // Let the browser set Content-Type together with its generated multipart boundary.
         const body = new FormData();
         body.append("file", file);
         xhr.send(body);

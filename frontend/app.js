@@ -16,8 +16,10 @@ const showRefreshFailure = (error) => {
     notice(error.message);
     refreshFailed = true;
 };
+/** Clear page-held credentials/content and invalidate pending successful responses. */
 function disconnect() {
     token = "";
+    // A completed fetch can outlive sign-out; generation guards prevent repainting it.
     generation++;
     clearInterval(poll);
     documents = [];
@@ -31,6 +33,7 @@ function disconnect() {
     $("file").value = "";
     $("upload-button").disabled = true;
 }
+/** Call the same-origin gateway with the current token and safe user-facing errors. */
 async function api(path, options = {}) {
     const response = await fetch(`/api${path}`, {
         ...options,
@@ -55,6 +58,7 @@ async function api(path, options = {}) {
         );
     return response.json();
 }
+/** Refresh library metadata and usage together, discarding a disconnected session. */
 async function refresh() {
     const current = generation;
     const [data, usage] = await Promise.all([
@@ -88,6 +92,7 @@ $("auth-form").addEventListener("submit", async (event) => {
         $("signout").hidden = false;
         $("token").value = "";
         poll = setInterval(() => {
+            // Background tabs need no polling; the next visible interval catches up.
             if (token && !document.hidden)
                 refresh().catch(showRefreshFailure);
         }, 6000);

@@ -37,6 +37,7 @@ class Pipeline:
         *,
         report: bool = False,
     ) -> StoredDocument:
+        """Run all processing stages before atomically storing the complete result."""
         times = [perf_counter()]
         with stage("extract"):
             extracted = extract(path)

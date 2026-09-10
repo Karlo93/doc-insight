@@ -33,6 +33,12 @@ Paths below are relative to the repository. Within an application,
 currently live in the worker package, so ingest and query depend on worker; the
 directory names do not imply fully independent deployable libraries.
 
+Function docstrings describe the service and adapter contracts. Inline comments
+explain decisions at the point they matter: transaction ownership and duplicate
+deliveries in persistence/worker code, token settlement and citation checks in query,
+and session lifetime and text-only rendering in the browser. Start with these
+boundaries when tracing a failure; the sections below connect them into full flows.
+
 ## Upload to searchable content
 
 1. The gateway verifies a JWT, derives tenant/user identity, consumes a rate-limit

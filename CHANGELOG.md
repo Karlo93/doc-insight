@@ -7,6 +7,8 @@ under a version and an ISO date when a release is cut.
 
 ### Added
 
+- Clarify service and adapter contracts with concise function docstrings, inline
+  explanations of failure/transaction boundaries, and browser helper documentation.
 - Ship a private browser workspace for uploads, processing status, filtered questions,
   citations and token usage; add tenant-scoped document listing and usage APIs.
 - Replace hosted generation with OpenAI Responses and structured citations, bounded

@@ -44,11 +44,14 @@ class Worker:
         self.cursor = "0-0"
 
     def dead_letter(self, message: StreamMessage, error: str, attempts: int) -> None:
+        """Persist a terminal delivery to the dead-letter stream before acknowledging it."""
+        # A crash between these calls may duplicate a DLQ entry, but cannot lose it.
         self.stream.xadd(DLQ, dict(message.fields, error=error, attempts=str(attempts)))
         self.stream.xack(STREAM, self.settings.worker_group, message.id)
         logger.warning("message_id=%s status=failed attempts=%d", message.id, attempts)
 
     def handle(self, message: StreamMessage) -> None:
+        """Validate one pending delivery and scope its parent trace to this attempt."""
         attempts = self.stream.xpending(STREAM, self.settings.worker_group, message.id)
         if not attempts:
             return
@@ -72,6 +75,7 @@ class Worker:
     def _handle_valid(
         self, message: StreamMessage, event: WorkerEvent, attempts: int
     ) -> None:
+        """Check replay and retry limits, then acknowledge only a durable outcome."""
         try:
             document = self.processor.lookup(event)
         except TRANSIENT:
@@ -82,6 +86,7 @@ class Worker:
             )
             return
         if self.processor.completed(document):
+            # Replay after a successful commit must succeed even past the delivery limit.
             self.stream.xack(STREAM, self.settings.worker_group, message.id)
             return
         if attempts > self.settings.worker_max_attempts:
@@ -111,6 +116,7 @@ class Worker:
         self.dead_letter(message, error, attempts)
 
     def _reclaim(self) -> list[StreamMessage]:
+        """Advance the pending-entry scan; schedule cooldown only when the cursor wraps."""
         self.cursor, messages = self.stream.xautoclaim(
             STREAM,
             self.settings.worker_group,
@@ -119,11 +125,13 @@ class Worker:
             self.cursor,
             self.settings.worker_batch,
         )
+        # An empty page can still have a continuation cursor; keep scanning next pass.
         if self.cursor == "0-0":
             self.next_reclaim = self.clock() + self.settings.worker_reclaim_seconds
         return messages
 
     def run_once(self) -> None:
+        """Reclaim idle work before new deliveries and stop between document attempts."""
         if self.stopping.is_set():
             return
         if not self.ready:
@@ -149,6 +157,7 @@ class Worker:
         self.stream.heartbeat(self.consumer)
 
     def run(self) -> None:
+        """Keep consuming with interruptible backoff when queue or storage is unavailable."""
         while not self.stopping.is_set():
             try:
                 self.run_once()

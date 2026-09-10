@@ -23,11 +23,13 @@ class MissingObject(Exception):
 
 
 def download(store: ObjectStore, event: WorkerEvent, path: Path) -> None:
+    """Download bounded bytes and verify size, digest and media type before inference."""
     digest, size = sha256(), 0
     try:
         with closing(store.get(event.object_key)) as source, path.open("wb") as target:
             while data := source.read(1024 * 1024):
                 size += len(data)
+                # Reject excess bytes before writing them to the temporary file.
                 if size > event.size_bytes:
                     raise ValueError("Object size mismatch")
                 digest.update(data)
@@ -60,6 +62,7 @@ class DocumentProcessor:
         self.repository, self.objects, self.pipeline = repository, objects, pipeline
 
     def lookup(self, event: WorkerEvent) -> StoredDocument:
+        """Require event metadata to match the document owned by the event tenant."""
         document = self.repository.get_document(event.tenant_id, event.document_id)
         if document is None:
             raise LookupError("Document not found for tenant")
@@ -74,12 +77,14 @@ class DocumentProcessor:
 
     @staticmethod
     def completed(document: StoredDocument) -> bool:
+        """Skip replay only when stored output uses the current pipeline version."""
         return (
             document.status == "processed"
             and document.pipeline_version == PIPELINE_VERSION
         )
 
     def process(self, event: WorkerEvent, document: StoredDocument) -> None:
+        """Index a temporary verified original and persist the final processing status."""
         self.repository.mark_status(event.tenant_id, event.document_id, "processing")
         with TemporaryDirectory(prefix="di-worker-") as directory:
             path = Path(directory) / "original"

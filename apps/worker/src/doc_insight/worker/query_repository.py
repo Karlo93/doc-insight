@@ -38,6 +38,7 @@ class PostgresQueryReader:
     def _read(
         self, statement: Select[Any], tenant_id: str, k: int, filter: QueryFilter | None
     ) -> list[SearchHit]:
+        """Apply tenant and optional filters, then stable tie-breaking before the limit."""
         if k < 1:
             raise ValueError("k must be positive")
         statement = statement.where(self.chunks.c.tenant_id == tenant_id)
@@ -48,6 +49,7 @@ class PostgresQueryReader:
                 )
             if filter.language is not None:
                 statement = statement.where(self.chunks.c.language == filter.language)
+        # Append tie-breakers to the caller's rank ordering for reproducible top-k cuts.
         statement = statement.order_by(self.chunks.c.document_id, self.chunks.c.ord)
         return [
             SearchHit(
@@ -65,6 +67,7 @@ class PostgresQueryReader:
         k: int,
         filter: QueryFilter | None = None,
     ) -> list[SearchHit]:
+        """Return cosine-ranked passages after validating the query vector shape."""
         validate_vector(vector, self.dimension)
         distance = self.chunks.c.embedding.cosine_distance(vector)
         statement = select(self.chunks, (1 - distance).label("score")).order_by(
@@ -75,6 +78,7 @@ class PostgresQueryReader:
     def search_text(
         self, tenant_id: str, query: str, k: int, filter: QueryFilter | None = None
     ) -> list[SearchHit]:
+        """Rank lexical matches with the language-neutral PostgreSQL simple dictionary."""
         config: ColumnElement[str] = literal_column("'simple'::regconfig")
         vector = func.to_tsvector(config, self.chunks.c.text)
         terms = func.websearch_to_tsquery(config, query)
@@ -87,6 +91,7 @@ class PostgresQueryReader:
         return self._read(statement, tenant_id, k, filter)
 
     def get_document(self, tenant_id: str, document_id: UUID) -> StoredDocument | None:
+        """Read tenant-owned metadata and ordered children from the same snapshot."""
         row = (
             self.connection.execute(
                 select(self.docs).filter_by(tenant_id=tenant_id, id=document_id)

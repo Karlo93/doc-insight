@@ -12,11 +12,13 @@ class PostgresUsageLedger:
         self.engine, self.limit = engine, limit
 
     def reserve(self, tenant: str, tokens: int, model: str) -> UUID:
+        """Atomically reserve UTC-day capacity or raise BudgetExceeded before inference."""
         if tokens < 1 or tokens > self.limit:
             raise BudgetExceeded("daily_budget")
         identifier = uuid4()
         with self.engine.begin() as connection:
             set_tenant(connection, tenant)
+            # The conditional upsert serializes competing reservations for the same day.
             row = connection.execute(
                 text("""
                 INSERT INTO llm_budgets (tenant_id, day, reserved) VALUES (:tenant, (clock_timestamp() AT TIME ZONE 'UTC')::date, :tokens)
@@ -83,6 +85,7 @@ class PostgresUsageLedger:
             )
 
     def summary(self, tenant: str) -> dict[str, int]:
+        """Report current UTC-day charges, outstanding reservations and provider counts."""
         with self.engine.begin() as connection:
             set_tenant(connection, tenant)
             budget = connection.execute(

@@ -26,7 +26,9 @@ class Generation(BaseModel):
 
 
 class Generator(Protocol):
-    def generate(self, question: str, passages: list[str]) -> Generation: ...
+    def generate(self, question: str, passages: list[str]) -> Generation:
+        """Answer from passages using zero-based citations, or return unsupported output."""
+        ...
 
 
 class QueryReader(Protocol):
@@ -50,7 +52,9 @@ class QueryReader(Protocol):
 
 
 class QueryRepository(Protocol):
-    def snapshot(self, tenant_id: str) -> AbstractContextManager[QueryReader]: ...
+    def snapshot(self, tenant_id: str) -> AbstractContextManager[QueryReader]:
+        """Own a consistent tenant read scope until the context manager exits."""
+        ...
 
 
 class Source(BaseModel):

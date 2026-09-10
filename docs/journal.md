@@ -34,6 +34,22 @@ separately and retains per-run timings.
 Review also exposed the offset-ordering assumption: reversed offsets can reject a valid
 window. A once-per-page monotonicity check now selects the reference when starts or ends
 move backwards, with separate regressions for reversed and nested offsets.
+## Inline code documentation (2026-09-10)
+
+Added 72 function/protocol docstrings across 23 Python modules and concise JSDoc
+for browser helpers. Inline comments explain tenant-bound transactions, duplicate
+delivery handling, upload bounds, conservative token charging, citation validation
+and stale browser responses. Kept existing detailed pipeline documentation and
+avoided boilerplate on straightforward accessors and route wrappers.
+
+Compared Python ASTs after removing docstrings and compared browser source after
+removing standalone comments against `e91c4cf`: executable content is unchanged in
+all 27 edited source files. Changed Python functions remain at most 40 lines and
+modules at most 250 lines. This documentation pass requires no runtime deployment.
+Validation: 473 default tests passed (91 deselected), 92.76% coverage; Ruff checks,
+strict mypy, browser syntax, Bandit, dependency audit and tracked-source/history
+secret scans passed. The dependency audit excludes editable packages and the two
+spaCy model wheels that have no PyPI advisory entry.
 
 ## Private browser release and measured capacity (2026-09-10)
 

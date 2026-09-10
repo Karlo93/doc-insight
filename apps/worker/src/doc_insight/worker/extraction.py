@@ -41,6 +41,7 @@ def _ocr(image: Image.Image, settings: Settings) -> str:
 
 
 def _pdf_page(page: pdfium.PdfPage, number: int, settings: Settings) -> Page:
+    """Prefer a sufficient text layer; otherwise OCR the rendered page at configured DPI."""
     with closing(page.get_textpage()) as text_page:
         text = _normalize(str(text_page.get_text_bounded()))
     if len(text) >= settings.ocr_min_chars:

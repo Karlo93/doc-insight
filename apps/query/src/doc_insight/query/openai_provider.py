@@ -38,6 +38,7 @@ class ProviderFailure(ValueError):
 
 
 def payload(settings: Settings, question: str, passages: list[str]) -> dict[str, Any]:
+    """Send numbered evidence with a strict answer schema and response storage disabled."""
     return {
         "model": settings.openai_model,
         "store": False,
@@ -89,6 +90,7 @@ def response_usage(data: dict[str, Any], request_id: str | None) -> TokenUsage |
 def parse_response(
     data: dict[str, Any], count: int, request_id: str | None
 ) -> Generation:
+    """Validate completion and citation indexes while preserving reported token usage."""
     usage = response_usage(data, request_id)
     try:
         if data.get("status") != "completed":
@@ -132,9 +134,11 @@ class OpenAIGenerator:
         )
 
     def generate(self, question: str, passages: list[str]) -> Generation:
+        """Attempt one admitted call; reject overload immediately so fallback can proceed."""
         if not self.key:
             raise ProviderFailure("disabled", TokenUsage())
         if not self.slots.acquire(blocking=False):
+            # No request left this process, so the ledger can release this reservation.
             raise ProviderFailure("busy", TokenUsage())
         ticket = self.breaker.acquire()
         try:
@@ -151,6 +155,7 @@ class OpenAIGenerator:
             self.slots.release()
 
     def _call(self, question: str, passages: list[str]) -> Generation:
+        """Make one Responses request and trace model/token metadata without prompt text."""
         with stage("openai.responses"):
             span = get_current_span()
             span.set_attribute("gen_ai.provider.name", "openai")

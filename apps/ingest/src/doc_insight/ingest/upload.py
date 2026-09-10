@@ -28,6 +28,7 @@ class UploadBody:
             raise HTTPException(400, "Expected one file field")
 
     def header_field(self, data: bytes, start: int, end: int) -> None:
+        """Accumulate header fragments; parser callbacks need not align with headers."""
         self.field += data[start:end].lower()
         self._bound_headers()
 
@@ -53,10 +54,12 @@ class UploadBody:
         self.filename = options[b"filename"].decode("utf-8", errors="replace")
 
     def part_data(self, data: bytes, start: int, end: int) -> None:
+        """Hash and spool bounded file bytes without retaining the whole upload."""
         self.size += end - start
         if self.size > self.limit:
             raise HTTPException(413, "Upload exceeds the configured limit")
         block = data[start:end]
+        # Signature sniffing needs only eight bytes, independent of filename/MIME headers.
         self.prefix = (self.prefix + block[:8])[:8]
         self.digest.update(block)
         self.target.write(block)
@@ -65,6 +68,7 @@ class UploadBody:
         self.complete = True
 
     async def read(self, request: Request) -> None:
+        """Parse exactly one complete file part and rewind the caller-owned stream."""
         kind, options = parse_options_header(request.headers.get("content-type", ""))
         boundary = options.get(b"boundary", b"")
         if kind != b"multipart/form-data" or not 1 <= len(boundary) <= 200:
@@ -84,10 +88,12 @@ class UploadBody:
         total = 0
         async for block in request.stream():
             total += len(block)
+            # Framing gets a small allowance; part_data separately caps actual file bytes.
             if total > self.limit + 16384:
                 raise HTTPException(413, "Upload exceeds the configured limit")
             parser.write(block)
         parser.finalize()
+        # Network EOF alone does not prove that the closing multipart boundary arrived.
         if not self.complete or self.parts != 1:
             raise HTTPException(400, "Incomplete multipart upload")
         self.target.seek(0)

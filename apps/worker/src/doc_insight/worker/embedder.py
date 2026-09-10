@@ -52,6 +52,7 @@ class FastEmbedEmbedder:
         return self.settings.embed_model
 
     def embed_passages(self, texts: list[str]) -> list[list[float]]:
+        """Validate the whole batch, then return unit vectors in input order."""
         if not texts:
             return []
         tokenizer = HfTokenizer(self.settings)

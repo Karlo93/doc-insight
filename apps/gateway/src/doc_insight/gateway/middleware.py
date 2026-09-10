@@ -17,6 +17,7 @@ class ErrorPolicy:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """Sanitize failures only while a replacement HTTP response is still legal."""
         started = False
 
         async def track_response(message: Message) -> None:
@@ -29,6 +30,7 @@ class ErrorPolicy:
             await self.app(scope, receive, track_response)
         except Exception:
             if started or scope["type"] != "http":
+                # ASGI cannot replace headers/status after response.start was sent.
                 raise
             await error(500, "internal_error", "request failed")(scope, receive, send)
 
@@ -64,6 +66,7 @@ class ResponsePolicy:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """Attach request IDs and cache policy to every HTTP response start."""
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return

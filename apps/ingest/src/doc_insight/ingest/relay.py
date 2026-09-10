@@ -21,6 +21,7 @@ class OutboxRelay:
         self.outbox = Table("outbox", MetaData(), autoload_with=engine)
 
     def run_once(self, tenant_id: str, batch: int = 100) -> int:
+        """Publish a locked batch for one tenant and return its committed row count."""
         if batch < 1:
             raise ValueError("Batch must be positive")
         table = self.outbox
@@ -32,6 +33,7 @@ class OutboxRelay:
             )
             .order_by(table.c.created_at, table.c.id)
             .limit(batch)
+            # Concurrent relays claim other rows instead of waiting for this batch.
             .with_for_update(skip_locked=True)
         )
         with self.engine.begin() as connection:
@@ -60,6 +62,7 @@ class OutboxRelay:
             return len(rows)
 
     def run(self, tenant_id: str, batch: int, poll: float, stop: Event) -> None:
+        """Poll each configured tenant in its own transaction until shutdown."""
         while not stop.is_set():
             for tenant in tenant_id.split(","):
                 self.run_once(tenant, batch)

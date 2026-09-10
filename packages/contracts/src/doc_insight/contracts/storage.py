@@ -43,6 +43,7 @@ class SearchHit(BaseModel):
 
 
 def validate_vector(vector: list[float], dimension: int) -> None:
+    """Reject shapes and values that cannot participate in cosine retrieval."""
     if len(vector) != dimension or not all(map(isfinite, vector)) or not any(vector):
         raise ValueError("Expected a finite nonzero vector matching the dimension")
 
@@ -50,6 +51,7 @@ def validate_vector(vector: list[float], dimension: int) -> None:
 def prepare_document(
     tenant_id: str, filename: str, document: Document
 ) -> StoredDocument:
+    """Validate embedded output and build metadata before any repository writes."""
     if not all((tenant_id.strip(), document.embed_model, document.embed_dimension)):
         raise ValueError("A tenant and an embedded document are required")
     for chunk in document.chunks:

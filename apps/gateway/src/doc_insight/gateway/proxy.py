@@ -24,6 +24,7 @@ class UploadTooLarge(Exception):
 
 
 def check_length(request: Request, limit: int) -> None:
+    """Reject ambiguous or oversized declared lengths before reading the body."""
     lengths = request.headers.getlist("content-length")
     if not lengths:
         return
@@ -34,6 +35,7 @@ def check_length(request: Request, limit: int) -> None:
 
 
 async def limited_body(request: Request, limit: int) -> AsyncIterator[bytes]:
+    """Enforce the byte limit even when Content-Length is absent or misleading."""
     total = 0
     async for chunk in request.stream():
         total += len(chunk)
@@ -79,6 +81,7 @@ class Gateway:
     query: Upstream
 
     async def quota(self, identity: Identity) -> Response | int | None:
+        """Return remaining quota, an error response, or None when failing open."""
         try:
             decision = await self.limiter.consume(identity)
         except BackendUnavailable:
@@ -93,6 +96,7 @@ class Gateway:
         return response
 
     async def proxy(self, request: Request, path: str, ingest: bool) -> Response:
+        """Authenticate and enforce tenant access and quota before upstream I/O."""
         try:
             authorization = request.headers.getlist("authorization")
             if len(authorization) != 1:
@@ -119,6 +123,7 @@ class Gateway:
     async def forward(
         self, request: Request, path: str, ingest: bool, identity: Identity
     ) -> Response:
+        """Stream a bounded request and translate transport failures to safe errors."""
         try:
             check_length(request, self.settings.max_upload_bytes)
             upstream = self.ingest if ingest else self.query

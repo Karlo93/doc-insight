@@ -18,6 +18,7 @@ class InvalidToken(Exception):
 
 
 def signing_keys(document: dict[str, Any]) -> dict[str, jwt.PyJWK]:
+    """Validate usable public RS256 keys; reject weak or ambiguous key sets."""
     result = {}
     for item in document["keys"]:
         if item.get("kty") != "RSA" or item.get("alg", "RS256") != "RS256":
@@ -39,6 +40,7 @@ def signing_keys(document: dict[str, Any]) -> dict[str, jwt.PyJWK]:
 
 
 def public_jwks(document: dict[str, Any]) -> dict[str, Any]:
+    """Rebuild the validated key set using only public RSA parameters."""
     result = []
     for kid, key in signing_keys(document).items():
         raw = json.loads(jwt.algorithms.RSAAlgorithm.to_jwk(key.key))
@@ -60,6 +62,7 @@ class Authenticator:
         self.lock = asyncio.Lock()
 
     async def key(self, kid: str) -> jwt.PyJWK:
+        """Resolve a signing key with serialized refresh and bounded cache lifetime."""
         async with self.lock:
             now = self.clock()
             if (
@@ -74,10 +77,12 @@ class Authenticator:
             return self.keys[kid]
 
     async def authenticate(self, authorization: str) -> Identity:
+        """Verify signature and required claims before returning a tenant identity."""
         try:
             scheme, token = authorization.split()
             if scheme.lower() != "bearer" or len(token) > 16384:
                 raise InvalidToken
+            # The unverified header selects a key; only jwt.decode establishes identity.
             header = jwt.get_unverified_header(token)
             kid = header.get("kid")
             if header.get("alg") != "RS256" or not isinstance(kid, str) or not kid:

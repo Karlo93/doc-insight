@@ -30,6 +30,7 @@ class FallbackGenerator:
     def generate(
         self, question: str, passages: list[str], *, tenant: str = ""
     ) -> tuple[Generation, GenerationInfo]:
+        """Return an answer and request-local provider metadata, including fallback reason."""
         reason, usage = "disabled", None
         if self.primary is not None and passages:
             try:
@@ -51,6 +52,7 @@ class FallbackGenerator:
         )
 
     def _hosted(self, tenant: str, question: str, passages: list[str]) -> Generation:
+        """Reserve the worst-case token budget and settle every provider outcome."""
         if self.primary is None:
             raise ProviderFailure("disabled")
         # UTF-8 bytes bound text tokenization; allowance also covers instructions/schema.
@@ -77,5 +79,6 @@ class FallbackGenerator:
                 usage, outcome = TokenUsage(), "rejected"
             raise
         finally:
+            # Timeouts can still be billable; unknown usage must not release the budget.
             if reservation is not None and self.ledger is not None:
                 self.ledger.settle(tenant, reservation, usage, outcome)

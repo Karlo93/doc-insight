@@ -1,4 +1,5 @@
 import { $, element } from "./dom.js";
+/** Render this library page and rebuild the query scope from processed documents. */
 export function renderDocuments(items) {
     const box = $("documents");
     box.replaceChildren();
@@ -32,12 +33,14 @@ export function renderDocuments(items) {
         box.append(row);
     }
     const selected = $("scope").value;
+    // Preserve selection across polling only while it remains on the current page.
     $("scope").replaceChildren(new Option("All documents", ""));
     for (const doc of items.filter((d) => d.status === "processed"))
         $("scope").append(new Option(doc.filename, doc.id));
     if ([...$("scope").options].some((option) => option.value === selected))
         $("scope").value = selected;
 }
+/** Render the server's answer or abstention with its returned evidence passages. */
 export function renderAnswer(data, documents) {
     const box = $("answer");
     box.replaceChildren();
@@ -75,6 +78,7 @@ export function renderAnswer(data, documents) {
     if (data.sources.length) box.append(element("h3", "Source passages"));
     data.sources.forEach((source, i) => {
         const details = element("details", "", "source");
+        // A source can belong to a document outside the current library page.
         const name =
             documents.find((d) => d.id === source.document_id)?.filename ||
             source.document_id;
