@@ -1,8 +1,8 @@
 # Architecture
 
 doc-insight turns PDF and image bytes into tenant-scoped, searchable passages with page
-citations and extracted entities. The implemented slice is the worker CLI and transactional
-Postgres/pgvector storage, pipeline version 6. The target service layer accepts authenticated
+citations and extracted entities. The implemented processing slice is the worker CLI, Redis
+consumer and transactional Postgres/pgvector storage, pipeline version 6. The target service layer accepts authenticated
 uploads, processes them asynchronously, and answers questions using retrieved passages.
 This document records both the current boundaries and the contracts that remain to land.
 
@@ -61,9 +61,9 @@ flowchart TB
 | Gateway, port 8000 | Validate RS256 JWT against JWKS; derive tenant/user; rate-limit and proxy | Lands with lane 4 |
 | Ingest, port 8001 | Stream validated uploads to objects; create document/outbox transaction; status reads and relay | Implemented; [upload, status and relay](ingest.md) |
 | Query, port 8002 | Retrieve tenant-owned evidence; generate cited answer or abstain | Implemented; [operation and confidence](query.md) |
-| Worker, no HTTP port | Extract → analyze → embed → store | CLI pipeline exists; stream consumer, status transitions and DLQ land with lane 2 |
+| Worker, no HTTP port | Extract → analyze → embed → store | CLI and `di worker run` share the pipeline; status transitions, replay, reclaim and DLQ are implemented |
 | Object storage, ports 9000/9001 | Original bytes in `documents`, at `{tenant_id}/{sha256}` | MinIO with mandatory SSE-S3 runs in the Compose `infra` profile; the ingest adapter streams originals into it |
-| Redis, port 6379 | Event stream, worker group, DLQ and rate-limit buckets | Redis runs in the Compose `infra` profile; the ingest relay publishes `di:documents`; the worker consumer and rate limiting land with lanes 2 and 4 |
+| Redis, port 6379 | Event stream, worker group, DLQ and rate-limit buckets | Redis runs in the Compose `infra` profile; the ingest relay publishes `di:documents` and `di worker run` consumes it; rate limiting lands with lane 4 |
 | Postgres, port 5432 | Relational metadata and 384-dimensional pgvector HNSW index | Implemented, including forced row-level security ([ADR-0005](adr/0005-tenant-row-level-security.md)); outbox implemented ([ADR-0007](adr/0007-transactional-outbox.md)); full-text expression retrieval implemented; `audit_events` delivery unassigned |
 | LLM | Mistral answer generation behind a provider boundary; extractive fallback | Implemented; hosted calls are opt-in, offline fallback validated |
 | Collector, port 4318; Prometheus; Tempo; Grafana | OTLP/HTTP ingestion, metrics, traces and dashboards | Runs in the Compose `telemetry` profile with a provisioned dashboard; the `doc_insight.observability` helper is implemented ([ADR-0004](adr/0004-opentelemetry.md)) and the CLI emits stage spans; services adopt it as they land |
@@ -76,7 +76,7 @@ services or automatic deployment of every component.
 is assigned yet. Full-text retrieval uses a `tsvector` expression; a persisted
 search column or GIN index is not part of the initial query-service contract.
 
-## Upload and processing path — lands with lanes 1, 2, 4 and 5
+## Upload and processing path — ingest and worker implemented; gateway and TLS land with lanes 4 and 5
 
 ```mermaid
 sequenceDiagram
@@ -190,20 +190,23 @@ chunks and entities in one transaction. Replay preserves the document and child 
 failure rolls back all output. Reads use a consistent snapshot. Expensive extraction and
 inference occur before the transaction, so replay repeats CPU work.
 
-**Lands with lanes 1 and 2:** the outbox commits intent with the document. The relay publishes
-to `di:documents` before marking the row published. A crash between those operations can
-republish, so delivery is at least once. Group `worker` must persist idempotently, acknowledge
-after durable completion, reclaim pending work and send exhausted failures to
-`di:documents:dlq` with original fields plus `error` and `attempts`. Retry/reclaim thresholds
-remain subject to the worker settings; no timing guarantee is asserted here.
+**Implemented:** the outbox commits intent with the document
+([ADR-0007](adr/0007-transactional-outbox.md)). The relay publishes to `di:documents` before
+marking the row published. A crash between those operations can republish, so delivery is
+at least once. Group `worker` persists idempotently, acknowledges after durable completion,
+reclaims pending work and sends exhausted failures to `di:documents:dlq` with original fields
+plus `error` and `attempts` ([worker runbook](worker.md)). Retry/reclaim thresholds are worker
+settings; no timing guarantee is asserted here.
 
-**Lands with lane 3:** timeouts and a circuit breaker bound Mistral failures; extractive
-fallback avoids a provider dependency for every answer. Abstention handles insufficient
-evidence. Breaker thresholds and evidence rules will be documented with the implementation.
+**Implemented:** timeouts and a circuit breaker bound Mistral failures; extractive fallback
+avoids a provider dependency for every answer. Abstention handles insufficient evidence;
+breaker thresholds and evidence rules are in [query.md](query.md) and
+[ADR-0008](adr/0008-hybrid-query.md).
 
-**Lands with lanes 1, 3, 4 and 5:** HTTP services expose dependency-free `GET /healthz` and
-dependency-checking `GET /readyz` (503 when unavailable). **Lands with lane 2:** the worker
-writes `di:worker:{hostname}` in Redis with a 30-second TTL. **Implemented:** the
+**Implemented in ingest and query; the gateway lands with lane 4:** HTTP services expose
+dependency-free `GET /healthz` and dependency-checking `GET /readyz` (503 when unavailable). **Implemented:** the worker writes
+`di:worker:{hostname}-{pid}` in Redis with a 30-second TTL at loop/message boundaries
+([ADR-0009](adr/0009-worker-heartbeat-identity.md)); long stages can outlast the TTL. **Implemented:** the
 `doc_insight.observability` helper emits stage durations and request spans and propagates
 `traceparent` through HTTP and stream carriers ([ADR-0004](adr/0004-opentelemetry.md)); the
 local telemetry profile receives them. Services adopt the helper as they land.
@@ -215,7 +218,7 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 | Decision | Alternative | Why | When to revisit |
 | --- | --- | --- | --- |
 | pgvector in Postgres (implemented) | Dedicated vector database | One transaction/backup boundary for metadata and vectors | Representative tenant-filtered recall or latency misses the agreed budget |
-| Redis Streams (relay implemented; consumer planned) | Separate message broker | Shares Redis with rate limiting and supplies consumer groups | Pending-work recovery, retention or throughput exceeds measured limits |
+| Redis Streams (relay and consumer implemented) | Separate message broker | Shares Redis with rate limiting and supplies consumer groups | Pending-work recovery, retention or throughput exceeds measured limits |
 | Multilingual MiniLM (implemented) | multilingual-e5-large | Existing 384-dimensional profile and 120/24 chunks pass the small regression set | Bilingual holdout recall@5 below 0.8; compare latency/memory before switching (ADR-0003) |
 | ONNX on CPU (implemented) | GPU inference | Current adapter runs without a PyTorch/GPU dependency | Measured inference throughput cannot meet the deployment budget |
 | Compose first (infrastructure and telemetry profiles implemented; application images planned) | Kubernetes | Local infrastructure lifecycle already works ([ADR-0006](adr/0006-local-infrastructure.md)); the full stack keeps one local entry point | Multi-node availability or orchestration requirements justify manifests |
@@ -238,4 +241,4 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 
 The [query guide](query.md) is implemented. `ingest.md`, `gateway.md` and `deploy.md` are not present yet; they
 land with their owning services. Add their links to the [index](README.md) when merged. The
-current worker service documentation is `pipeline.md`.
+worker service documentation is [worker.md](worker.md), with pipeline details in `pipeline.md`.

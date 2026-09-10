@@ -8,6 +8,7 @@ Processing that stream belongs to the worker consumer; the CLI path below remain
 JPEG and TIFF files; it does not contact a service or persist a document.
 `di analyze` adds page languages, named entities and chunks with exact page offsets.
 `di analyze --embed` adds one vector per chunk; results still live only in memory/CLI output.
+`di worker run` consumes uploaded originals through the same pipeline; see [worker operations](worker.md).
 `di index` runs those stages and stores their output atomically; `di show` and `di search`
 read only the requested tenant's rows. Start with the M4 section below for the complete slice.
 
@@ -235,7 +236,7 @@ See [ADR-0005](adr/0005-tenant-row-level-security.md) for the role and trust bou
 The unique `(tenant_id, sha256)` conflict locks the row, serializing concurrent replays.
 Any failure rolls everything back; readers use one consistent snapshot. Re-indexing preserves
 the document ID, creation time and deterministic child IDs, while refreshing `processed_at`.
-A new pipeline version replaces the old output. Processing still runs on every replay;
+A new pipeline version replaces the old output. The index CLI still processes each invocation; the consumer skips a completed current-version event.
 "effectively once" describes the stored result, not the CPU work. Version 6 adds chunk language.
 Standalone child replacement also locks its parent and commits both child sets together.
 

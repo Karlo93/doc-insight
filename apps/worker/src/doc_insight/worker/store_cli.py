@@ -2,14 +2,12 @@
 
 import argparse
 from pathlib import Path
-from time import perf_counter
 from uuid import UUID
 
 from doc_insight.contracts.storage import DocumentRepository, StoredDocument
 from doc_insight.observability import configure, stage
 from doc_insight.worker.embedder import FastEmbedEmbedder
-from doc_insight.worker.embedding import embed_document
-from doc_insight.worker.extraction import extract
+from doc_insight.worker.pipeline import Pipeline
 from doc_insight.worker.providers import (
     HfTokenizer,
     LinguaLanguageDetector,
@@ -17,7 +15,6 @@ from doc_insight.worker.providers import (
 )
 from doc_insight.worker.repository import PostgresRepository
 from doc_insight.worker.settings import get_settings
-from doc_insight.worker.structure import analyze
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -41,29 +38,13 @@ def index_file(
     path: Path, tenant: str, repository: DocumentRepository
 ) -> StoredDocument:
     settings = get_settings()
-    started = perf_counter()
-    with stage("extract"):
-        extracted = extract(path)
-    extracted_at = perf_counter()
-    with stage("analyze"):
-        document = analyze(
-            extracted,
-            LinguaLanguageDetector(settings),
-            SpacyNerExtractor(settings),
-            HfTokenizer(settings),
-            settings,
-        )
-    analyzed_at = perf_counter()
-    with stage("embed"):
-        embedded = embed_document(document, FastEmbedEmbedder(settings))
-    embedded_at = perf_counter()
-    with stage("store"):
-        stored = repository.upsert_document(tenant, path.name, embedded)
-    stored_at = perf_counter()
-    print(
-        f"extract={extracted_at - started:.3f}s analyze={analyzed_at - extracted_at:.3f}s embed={embedded_at - analyzed_at:.3f}s store={stored_at - embedded_at:.3f}s"
-    )
-    return stored
+    return Pipeline(
+        settings,
+        LinguaLanguageDetector(settings),
+        SpacyNerExtractor(settings),
+        HfTokenizer(settings),
+        FastEmbedEmbedder(settings),
+    ).index(path, tenant, repository, report=True)
 
 
 def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:

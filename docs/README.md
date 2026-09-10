@@ -7,6 +7,7 @@
 - [API contract](api.md): upload, status, question and stream payloads; delivery status is explicit.
 - [Configuration](configuration.md): current settings tables, defaults and Compose versus Python environment handling.
 - [Pipeline](pipeline.md): implemented extraction, OCR, structure, embeddings, storage and retrieval.
+- [Worker](worker.md): sequential consumption, recovery, dead letters and manual object/event examples.
 - [Local stack](local-stack.md): Compose `infra` and `telemetry` profiles, ports, encryption and Grafana.
 - [Observability](observability.md): the shared OpenTelemetry helper, emitted signals and attribute policy.
 - [CI](ci.md): lint, types, tests, security checks and repository protection setup.
@@ -20,6 +21,7 @@
 - [ADR-0006](adr/0006-local-infrastructure.md): independent infrastructure and telemetry Compose profiles.
 - [ADR-0007](adr/0007-transactional-outbox.md): transactional outbox and Redis Streams delivery.
 - [ADR-0008](adr/0008-hybrid-query.md): hybrid retrieval with RRF, extractive fallback and confidence.
+- [ADR-0009](adr/0009-worker-heartbeat-identity.md): one progress heartbeat per consumer process.
 - [Changelog](../CHANGELOG.md): changes awaiting release.
 - [Contributing](../CONTRIBUTING.md): branch/commit conventions, test tiers, budgets and review checklist.
 - [Security policy](../SECURITY.md): private reporting, supported versions and secrets handling.
@@ -28,5 +30,5 @@
 - [Task template](../.github/ISSUE_TEMPLATE/task.md): scope, acceptance criteria and validation.
 - [Fixture font provenance](../scripts/fonts/readme.md): generated fixture font and its license.
 
-Service runbooks and the final demo walkthrough will be linked here when their implementations
-merge. The current application runbook is [Pipeline](pipeline.md).
+The current application runbooks are [Pipeline](pipeline.md) and [Worker](worker.md).
+Additional service runbooks and the final demo walkthrough will be linked as they land.

@@ -17,6 +17,15 @@ Transcribed the reference system diagram into Mermaid and separated implemented 
 behavior from the planned HTTP, queue and deployment contracts. The README starts with the
 current database/CLI flow. Token tooling, captured HTTP responses and telemetry screenshots
 remain dependent on the service implementations; contract examples are labeled as illustrative.
+## Worker service
+
+The CLI and consumer share one sequential pipeline. Stream messages validate tenant,
+object identity and content digest before extraction. Pipeline failures store a fixed
+summary; storage and database outages leave entries pending for reclaim. Tests cover
+replay after commit, version replacement, poison messages, and a child process killed
+after analysis and restarted against durable Redis/Postgres state. The shared S3
+adapter serves both ingestion and processing. No schema or pipeline-version change.
+ADR-0009 records per-consumer heartbeat identity and its progress-reporting limits.
 
 ## Local infrastructure and telemetry
 
