@@ -1,4 +1,4 @@
-# ADR-0004: FORCE row-level security with transaction-local tenant context
+# ADR-0005: FORCE row-level security with transaction-local tenant context
 
 Status: accepted. Date: 2026-09-10.
 

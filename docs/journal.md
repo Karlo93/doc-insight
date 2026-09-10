@@ -22,5 +22,5 @@ transaction. Database tests use disposable databases, protecting local demo data
 Migration 0002 applies FORCE RLS to documents, chunks and entities. Every repository
 transaction binds a local tenant setting. Restricted-login tests cover raw SQL isolation,
 missing context, pool reuse, owner enforcement, replay and reversible migrations.
-Runtime credentials are separate from the privileged migration connection. ADR-0004
+Runtime credentials are separate from the privileged migration connection. ADR-0005
 records the shared-table choice and its trust boundary. Pipeline output is unchanged.

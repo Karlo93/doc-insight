@@ -213,7 +213,7 @@ setting with `set_config(..., true)` at the start of every transaction, includin
 REPEATABLE READ snapshot. Commit, rollback and pool return clear the tenant context.
 Without a tenant, row reads/updates/deletes return nothing and inserts are rejected.
 The CLI's caller supplies a trusted tenant until authenticated services arrive.
-See [ADR-0004](adr/0004-tenant-row-level-security.md) for the role and trust boundaries.
+See [ADR-0005](adr/0005-tenant-row-level-security.md) for the role and trust boundaries.
 
 `upsert_document` writes metadata and replaces all chunks/entities in one transaction.
 The unique `(tenant_id, sha256)` conflict locks the row, serializing concurrent replays.
@@ -235,9 +235,11 @@ From the repository root, with Docker running:
 ```text
 make db-up
 make migrate
-# Once per development cluster: create a restricted runtime login.
+# A fresh Compose volume creates the restricted di_app login automatically
+# (deploy/postgres/init-runtime-role.sql). For a volume created before that script
+# existed, run the same two statements once, or recreate the volume with `make db-down`
+# followed by `docker compose down -v`:
 docker compose exec db psql -U di -d di -c "CREATE ROLE di_app LOGIN NOSUPERUSER NOBYPASSRLS NOINHERIT PASSWORD 'di_app'"
-# Grant only row operations on the three tenant tables.
 docker compose exec db psql -U di -d di -c "GRANT USAGE ON SCHEMA public TO di_app; GRANT SELECT, INSERT, UPDATE, DELETE ON documents, chunks, entities TO di_app"
 uv run --locked --all-packages di index tests/fixtures/text_hr.pdf --tenant demo
 uv run --locked --all-packages di show <document-id> --tenant demo
