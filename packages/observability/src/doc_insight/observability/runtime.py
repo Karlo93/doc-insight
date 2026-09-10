@@ -13,7 +13,7 @@ from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from pydantic import Field, HttpUrl
+from pydantic import Field, HttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,7 +22,15 @@ class Settings(BaseSettings):
 
     otel_endpoint: HttpUrl | None = None
     otel_service_name: str | None = Field(default=None, min_length=1, max_length=64)
+    # Bounds every export attempt, including the flush at exit with no collector.
+    otel_timeout_seconds: float = Field(default=3, gt=0, le=60)
     env: str = Field(default="development", min_length=1, max_length=64)
+
+    @field_validator("otel_endpoint", mode="before")
+    @classmethod
+    def blank_means_disabled(cls, value: object) -> object:
+        # Templated environments often render an unset variable as an empty string.
+        return None if isinstance(value, str) and not value.strip() else value
 
 
 class Telemetry:
@@ -91,15 +99,20 @@ def _exporting(service: str, settings: Settings) -> Telemetry:
     resource = Resource(
         {"service.name": service, "deployment.environment.name": settings.env}
     )
+    timeout = settings.otel_timeout_seconds
     traces = TracerProvider(resource=resource)
     traces.add_span_processor(
-        BatchSpanProcessor(OTLPSpanExporter(endpoint=f"{endpoint}/v1/traces"))
+        BatchSpanProcessor(
+            OTLPSpanExporter(endpoint=f"{endpoint}/v1/traces", timeout=timeout),
+            export_timeout_millis=int(timeout * 1000),
+        )
     )
     meters = MeterProvider(
         resource=resource,
         metric_readers=[
             PeriodicExportingMetricReader(
-                OTLPMetricExporter(endpoint=f"{endpoint}/v1/metrics")
+                OTLPMetricExporter(endpoint=f"{endpoint}/v1/metrics", timeout=timeout),
+                export_timeout_millis=int(timeout * 1000),
             )
         ],
     )

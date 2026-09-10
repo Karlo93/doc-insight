@@ -33,7 +33,7 @@ class RequestTelemetry:
         from doc_insight.observability import extract
 
         telemetry = runtime.current
-        started, status = perf_counter(), 500
+        started, status, sent = perf_counter(), 500, False
         headers = {
             k.decode("latin1"): v.decode("latin1")
             for k, v in scope["headers"]
@@ -41,9 +41,9 @@ class RequestTelemetry:
         }
 
         async def send_response(message: Message) -> None:
-            nonlocal status
+            nonlocal status, sent
             if message["type"] == "http.response.start":
-                status = message["status"]
+                status, sent = message["status"], True
             await send(message)
 
         with telemetry.tracer.start_as_current_span(
@@ -56,7 +56,9 @@ class RequestTelemetry:
             try:
                 await self.app(scope, receive, send_response)
             except BaseException as error:
-                status = 500
+                # A body that fails after the start line was still a 200 to the client.
+                status = status if sent else 500
+                span.set_status(StatusCode.ERROR)
                 span.set_attribute("error.type", type(error).__name__)
                 raise
             finally:

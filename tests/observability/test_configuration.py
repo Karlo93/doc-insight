@@ -11,7 +11,11 @@ from pydantic import ValidationError
 @pytest.fixture(autouse=True)
 def reset_configuration(monkeypatch):
     monkeypatch.setattr(runtime, "_configured", False)
-    monkeypatch.setattr(runtime, "current", runtime.current)
+    monkeypatch.setattr(
+        runtime,
+        "current",
+        runtime.Telemetry("", trace.NoOpTracerProvider(), metrics.NoOpMeterProvider()),
+    )
 
 
 def test_no_endpoint_is_noop_and_configuration_is_once(monkeypatch):
@@ -37,22 +41,25 @@ def test_export_configuration_and_reuse(monkeypatch):
     reader = InMemoryMetricReader()
     monkeypatch.setattr(runtime, "OTLPSpanExporter", span_factory)
     monkeypatch.setattr(runtime, "OTLPMetricExporter", metric_factory)
-    monkeypatch.setattr(
-        runtime, "PeriodicExportingMetricReader", lambda exporter: reader
-    )
+    readers = Mock(return_value=reader)
+    monkeypatch.setattr(runtime, "PeriodicExportingMetricReader", readers)
     monkeypatch.setenv("DI_OTEL_ENDPOINT", "http://localhost:4318/collector/")
     monkeypatch.setenv("DI_OTEL_SERVICE_NAME", "override")
     monkeypatch.setenv("DI_ENV", "test")
+    monkeypatch.setenv("DI_OTEL_TIMEOUT_SECONDS", "2.5")
     configure("worker")
     instance = runtime.current
     try:
         configure("worker")
         assert runtime.current is instance
         span_factory.assert_called_once_with(
-            endpoint="http://localhost:4318/collector/v1/traces"
+            endpoint="http://localhost:4318/collector/v1/traces", timeout=2.5
         )
         metric_factory.assert_called_once_with(
-            endpoint="http://localhost:4318/collector/v1/metrics"
+            endpoint="http://localhost:4318/collector/v1/metrics", timeout=2.5
+        )
+        readers.assert_called_once_with(
+            metric_factory.return_value, export_timeout_millis=2500
         )
         with stage("extract"):
             pass
@@ -73,6 +80,8 @@ def test_export_configuration_and_reuse(monkeypatch):
         ("DI_OTEL_ENDPOINT", "ftp://localhost"),
         ("DI_ENV", ""),
         ("DI_OTEL_SERVICE_NAME", ""),
+        ("DI_OTEL_TIMEOUT_SECONDS", "0"),
+        ("DI_OTEL_TIMEOUT_SECONDS", "61"),
     ],
 )
 def test_invalid_configuration_fails_at_startup(monkeypatch, variable, value):
@@ -84,3 +93,12 @@ def test_invalid_configuration_fails_at_startup(monkeypatch, variable, value):
 def test_invalid_service_name():
     with pytest.raises(ValueError, match="Service name"):
         configure(" ")
+
+
+@pytest.mark.parametrize("value", ["", "   "])
+def test_blank_endpoint_means_disabled(monkeypatch, value):
+    exporter = Mock(side_effect=AssertionError("Exporter must not be created"))
+    monkeypatch.setattr(runtime, "_exporting", exporter)
+    monkeypatch.setenv("DI_OTEL_ENDPOINT", value)
+    configure("worker")
+    assert isinstance(runtime.current.traces, trace.NoOpTracerProvider)

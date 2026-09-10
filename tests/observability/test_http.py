@@ -96,3 +96,29 @@ def test_requests_are_counted_once_and_sanitized(telemetry, path, status, route)
             next(span for span in spans if span.name == "retrieve").parent.span_id
             == request_span.context.span_id
         )
+
+
+def test_failure_after_response_start_keeps_the_sent_status(telemetry):
+    from doc_insight.observability.http import RequestTelemetry
+
+    async def app(scope, receive, send):
+        await send({"type": "http.response.start", "status": 200, "headers": []})
+        raise RuntimeError("body iterator failed")
+
+    async def receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
+    async def send(message):
+        pass
+
+    scope = {"type": "http", "headers": [], "route": None}
+    coroutine = RequestTelemetry(app)(scope, receive, send)
+    with pytest.raises(RuntimeError, match="body iterator"):
+        coroutine.send(None)
+    _, exporter, reader = telemetry
+    span = exporter.get_finished_spans()[0]
+    assert span.attributes["http.response.status_code"] == 200
+    assert span.attributes["error.type"] == "RuntimeError"
+    assert span.status.status_code.name == "ERROR"
+    point = measurements(reader)["di_request_duration_seconds"][0]
+    assert point.attributes == {"route": "unmatched", "status": "200"}

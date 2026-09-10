@@ -8,8 +8,9 @@ restart the process after changing configuration.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `DI_OTEL_ENDPOINT` | Unset | OTLP/HTTP base URL; unset installs no-op providers |
+| `DI_OTEL_ENDPOINT` | Unset | OTLP/HTTP base URL; unset or empty installs no-op providers |
 | `DI_OTEL_SERVICE_NAME` | `configure` argument | Override the resource service name and stage metric service label |
+| `DI_OTEL_TIMEOUT_SECONDS` | `3` | Bound on every export attempt, including the flush at process exit; 0 < value ≤ 60 |
 | `DI_ENV` | `development` | Resource `deployment.environment.name` |
 
 The shared package validates these settings once. App settings remain owned by
@@ -18,7 +19,10 @@ a reference and this package does not load `.env` files automatically.
 Use an HTTP or HTTPS base endpoint such as `http://localhost:4318`:
 the package appends `/v1/traces` and `/v1/metrics`. Inside a container network,
 use the collector service URL, for example `http://otel-collector:4318`.
-Do not include a signal suffix. Leave the variable unset to disable export.
+Do not include a signal suffix. Leave the variable unset or empty to disable export.
+When the collector is unreachable, each export attempt gives up after
+`DI_OTEL_TIMEOUT_SECONDS`, including the flush at process exit, so a missing
+collector delays a command by at most a few seconds instead of blocking it.
 
 ```python
 from fastapi import FastAPI
