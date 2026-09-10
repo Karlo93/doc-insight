@@ -4,11 +4,11 @@ from doc_insight.contracts.query import QueryFilter
 from doc_insight.query.retrieval import named_scope
 
 
-def test_filename_scope_tolerates_typo_and_ignores_unrelated_assignment():
-    diagram, assignment = UUID(int=1), UUID(int=2)
+def test_filename_scope_tolerates_typo_and_ignores_unrelated_document():
+    diagram, overview = UUID(int=1), UUID(int=2)
     names = [
         (diagram, "doc-insight-architecture-v2_1.png"),
-        (assignment, "TechAssignment_AI Tech Lead.pdf"),
+        (overview, "platform-tech-overview.pdf"),
     ]
     scope = named_scope(
         "what tech stack is in 'woker' in arhitecture diagram", names, QueryFilter()

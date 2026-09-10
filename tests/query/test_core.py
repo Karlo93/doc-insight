@@ -4,7 +4,13 @@ import pytest
 from doc_insight.contracts.storage import SearchHit
 from doc_insight.contracts.structure import Chunk
 from doc_insight.query.extractive import ExtractiveGenerator
-from doc_insight.query.ranking import confidence, fuse, lexical_query, should_abstain
+from doc_insight.query.ranking import (
+    confidence,
+    fuse,
+    lexical_query,
+    should_abstain,
+    words,
+)
 
 
 def hit(ordinal, score=0.45):
@@ -73,6 +79,17 @@ def test_natural_language_lexical_terms_are_disjunctive_and_operators_are_inert(
     )
     assert lexical_query('"worker" OR --database') == '"database" OR "worker"'
     assert lexical_query("What is it?") == ""
+
+
+def test_uppercase_acronyms_survive_stop_word_removal():
+    assert words("What is CAN?") == {"can"}
+    assert words("what can it do") == set()
+    assert lexical_query("Explain the CAN bus") == '"bus" OR "can"'
+    assert lexical_query("CAN OR AND gate") == '"can" OR "gate"'
+    generation = ExtractiveGenerator().generate(
+        "What is CAN?", ["CAN is a serial bus. It links controllers."]
+    )
+    assert generation.supported and generation.answer.startswith("CAN is a serial bus")
 
 
 def test_extractive_selects_contiguous_window_and_rejects_irrelevant_question():

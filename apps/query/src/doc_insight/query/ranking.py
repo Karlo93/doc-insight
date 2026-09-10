@@ -60,10 +60,19 @@ STOP_WORDS = frozenset(
         "za",
     ]
 )
+OPERATORS = frozenset(["and", "or"])
 
 
 def words(text: str) -> set[str]:
-    return set(re.findall(r"[^\W_]+", text.casefold())) - STOP_WORDS
+    """Casefold content words; an all-caps token such as CAN is a term, not a stop word."""
+    found = set()
+    for token in re.findall(r"[^\W_]+", text):
+        folded = token.casefold()
+        # Search operators typed in capitals are not acronyms.
+        acronym = len(token) > 1 and token.isupper() and folded not in OPERATORS
+        if folded not in STOP_WORDS or acronym:
+            found.add(folded)
+    return found
 
 
 def overlap(text: str, evidence: str) -> float:
