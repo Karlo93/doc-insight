@@ -10,7 +10,7 @@ JPEG and TIFF files; it does not contact a service or persist a document.
 `di analyze --embed` adds one vector per chunk; results still live only in memory/CLI output.
 `di worker run` consumes uploaded originals through the same pipeline; see [worker operations](worker.md).
 `di index` runs those stages and stores their output atomically; `di show` and `di search`
-read only the requested tenant's rows. Start with the M4 section below for the complete slice.
+read only the requested tenant's rows. Start with [storage and search](#storage-and-search) for setup.
 
 ```mermaid
 flowchart LR
@@ -64,9 +64,9 @@ words, not byte-identical OCR output. Dependencies and fixture tooling use uv.lo
 Version 2 applies declared EXIF orientation before image OCR and removes the tag;
 the sideways-JPEG regression test checks recovered words, not just nonempty output.
 PDFium applies PDF rotation metadata when rendering. Unmarked sideways scans,
-including images inside PDFs, still need orientation detection, which M1 does not do.
+including images inside PDFs, still need orientation detection, which the extractor does not implement.
 
-## Structure (M2)
+## Structure
 
 | Model | Fields and meaning |
 | --- | --- |
@@ -129,14 +129,14 @@ compatible with spaCy 3.8; Lingua's models ship inside its package. `uv.lock` pi
 pip-audit reports the two model wheels as unauditable because they are outside PyPI;
 their exact URLs and lockfile hashes fix the artifacts, but do not constitute a vulnerability audit.
 The first `di analyze` downloads the pinned tokenizer into `DI_MODEL_CACHE`; later processes
-reuse it. No embedding weights are needed in M2.
+reuse it. Text analysis without embeddings does not load embedding weights.
 MiniLM's pinned `sentence_bert_config.json` specifies 128 input tokens. The 120/24 defaults
 leave room for special tokens without relying on the underlying BERT's larger position table.
 The embedding adapter preserves this limit and rejects overlong inputs rather than truncating them.
 Changing the embedding model also changes tokenizer/chunking and requires a pipeline-version bump.
 An explicitly relative cache override is resolved from the startup directory; the default is absolute.
 
-## Embeddings (M3)
+## Embeddings
 
 `Embedder` exposes `embed_passages`, `embed_query`, `dimension` and `model_id`.
 `embed_document` copies the structured document, attaching each returned vector to its chunk's
@@ -156,7 +156,7 @@ the angle between vectors and rejects zero/nonfinite or mismatched inputs.
 | `DI_EMBED_REVISION` | `faf4aa4225822f3bc6376869cb1164e8e3feedd0` | Immutable ONNX snapshot revision; changing it requires a version bump |
 
 The model loads once per configuration. Weights and tokenizer share `DI_MODEL_CACHE`.
-For offline containers in M4, warm both snapshots there, then set `HF_HUB_OFFLINE=1` before
+For offline containers, warm both snapshots there, then set `HF_HUB_OFFLINE=1` before
 startup; a commit pin alone does not prevent a network attempt. Future query services must
 translate rejection of overlong questions into a clear HTTP 400 response.
 The first `--embed` run downloads roughly 0.22 GB; without that flag only the tokenizer is needed.
@@ -196,9 +196,9 @@ score 1.000/0.875 at both sizes; these cross-lingual rows are report-only.
 Different chunk sets and eight questions per language make this a bilingual regression
 fixture, not a general quality claim or a Croatian-to-English evaluation.
 See [ADR-0003](adr/0003-embeddings-and-vector-storage.md) for the complete table, upgrade criterion,
-e5's tokenizer/input changes, migration cost, and the pgvector decision for M4.
+e5's tokenizer/input changes, migration cost, and the pgvector decision.
 
-## Storage and search (M4)
+## Storage and search
 
 ```mermaid
 erDiagram
@@ -332,9 +332,9 @@ Commands work from the repository root in either shell:
 ```text
 uv run --locked --all-packages di extract tests/fixtures/mixed.pdf
 uv run --locked --all-packages di extract tests/fixtures/text_hr.pdf --json
-uv run --locked --all-packages di extract "inputs/demo-files/DSJ Europe Engineering Salary Guide.pdf"
+uv run --locked --all-packages di extract "inputs/example.pdf"
 uv run --locked --all-packages di analyze tests/fixtures/text_hr.pdf --json
-uv run --locked --all-packages di analyze "inputs/demo-files/DSJ Europe Engineering Salary Guide.pdf"
+uv run --locked --all-packages di analyze "inputs/example.pdf"
 uv run --locked --all-packages python scripts/make_fixtures.py
 make check
 make test-models
@@ -362,12 +362,10 @@ The Croatian topics have 95–100 words each. Font coverage and extracted text r
 tested; the existing English fixtures remain byte-identical after regeneration.
 See [font provenance](../scripts/fonts/readme.md) and [ADR-0001](adr/0001-text-extraction.md).
 
-## Not yet
+## Limits
 
-Stream consumer, gateway/JWT and application containers remain later work.
-Infrastructure and telemetry have independent Compose profiles.
-M2 performance follow-ups are still pending; the bilingual fixtures and real Croatian smoke
-test do not replace a representative retrieval-quality benchmark.
-Extraction and analysis remain stateless; index/show/search and the query service require a tenant.
-Multi-frame TIFF traversal, mixed text/image regions within one page, encrypted
-PDF passwords and parallel extraction are not implemented in M1.
+The small bilingual fixtures do not establish retrieval quality on an unseen corpus.
+Extraction and analysis are stateless; index/show/search and the query service
+require a tenant. Multi-frame TIFF traversal, mixed text/image regions within one
+page, password-protected PDF input and parallel extraction are not implemented.
+See the [load report](../benchmark/README.md) for measured HTTP capacity.

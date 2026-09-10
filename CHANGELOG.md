@@ -29,7 +29,7 @@ under a version and an ISO date when a release is cut.
 - Add a code walkthrough and deployment guidance; document service and pipeline
   boundaries with docstrings.
 - Keep provider credentials scoped to query; an empty key selects local extractive answers.
-- Document the current CLI setup, target architecture and planned API contracts.
+- Document CLI setup, architecture and API contracts.
 - Add locked service images, offline worker models and OCR, migration-first local
   startup behind Caddy TLS (`make local-run`, `make dev-token`) and main-only GHCR
   publication with SBOMs.
@@ -41,7 +41,7 @@ under a version and an ISO date when a release is cut.
   provisioned Grafana dashboards, health/version smoke checks and Redis/MinIO in CI.
 - Add Croatian retrieval fixtures, bilingual recall gates and English-to-Croatian evaluation reports; pipeline version stays 6.
 - Add optional OTLP traces, stage/request duration metrics and document outcome counts.
-- Add tenant-scoped `POST /query`, PostgreSQL hybrid retrieval, cited extractive answers, optional Mistral fallback handling and heuristic abstention.
+- Add tenant-scoped `POST /query`, PostgreSQL hybrid retrieval, cited extractive answers, provider fallback handling and extractive abstention.
 - Persist processed documents, chunks and entities atomically in tenant-scoped Postgres tables.
 - Add `di index`, `di show`, `di search`, database lifecycle targets and integration CI.
 - Add contribution standards, code ownership, PR/issue templates and a security policy.

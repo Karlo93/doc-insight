@@ -1,11 +1,11 @@
 # ADR-0003: Embeddings and vector storage
 
-Status: embedding decision implemented in M3; storage decision implemented in M4.
+Status: accepted; embedding and storage decisions implemented.
 
 ## Decision
 
 Use FastEmbed's CPU ONNX implementation of multilingual MiniLM, producing 384-dimensional
-vectors. Keep M2's 120/24 chunks and reject any embedding input above 126 content tokens;
+vectors. Keep the 120/24 chunk profile and reject any embedding input above 126 content tokens;
 two special tokens complete the published 128-token sentence input. MiniLM requires no
 query/passage prefixes. A shared Embedder Protocol keeps inference out of the pure pipeline.
 
@@ -24,7 +24,7 @@ Model, tokenizer, weight revisions, prefixes and input budget change together af
 `DI_EMBED_MODEL` and `DI_EMBED_ONNX_REPO` are a fixed profile, not interchangeable env options.
 The canonical `Qdrant` repository ID avoids relying on a redirect; the revision is unchanged.
 
-For the M4 container, warm both tokenizer and ONNX snapshots in the mounted cache, then set
+For the worker container, warm both tokenizer and ONNX snapshots in the mounted cache, then set
 `HF_HUB_OFFLINE=1` before starting the process. A pinned revision alone still allows a network
 attempt before cache fallback. The later query service must report overlong questions as a
 clear HTTP 400; the adapter's refusal to truncate must not become an HTTP 500.
@@ -70,7 +70,7 @@ Croatian accuracy, Croatian-to-English retrieval, or quality on unseen books and
 Keyword and MiniLM use different chunk sets. At production size, top five covers roughly
 a fifth of the model corpus; even perfect recall can hide poor ordering. The local book
 smoke reported in the PR exercises real input, but is not a representative benchmark.
-The bilingual evaluation promised before M4 was completed after M4; pipeline version stays 6
+The bilingual evaluation leaves pipeline version 6 unchanged
 because no stored output changes.
 
 Keep MiniLM while it passes the 0.8 recall@5 gate in both languages. If a separate representative English/Croatian
@@ -81,7 +81,7 @@ dimensions, a 512-token input limit and query/passage prefixes; those consume in
 It is an upgrade candidate, not an implemented or benchmarked alternative in this PR.
 
 A switch requires new tokenizer/weights, regenerated chunks, and a pipeline-version bump.
-After M4 it also needs a vector-column migration from 384 to 1024 dimensions, rebuilding the
+It also needs a vector-column migration from 384 to 1024 dimensions, rebuilding the
 vector index and re-embedding every document. Equal dimensions alone do not make model spaces compatible.
 
 ## Alternatives
@@ -92,8 +92,8 @@ vector index and re-embedding every document. Equal dimensions alone do not make
 - Hashed keyword vectors: useful offline retrieval baseline, but miss paraphrases without shared words.
 - A generative model: useful for the later answer stage; not the retrieval embedding provider.
 
-M4 implements [pgvector](https://github.com/pgvector/pgvector) in Postgres, alongside documents,
+The repository uses [pgvector](https://github.com/pgvector/pgvector) in Postgres, alongside documents,
 entities and chunks. It supports cosine search while sharing transactions and backups with
 the relational data. A dedicated vector database would add another service and a consistency
-boundary before this workload demonstrates a need for it. See [storage and search](../pipeline.md#storage-and-search-m4)
-for the implemented repository and migration; M3 itself added no database dependency or schema.
+boundary before this workload demonstrates a need for it. See [storage and search](../pipeline.md#storage-and-search)
+for the repository and migration.

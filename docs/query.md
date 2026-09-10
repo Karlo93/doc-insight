@@ -155,7 +155,7 @@ uv run --locked --all-packages di-query serve
 ```
 
 Fresh volumes create `di_app` through the committed init script. For an older
-volume, follow the [runtime-role setup](pipeline.md#storage-and-search-m4) first.
+volume, follow the [runtime-role setup](pipeline.md#storage-and-search) first.
 
 In another terminal (use `curl.exe` in Windows PowerShell):
 
