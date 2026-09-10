@@ -28,6 +28,7 @@ User ids contain 1–256 visible ASCII characters so they can be safely forwarde
 JWT numeric dates must be integers. Failures return the same `invalid token` message.
 JWKS URLs come only from configuration; token `jku` and `x5u` headers are not used.
 Unknown keys refresh within the configured cooldown. Failed refreshes also back off.
+Startup rejects a cache lifetime shorter than the refresh cooldown.
 An expired cache is never used to accept a token. Keys must be public RSA keys of at
 least 2048 bits with unique, nonempty `kid` values and signing/verification usage.
 
@@ -49,7 +50,9 @@ the gateway generates a UUID. The same id is returned on every response.
 Every response has `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`.
 CORS is absent by default; configured origins permit GET/POST and explicit auth/content
 headers. Response cookies and upstream redirects are not forwarded. Successful response
-bodies are read in memory; multipart requests stream without whole-body buffering.
+bodies are read in memory up to 16 MiB by default; larger responses return 502 and the
+upstream stream closes immediately. Missing response content types default to JSON.
+Multipart requests stream without whole-body buffering.
 The upload limit covers the entire multipart envelope. Declared oversized requests are
 rejected before forwarding; streamed bodies stop before the chunk that exceeds the limit.
 Ingest must clean up an incomplete body. Query strings are not forwarded because none
@@ -86,6 +89,7 @@ Export variables before startup. One cached Pydantic-settings object validates t
 | `DI_RATE_LIMIT_BURST` | `10` | Positive integer bucket capacity |
 | `DI_RATE_LIMIT_FAIL_OPEN` | `false` | Allow authenticated requests on Redis failure |
 | `DI_MAX_UPLOAD_BYTES` | `52428800` | Maximum total request body, 50 MiB |
+| `DI_MAX_UPSTREAM_RESPONSE_BYTES` | `16777216` | Maximum buffered successful response, 16 MiB |
 | `DI_INGEST_URL` | `http://127.0.0.1:8001` | Ingest base URL |
 | `DI_QUERY_URL` | `http://127.0.0.1:8002` | Query base URL |
 | `DI_UPSTREAM_TIMEOUT_SECONDS` | `30` | Query deadline; ingest gets four times this value |

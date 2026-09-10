@@ -10,13 +10,36 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 
+class ErrorPolicy:
+    """Create sanitized errors inside CORS; outer response policy also covers preflight."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        started = False
+
+        async def track_response(message: Message) -> None:
+            nonlocal started
+            if message["type"] == "http.response.start":
+                started = True
+            await send(message)
+
+        try:
+            await self.app(scope, receive, track_response)
+        except Exception:
+            if started or scope["type"] != "http":
+                raise
+            await error(500, "internal_error", "request failed")(scope, receive, send)
+
+
 class CorsPolicy:
     def __init__(self, app: ASGIApp, settings: Settings | None = None) -> None:
         settings = settings or get_settings()
-        self.app = app
+        self.app: ASGIApp = ErrorPolicy(app)
         if settings.cors_origins:
             self.app = CORSMiddleware(
-                app,
+                self.app,
                 allow_origins=[
                     o.strip().rstrip("/")
                     for o in settings.cors_origins.split(",")

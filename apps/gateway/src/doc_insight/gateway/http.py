@@ -57,8 +57,14 @@ class HttpJwksSource:
 
 
 class HttpUpstream:
-    def __init__(self, client: httpx.AsyncClient, url: str) -> None:
+    def __init__(
+        self,
+        client: httpx.AsyncClient,
+        url: str,
+        max_response_bytes: int = 16 * 1024 * 1024,
+    ) -> None:
         self.client, self.url = client, url.rstrip("/")
+        self.max_response_bytes = max_response_bytes
 
     async def exchange(
         self,
@@ -74,15 +80,19 @@ class HttpUpstream:
                 self.client, method, self.url + path, timeout, headers, body
             ) as response,
         ):
-            if 200 <= response.status_code < 300:
-                data = await response.aread()
-            else:
-                try:
-                    data = await bounded_read(response, 64 * 1024)
-                except ValueError:
-                    data = b""
+            limit = (
+                self.max_response_bytes
+                if 200 <= response.status_code < 300
+                else 64 * 1024
+            )
+            try:
+                data = await bounded_read(response, limit)
+            except ValueError:
+                return UpstreamReply(502, b"")
             return UpstreamReply(
-                response.status_code, data, response.headers.get("content-type", "")
+                response.status_code,
+                data,
+                response.headers.get("content-type") or "application/json",
             )
 
     async def ready(self) -> bool:

@@ -37,8 +37,12 @@ async def production_gateway() -> AsyncIterator[Gateway]:
             settings,
             Authenticator(HttpJwksSource(client, str(settings.jwks_url)), settings),
             RedisRateLimiter(redis, settings.rate_limit_rps, settings.rate_limit_burst),
-            HttpUpstream(client, str(settings.ingest_url)),
-            HttpUpstream(client, str(settings.query_url)),
+            HttpUpstream(
+                client, str(settings.ingest_url), settings.max_upstream_response_bytes
+            ),
+            HttpUpstream(
+                client, str(settings.query_url), settings.max_upstream_response_bytes
+            ),
         )
 
 

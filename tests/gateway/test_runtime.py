@@ -42,6 +42,10 @@ async def test_production_clients_created_once_and_closed(settings):
     async with production_gateway() as gateway:
         client = gateway.query.client
         assert gateway.ingest.client is client
+        assert (
+            gateway.query.max_response_bytes
+            == gateway.settings.max_upstream_response_bytes
+        )
         assert gateway.auth.source.client is client
         assert not client.is_closed
     assert client.is_closed
@@ -94,6 +98,12 @@ def test_invalid_signing_keys(keypair, changes):
 def test_duplicate_key_ids_rejected(keypair):
     with pytest.raises(ValueError):
         signing_keys({"keys": [keypair[1], keypair[1]]})
+
+
+def test_cache_cannot_expire_before_refresh_cooldown():
+    with pytest.raises(ValidationError):
+        Settings(jwks_cache_seconds=1, jwks_refresh_seconds=5)
+    assert Settings(jwks_cache_seconds=5, jwks_refresh_seconds=5)
 
 
 def test_public_jwks_does_not_promote_encryption_keys(keypair):

@@ -93,7 +93,10 @@ async def test_one_span_with_ids_and_no_credentials(gateway, token, monkeypatch)
     provider.shutdown()
 
 
-async def test_unexpected_error_still_has_security_headers(gateway, monkeypatch):
+@pytest.mark.parametrize("cors", [False, True])
+async def test_unexpected_error_still_has_security_headers(gateway, monkeypatch, cors):
+    gateway.settings.cors_origins = "https://client.example" if cors else ""
+
     async def fail(identity):
         raise RuntimeError("private")
 
@@ -106,10 +109,18 @@ async def test_unexpected_error_still_has_security_headers(gateway, monkeypatch)
         ) as client,
     ):
         response = await client.post(
-            "/query", headers={"authorization": "Bearer anything"}
+            "/query",
+            headers={
+                "authorization": "Bearer anything",
+                "origin": "https://client.example",
+            },
         )
     assert response.status_code == 500
     assert response.headers["cache-control"] == "no-store"
     assert response.headers["x-content-type-options"] == "nosniff"
     assert response.headers["x-request-id"]
     assert "private" not in response.text
+    if cors:
+        assert (
+            response.headers["access-control-allow-origin"] == "https://client.example"
+        )

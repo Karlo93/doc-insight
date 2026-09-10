@@ -2,8 +2,9 @@
 
 from functools import cache
 from pathlib import Path
+from typing import Self
 
-from pydantic import Field, HttpUrl, RedisDsn, field_validator
+from pydantic import Field, HttpUrl, RedisDsn, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,12 +24,19 @@ class Settings(BaseSettings):
     rate_limit_burst: int = Field(default=10, ge=1)
     rate_limit_fail_open: bool = False
     max_upload_bytes: int = Field(default=50 * 1024 * 1024, ge=1)
+    max_upstream_response_bytes: int = Field(default=16 * 1024 * 1024, ge=1)
     ingest_url: HttpUrl = HttpUrl("http://127.0.0.1:8001")
     query_url: HttpUrl = HttpUrl("http://127.0.0.1:8002")
     upstream_timeout_seconds: float = Field(default=30, gt=0, allow_inf_nan=False)
     cors_origins: str = ""
     gateway_host: str = "127.0.0.1"
     gateway_port: int = Field(default=8000, ge=1, le=65535)
+
+    @model_validator(mode="after")
+    def cache_covers_refresh_cooldown(self) -> Self:
+        if self.jwks_cache_seconds < self.jwks_refresh_seconds:
+            raise ValueError("JWKS cache lifetime must cover the refresh interval")
+        return self
 
     @field_validator("dev_jwks_path", mode="before")
     @classmethod

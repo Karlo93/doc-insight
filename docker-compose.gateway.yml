@@ -18,6 +18,7 @@ services:
       DI_RATE_LIMIT_RPS: ${DI_RATE_LIMIT_RPS:-5}
       DI_RATE_LIMIT_BURST: ${DI_RATE_LIMIT_BURST:-10}
       DI_RATE_LIMIT_FAIL_OPEN: ${DI_RATE_LIMIT_FAIL_OPEN:-false}
+      DI_MAX_UPSTREAM_RESPONSE_BYTES: ${DI_MAX_UPSTREAM_RESPONSE_BYTES:-16777216}
     volumes:
       - ./.dev-keys/jwks.json:/keys/jwks.json:ro
     ports:
