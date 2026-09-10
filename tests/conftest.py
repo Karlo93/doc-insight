@@ -14,6 +14,7 @@ def isolated_settings(monkeypatch: pytest.MonkeyPatch):
             "DI_TESSERACT_CMD",
             "DI_MODEL_CACHE",
             "DI_DATABASE_URL",
+            "DI_ALLOW_REMOTE_TEST_DB",
         }:
             monkeypatch.delenv(key)
     get_settings.cache_clear()

@@ -245,7 +245,10 @@ If 5432 is occupied, set `POSTGRES_PORT=55432` for Compose and the matching URL 
 PowerShell: `$env:DI_DATABASE_URL = 'postgresql+psycopg://di:di@127.0.0.1:55432/di'`;
 WSL/Linux: `export DI_DATABASE_URL='postgresql+psycopg://di:di@localhost:55432/di'`.
 `make test-integration` needs database-creation permission: tests create and drop only their
-randomly named databases, never the configured development database's tables.
+randomly named databases, never the configured development database's tables. The harness
+refuses hosts other than localhost unless `DI_ALLOW_REMOTE_TEST_DB=1` is set, so a shared
+server named in `DI_DATABASE_URL` cannot be touched by accident. Compose and CI pin the
+same `pgvector/pgvector` image tag; move both together.
 
 ## Run it: WSL2/Linux
 

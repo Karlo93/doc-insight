@@ -17,7 +17,7 @@ from doc_insight.worker.providers import (
 from doc_insight.worker.repository import PostgresRepository
 from doc_insight.worker.settings import get_settings
 from doc_insight.worker.structure import analyze
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -62,10 +62,16 @@ def index_file(
 
 
 def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
-    if not args.tenant.strip() or (args.command == "search" and args.k < 1):
-        parser.error("tenant must be nonblank and k must be positive")
-    engine = create_engine(get_settings().database_url, hide_parameters=True)
+    if not args.tenant.strip():
+        parser.error("tenant must be nonblank")
+    if args.command == "search" and args.k < 1:
+        parser.error("k must be positive")
+    if args.command == "search" and not args.value.strip():
+        parser.error("search text must be nonblank")
+    engine: Engine | None = None
     try:
+        # A malformed URL fails here and must get the same sanitized message.
+        engine = create_engine(get_settings().database_url, hide_parameters=True)
         repository = PostgresRepository(engine)
         if args.command == "search":
             vector = FastEmbedEmbedder(get_settings()).embed_query(args.value)
@@ -88,4 +94,5 @@ def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     except (ValueError, OSError) as error:
         parser.error(str(error))
     finally:
-        engine.dispose()
+        if engine is not None:
+            engine.dispose()

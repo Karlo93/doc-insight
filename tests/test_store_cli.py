@@ -8,6 +8,7 @@ from doc_insight.testing.embedding import KeywordEmbedder
 from doc_insight.testing.storage import InMemoryRepository
 from doc_insight.testing.structure import FakeTokenizer
 from doc_insight.worker import cli, store_cli
+from doc_insight.worker.settings import get_settings
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -62,18 +63,31 @@ def test_index_show_search_cli(monkeypatch, capsys, cli_repository):
 
 
 @pytest.mark.parametrize(
-    "args",
+    "args,message",
     [
-        ("index", "file.pdf"),
-        ("show", "invalid", "--tenant", "a"),
-        ("search", "words", "--tenant", ""),
-        ("search", "words", "--tenant", "a", "-k", "0"),
+        (("index", "file.pdf"), "required: --tenant"),
+        (("show", "invalid", "--tenant", "a"), "invalid UUID value"),
+        (("search", "words", "--tenant", ""), "tenant must be nonblank"),
+        (("search", "words", "--tenant", "a", "-k", "0"), "k must be positive"),
+        (("search", "   ", "--tenant", "a"), "search text must be nonblank"),
     ],
 )
-def test_invalid_cli_arguments(monkeypatch, args):
+def test_invalid_cli_arguments(monkeypatch, capsys, args, message):
     with pytest.raises(SystemExit) as error:
         invoke(monkeypatch, *args)
     assert error.value.code == 2
+    assert message in capsys.readouterr().err
+
+
+def test_malformed_database_url_is_a_clean_error(monkeypatch, capsys):
+    monkeypatch.setenv("DI_DATABASE_URL", "not-a-url")
+    get_settings.cache_clear()
+    with pytest.raises(SystemExit) as error:
+        invoke(monkeypatch, "show", uuid4(), "--tenant", "a")
+    assert error.value.code == 2
+    captured = capsys.readouterr()
+    assert "Database operation failed" in captured.err
+    assert "Traceback" not in captured.err
 
 
 def test_database_errors_do_not_print_query_parameters(monkeypatch, capsys):
