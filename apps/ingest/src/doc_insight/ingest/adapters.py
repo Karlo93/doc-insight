@@ -1,20 +1,14 @@
 """Long-lived S3 and Redis clients at the service boundary."""
 
-from typing import BinaryIO, cast
-
 import boto3
 from botocore.config import Config
-from botocore.exceptions import ClientError
 from doc_insight.contracts.ingest import DocumentUploaded
 from doc_insight.ingest.settings import Settings
-from mypy_boto3_s3 import S3Client
+from doc_insight.worker.object_store import S3ObjectStore as BaseS3ObjectStore
 from redis import Redis
 
 
-class S3ObjectStore:
-    def __init__(self, client: S3Client, bucket: str) -> None:
-        self.client, self.bucket = client, bucket
-
+class S3ObjectStore(BaseS3ObjectStore):
     @classmethod
     def from_settings(cls, settings: Settings) -> "S3ObjectStore":
         client = boto3.client(
@@ -29,30 +23,6 @@ class S3ObjectStore:
             ),
         )
         return cls(client, settings.s3_bucket)
-
-    def put(self, key: str, stream: BinaryIO, size: int, media_type: str) -> None:
-        self.client.put_object(
-            Bucket=self.bucket,
-            Key=key,
-            Body=stream,
-            ContentLength=size,
-            ContentType=media_type,
-            ServerSideEncryption="AES256",
-        )
-
-    def get(self, key: str) -> BinaryIO:
-        return cast(
-            BinaryIO, self.client.get_object(Bucket=self.bucket, Key=key)["Body"]
-        )
-
-    def exists(self, key: str) -> bool:
-        try:
-            self.client.head_object(Bucket=self.bucket, Key=key)
-        except ClientError as error:
-            if error.response["Error"]["Code"] in {"404", "NoSuchKey", "NotFound"}:
-                return False
-            raise
-        return True
 
 
 class RedisPublisher:

@@ -8,6 +8,8 @@ under a version and an ISO date when a release is cut.
 ### Added
 
 - Document the current CLI setup, target architecture and planned API contracts.
+- Add `di worker run`: sequential Redis consumption, tenant/object validation, version-aware replay, pending recovery, sanitized dead letters and graceful shutdown.
+
 - Add tenant-scoped uploads, encrypted object storage, document status and an atomic outbox with a Redis Streams relay.
 - Enforce FORCE row-level security with transaction-local tenant context and separate runtime/migration credentials.
 - Add independent infrastructure and telemetry Compose profiles, encrypted local S3,
