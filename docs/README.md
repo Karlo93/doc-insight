@@ -1,6 +1,5 @@
 # Documentation index
 
-- [Finish-today plan](finish-today-plan.md): OpenAI migration, frontend, private-server deployment, tests and publication gates.
 - [Code walkthrough](code-guide.md): reading order, module responsibilities and extension points.
 - [Assignment review](assignment-review.md): requirement-by-requirement status and remaining evidence.
 - [Online readiness](online-readiness.md): local versus public deployment, credentials and token accounting.

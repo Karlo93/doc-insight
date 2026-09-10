@@ -1,8 +1,7 @@
 # Technical assignment review
 
-> Historical baseline review before the same-day implementation. Follow the
-> [delivery plan](finish-today-plan.md) and [current readiness](online-readiness.md)
-> for changes made after this review.
+> Historical baseline review before the implementation that followed. See
+> [current readiness](online-readiness.md) for changes made after this review.
 
 Review date: 2026-09-10. Baseline: GitHub main `3ec103b9d4e549f5c18405211a735a42540dda47`.
 Source: `inputs/TechAssignment_ AI Tech Lead.pdf`, all four pages. The assignment

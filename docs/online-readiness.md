@@ -10,7 +10,7 @@ Use the [private deployment runbook](private-deployment.md) for operation.
 ## API credentials and token usage
 
 OCR, language detection, named entities and CPU embeddings run locally. Only answer
-generation needs an OpenAI API key. A ChatGPT/Codex login is not an application API
+generation needs an OpenAI platform API key; a chat subscription is not an API
 credential. Use `DI_OPENAI_API_KEY`, or a mounted key via `deploy/compose.secret.yml`
 and `OPENAI_SECRET_FILE`. The pinned model is `gpt-4.1-mini-2025-04-14`.
 
