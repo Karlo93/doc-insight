@@ -24,6 +24,7 @@ class LargeResponse(httpx.AsyncByteStream):
 
 
 async def test_successful_response_size_is_bounded_and_closed():
+    # Even a successful upstream response is untrusted until its streamed size is bounded.
     stream = LargeResponse()
     async with httpx.AsyncClient(
         transport=httpx.MockTransport(

@@ -7,6 +7,7 @@
 - [Docker deployment](deploy.md), [private hosting and credentials](private-deployment.md)
 - [Metrics and tracing](observability.md), [captured examples](evidence/README.md)
 - [Performance report](../benchmark/README.md) and reproducible measurements
+- [Security boundaries](security-boundaries.md), [scaling strategy](scaling.md), [cost estimate](costs.md)
 
 ## Develop
 

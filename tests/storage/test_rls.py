@@ -40,6 +40,7 @@ def insert_row(repository, migration_database, table, tenant):
 
 @pytest.mark.parametrize("table", TABLES)
 def test_raw_select_update_delete_are_tenant_scoped(database, tenants, table):
+    # Unqualified SQL deliberately bypasses repository filters to test database-enforced isolation.
     _, first, second = tenants
     with database.connect() as connection:
         set_tenant(connection, first)

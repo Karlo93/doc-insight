@@ -13,6 +13,7 @@ SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "container_health.py"
 
 @pytest.mark.parametrize("ttl", [-2, -1, 0, 1, 30, None])
 def test_worker_requires_unexpired_heartbeat(monkeypatch, ttl):
+    # Process liveness alone is insufficient; a worker must have a current progress heartbeat.
     monkeypatch.setenv("DI_CONTAINER_APP", "worker")
     monkeypatch.setenv("DI_REDIS_URL", "redis://redis:6379/0")
     client = MagicMock()

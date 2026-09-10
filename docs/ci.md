@@ -5,7 +5,7 @@ ref cancel superseded runs. Default workflow permissions are read-only.
 
 | Job | Required verification |
 | --- | --- |
-| `quality` | Ruff, strict mypy, Compose configuration, JavaScript syntax |
+| `quality` | Ruff, strict mypy, Compose configuration, JavaScript syntax and browser transport unit tests |
 | `test` | Offline tests with 70% coverage floor, then PostgreSQL/Redis/MinIO integration tests |
 | `security` | Bandit, pip-audit and pinned gitleaks |
 
@@ -25,9 +25,10 @@ Hooks use the locked uv environment. The push audit additionally needs GNU Make
 and Go 1.24.11+. CI runs independently of local hooks, including when hooks are skipped.
 Use [CONTRIBUTING](../CONTRIBUTING.md) for commands and migration requirements.
 
-Gitleaks in `make audit` scans current files, not deleted secrets in old commits.
+Gitleaks in `make audit` scans all fetched Git history; the security job fetches
+full history. Inspect uncommitted and ignored files separately.
 pip-audit skips editable workspace stubs and cannot check model wheels outside its
-advisory database. Passing these checks does not replace a history scan or review.
+advisory database. Passing these checks does not replace a manual security review.
 Dependabot proposes weekly Actions and uv dependency updates with grouped
 minor/patch releases.
 

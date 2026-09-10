@@ -9,6 +9,7 @@ from .conftest import measurements
 
 
 def test_stage_spans_and_histograms(telemetry, monkeypatch):
+    # A recorded duration is required for each completed stage, not only for the whole document.
     from doc_insight.observability import runtime
 
     times = iter([10.0, 10.25, 20.0, 20.5, 30.0, 31.0, 40.0, 42.0])

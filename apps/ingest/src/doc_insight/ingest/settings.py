@@ -9,7 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="DI_")
 
-    database_url: str = "postgresql+psycopg://di_app:di_app@localhost:5432/di"
+    database_url: str = "postgresql+psycopg://di_app@localhost:5432/di"
     s3_endpoint: str = "http://localhost:9000"
     s3_region: str = "us-east-1"
     s3_bucket: str = "documents"

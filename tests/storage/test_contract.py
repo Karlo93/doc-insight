@@ -5,6 +5,7 @@ from doc_insight.testing.storage import InMemoryRepository
 
 
 def test_replay_and_version_change_replace_one_document(repository, document):
+    # Identical input is a replay, so it must retain one document identity instead of duplicating rows.
     tenant = uuid4().hex
     first = repository.upsert_document(tenant, "first.pdf", document)
     replay = repository.upsert_document(tenant, "first.pdf", document)

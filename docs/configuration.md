@@ -1,8 +1,11 @@
 # Configuration index
 
 The current worker uses one cached Pydantic-settings object with `env_prefix="DI_"`.
-Values are validated at process startup. Export variables before invoking the CLI;
-its settings class does not configure `.env` loading. Compose reads `.env` separately.
+Values are validated at process startup. Generate local credentials once with
+`python scripts/configure_local.py`; invoke host commands with
+`uv run --env-file .env --locked --all-packages ...`. Settings do not load `.env`
+automatically. Compose reads `.env` separately. Existing environment variables
+override the file; clear stale exported credentials when switching deployments.
 Reading `.env` for Compose substitution does not pass every variable to containers:
 only entries mapped in `docker-compose.yml` reach each service. Query's hosted-model
 and retrieval settings are explicitly mapped; other host tuning values may need a
@@ -16,10 +19,10 @@ Compose override. See [private deployment](private-deployment.md).
 | Embedding batch and pinned ONNX snapshot | [Embedding table](pipeline.md#embeddings) |
 | Redis, S3 and `DI_WORKER_*` | [Worker settings](worker.md#settings): stream reads, reclaim, attempts and original object storage |
 | Gateway JWT/JWKS, Redis quotas, upload limits, upstreams and CORS | [Gateway settings](gateway.md#settings) |
-| `DI_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@localhost:5432/di`; restricted runtime login for the CLI and storage code; cannot bypass row-level security |
-| `DI_MIGRATION_DATABASE_URL` | `postgresql+psycopg://di:di@localhost:5432/di`; privileged login for `make migrate` and the disposable integration databases |
+| `DI_DATABASE_URL` | `DI_DATABASE_URL` from generated `.env`; restricted runtime login for the CLI and storage code; cannot bypass row-level security |
+| `DI_MIGRATION_DATABASE_URL` | `DI_MIGRATION_DATABASE_URL` from generated `.env`; privileged login for `make migrate` and the disposable integration databases |
 | `DI_ALLOW_REMOTE_TEST_DB` | Unset; the integration harness refuses nonlocal database hosts unless explicitly enabled |
-| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Each defaults to `di`; Compose development database initialization; a fresh volume also creates `di_app` |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | User and database default to `di`; password is generated and required for Compose initialization; a fresh volume also creates `di_app` |
 | `POSTGRES_PORT` | `5432`; Compose host port, bound to `127.0.0.1`; export matching `DI_DATABASE_URL` and `DI_MIGRATION_DATABASE_URL` values if changed |
 | `DI_OTEL_ENDPOINT`, `DI_OTEL_SERVICE_NAME`, `DI_OTEL_TIMEOUT_SECONDS`, `DI_ENV` | [Observability](observability.md); unset or empty endpoint disables export |
 | `COMPOSE_PROJECT_NAME` | Compose override for resource isolation; otherwise this file uses `doc-insight-core` |
@@ -35,8 +38,8 @@ quota adapter also reads `DI_REDIS_URL`, and `DI_MAX_UPLOAD_BYTES` bounds both t
 streaming requests and ingest uploads.
 The observability package validates its own `DI_OTEL_*` settings once at `configure()`.
 
-Keep credentials out of tracked files. The checked-in database values are for local
-development. Model-cache paths must be absolute in containers. Warm the pinned snapshots
+Keep credentials out of tracked files. The example file has no usable passwords;
+Compose refuses missing credentials. Model-cache paths must be absolute in containers. Warm the pinned snapshots
 before enabling `HF_HUB_OFFLINE=1`; see [embedding operation](pipeline.md#embeddings).
 
 Release additions: `DI_EMBED_THREADS` defaults to 2 native inference threads;

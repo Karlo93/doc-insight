@@ -15,6 +15,7 @@ from pydantic import ValidationError
 
 
 def test_settings_require_credentials_and_validate_limits(monkeypatch):
+    # Fail at startup when storage credentials or resource limits are invalid.
     get_settings.cache_clear()
     with pytest.raises(ValidationError):
         get_settings()

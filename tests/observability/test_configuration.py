@@ -19,6 +19,7 @@ def reset_configuration(monkeypatch):
 
 
 def test_no_endpoint_is_noop_and_configuration_is_once(monkeypatch):
+    # Disabled telemetry must not create exporters or mutate global SDK state.
     exporter = Mock(side_effect=AssertionError("Exporter must not be created"))
     monkeypatch.setattr(runtime, "_exporting", exporter)
     global_provider = trace.get_tracer_provider()

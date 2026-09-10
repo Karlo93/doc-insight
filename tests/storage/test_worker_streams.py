@@ -15,6 +15,7 @@ def stream_adapter(request):
 
 
 def test_stream_contract(stream_adapter):
+    # Run the same delivery and recovery contract against the fake and Redis adapter.
     adapter, client = stream_adapter
     stream, group, consumer = f"test:{uuid4().hex}", "contract", uuid4().hex
     try:

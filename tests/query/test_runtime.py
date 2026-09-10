@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 
 def test_lifespan_owns_runtime_and_releases_clients(monkeypatch):
+    # Models and clients belong to the service lifespan, not to individual requests.
     runtime = Mock()
     factory = Mock(return_value=runtime)
     monkeypatch.setattr("doc_insight.query.main.Runtime", factory)

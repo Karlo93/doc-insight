@@ -1,7 +1,7 @@
 # Local infrastructure
 
 Docker Compose v2 and Bash run the infrastructure without building any application
-image. Use Git Bash on native Windows, or WSL/Linux. Copy `.env.example` to `.env`;
+image. Use Git Bash on native Windows, or WSL/Linux. Run `python scripts/configure_local.py`;
 Compose reads it automatically. Export the matching `DI_` values separately before
 running Python commands. See [pipeline setup](pipeline.md) for Python and OCR.
 
@@ -49,16 +49,16 @@ If another database already owns 5432, choose a free `POSTGRES_PORT` before star
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | `di` each | Local database initialization |
-| `DI_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@localhost:5432/di` | Host Python restricted runtime connection |
-| `DI_MIGRATION_DATABASE_URL` | `postgresql+psycopg://di:di@localhost:5432/di` | Migration and disposable integration database connection |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | `di`, generated password in `.env`, `di` | Local database initialization |
+| `DI_DATABASE_URL` | `DI_DATABASE_URL` from generated `.env` | Host Python restricted runtime connection |
+| `DI_MIGRATION_DATABASE_URL` | `DI_MIGRATION_DATABASE_URL` from generated `.env` | Migration and disposable integration database connection |
 | `DI_REDIS_URL` | `redis://127.0.0.1:6379/0` | Host queue connection |
 | `DI_S3_ENDPOINT` | `http://127.0.0.1:9000` | Host S3 endpoint |
 | `DI_S3_REGION` | `us-east-1` | S3 signing region |
 | `DI_S3_BUCKET` | `documents` | Bucket created by initialization |
-| `DI_S3_ACCESS_KEY`, `DI_S3_SECRET_KEY` | `minioadmin` each | Public local credentials; also initialize MinIO root access |
+| `DI_S3_ACCESS_KEY`, `DI_S3_SECRET_KEY` | Generated in `.env` | Required credentials; also initialize MinIO root access |
 | `DI_S3_USE_SSL` | `false` | HTTP on the local development network |
-| `GRAFANA_ADMIN_USER`, `GRAFANA_ADMIN_PASSWORD` | `admin` each | Initial local Grafana login |
+| `GRAFANA_ADMIN_USER`, `GRAFANA_ADMIN_PASSWORD` | `admin`; generated password in `.env` | Initial Grafana login |
 | `DI_OTEL_ENDPOINT` | unset | Set to `http://127.0.0.1:4318` for host export |
 | `DI_OTEL_SERVICE_NAME` | configure argument | Optional service identity override |
 | `DI_OTEL_TIMEOUT_SECONDS` | `3` | Export timeout in seconds |

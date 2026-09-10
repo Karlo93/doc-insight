@@ -27,6 +27,7 @@ def detector(request: pytest.FixtureRequest) -> LanguageDetector:
     "text", ["", "Alice Johnson visited the British Museum in London."]
 )
 def test_language_contract(detector: LanguageDetector, text: str) -> None:
+    # Real and fake language providers must satisfy the same bounded-confidence contract.
     guess = detector.detect(text)
     assert 0 <= guess.confidence <= 1
     assert guess.language == ("en" if text else "und")

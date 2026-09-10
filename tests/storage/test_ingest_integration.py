@@ -37,6 +37,7 @@ def pending(database, tenant):
 
 
 def test_pdf_to_stream(database, s3, redis_client, storage_settings):
+    # Duplicate uploads must share both document identity and the durable outbox event.
     tenant = uuid4().hex
     repository = PostgresRepository(database)
     data = (Path(__file__).parents[1] / "fixtures/text_hr.pdf").read_bytes()

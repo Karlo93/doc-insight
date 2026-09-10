@@ -47,6 +47,7 @@ def with_fakes(source: ExtractedDocument, **settings):
     ["text_en.pdf", "text_hr.pdf", "text_long.pdf", "scanned.png", "mixed.pdf"],
 )
 def test_every_fixture_chunk_is_an_exact_page_slice(filename: str) -> None:
+    # Offsets are citation boundaries: every emitted chunk must be an exact slice of its page.
     source = extract(FIXTURES / filename)
     result = with_fakes(source, chunk_tokens=32, chunk_overlap=8)
     assert result.chunks

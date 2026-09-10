@@ -18,6 +18,7 @@ def embedder(request: pytest.FixtureRequest) -> Embedder:
 
 
 def test_embedder_contract(embedder: Embedder) -> None:
+    # Dimensions and finite vector values are adapter obligations, independent of semantic quality.
     texts = [
         "Saturn telescope rings",
         "Sourdough bread bakery",

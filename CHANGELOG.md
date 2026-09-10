@@ -7,12 +7,18 @@ under a version and an ISO date when a release is cut.
 
 ### Fixed
 
+- Generate independent local credentials, preserve existing configuration, scope
+  container secrets to their consumers, and reject browser token use over network HTTP.
+
 - Retrieve natural-language content terms and recognize document names with minor
   misspellings; preserve tenant isolation and explicit search filters.
 - Stop rejecting hosted paraphrases on lexical-overlap scores, constrain generated
   citation IDs to available passages, and show passage counts in the browser.
 
 ### Added
+
+- Document encryption boundaries, capacity-based scaling proposals and cost assumptions.
+- Explain intent in 48 test modules and test local credential creation and browser transport.
 
 - License project code under PolyForm Noncommercial 1.0.0.
 

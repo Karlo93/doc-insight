@@ -18,6 +18,7 @@ pytestmark = pytest.mark.integration
 
 
 def test_keyword_retrieval_through_postgres(database):
+    # The frozen fixture keeps retrieval regressions separate from changing source documents.
     settings = Settings(chunk_tokens=64, chunk_overlap=8)
     extracted = extract(FIXTURES / "text_long.pdf")
     chunks = []

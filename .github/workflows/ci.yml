@@ -20,10 +20,13 @@ jobs:
       - run: make typecheck
       - name: compose
         run: |
+          python scripts/configure_local.py
           docker compose --profile '*' config --quiet
           docker compose -f docker-compose.yml -f deploy/compose.private.yml --profile '*' config --quiet
       - name: Browser modules
-        run: for file in frontend/*.js; do node --check "$file"; done
+        run: |
+          for file in frontend/*.js frontend/*.mjs; do node --check "$file"; done
+          node --test tests/frontend/*.test.mjs
   test:
     runs-on: ubuntu-latest
     env:
@@ -61,6 +64,7 @@ jobs:
       # Actions services cannot supply MinIO's required server command.
       - name: MinIO service
         run: |
+          python scripts/configure_local.py
           docker compose up -d --wait --wait-timeout 60 minio
           docker compose run --rm minio-init
       - run: make setup
@@ -80,6 +84,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true

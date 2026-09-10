@@ -71,6 +71,7 @@ def event_setup(database, monkeypatch, redis_client):
 def test_worker_real_redis_postgres_and_object_store(
     event_setup, redis_client, request, real_objects
 ):
+    # This tier exercises real queue, object-store and database boundaries together.
     repository, event, data, stream_name = event_setup
     objects = request.getfixturevalue("s3") if real_objects else InMemoryObjectStore()
     objects.put(event.object_key, BytesIO(data), len(data), event.media_type)

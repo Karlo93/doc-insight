@@ -56,6 +56,7 @@ def client(service):
 
 
 def test_response_and_tenant_isolation(client):
+    # An API result must retain both the answer contract and the authenticated tenant boundary.
     body = {"question": "Where does the pharmacy store vaccines?", "top_k": 3}
     data = client.post("/query", headers={"X-Tenant-Id": "demo"}, json=body).json()
     assert not data["abstained"] and data["confidence"] == 0.7

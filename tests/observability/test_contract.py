@@ -6,6 +6,7 @@ from doc_insight.testing.telemetry import FakeStageObserver
 @pytest.mark.parametrize("provider", ["fake", "sdk"])
 @pytest.mark.parametrize("fails", [False, True])
 def test_stage_observer_contract(provider, fails, telemetry):
+    # The same observer contract applies to the production helper and deterministic fake.
     instance, exporter, _ = telemetry
     fake = FakeStageObserver()
     observer: StageObserver = fake if provider == "fake" else instance

@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 @pytest.mark.anyio
 async def test_dev_issuer_roundtrip(tmp_path, gateway):
+    # Exercise the actual issuer/verifier boundary, not a hand-built fake identity.
     directory = tmp_path / "keys"
     generate_keys(directory)
     with pytest.raises(FileExistsError):

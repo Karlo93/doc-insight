@@ -12,6 +12,7 @@ from sqlalchemy.exc import OperationalError
 
 
 def test_signal_handlers_finish_first_and_exit_immediately_second(monkeypatch):
+    # The first signal permits cleanup; a second signal must let an operator force termination.
     handlers = {}
     monkeypatch.setattr(
         signal, "signal", lambda signum, handler: handlers.setdefault(signum, handler)

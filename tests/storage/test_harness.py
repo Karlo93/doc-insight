@@ -12,6 +12,7 @@ import pytest
 def test_temporary_databases_refuse_remote_hosts_before_connecting(
     monkeypatch: pytest.MonkeyPatch, temporary_database_factory, url: str, allowed: bool
 ) -> None:
+    # Reject a remote target before connecting; this harness creates and drops databases.
     monkeypatch.setenv("DI_MIGRATION_DATABASE_URL", url)
     monkeypatch.delenv("DI_ALLOW_REMOTE_TEST_DB", raising=False)
     # The default suite blocks connections, so a local URL fails only at connect time.

@@ -8,10 +8,10 @@ Docker Compose runs the services locally; [private deployment](private-deploymen
 
 ## System diagram
 
-This Mermaid transcription preserves the supplied architecture diagram's component boxes
-and data paths. Solid arrows
+The diagram shows service boundaries and data paths. Solid arrows
 denote requests/writes; dashed arrows denote reads, asynchronous delivery or telemetry.
-The component table below identifies what is implemented. The browser UI is deployed; general-purpose audit storage remains outside this release.
+The component table below identifies what is implemented. General-purpose audit
+storage is not implemented.
 
 ```mermaid
 flowchart TB

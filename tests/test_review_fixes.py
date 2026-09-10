@@ -19,6 +19,7 @@ class CharacterTokenizer:
 
 
 def test_subword_windows_keep_whole_words_and_exact_counts() -> None:
+    # Token counts must describe the emitted text, including words split into several subwords.
     page = Page(number=1, text="observatory weather cloud", source="text_layer")
     chunks = chunk_page(
         page, CharacterTokenizer(), Settings(chunk_tokens=13, chunk_overlap=4), 0

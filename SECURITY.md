@@ -23,6 +23,7 @@ gateway, per-user quotas, tenant-scoped queries and forced PostgreSQL row-level
 security. Internal services trust the isolated Compose network and must not be
 exposed directly. The development issuer is for operator-managed workspaces;
 self-service identity lifecycle and multi-node availability are not implemented.
+See [security boundaries](docs/security-boundaries.md) for the encryption matrix.
 See [private deployment](docs/private-deployment.md) for credentials, backups and
 network boundaries. Hosted generation sends selected passages and questions to
 the provider; local extraction and embeddings do not require a hosted API.
@@ -32,11 +33,11 @@ the provider; local extraction and embeddings do not require a hosted API.
 - Keep secrets in environment variables or ignored local files. Never commit private keys,
   tokens, database credentials, real document samples or private infrastructure details.
 - `.env`, `*.pem`, `*.key`, `inputs/`, `.cache/` and `.local/` are ignored; inspect the staged diff anyway.
-  Local example database credentials are not deployment credentials.
+  Generate unique local credentials with `python scripts/configure_local.py`.
 - Logs and review attachments must exclude document text, questions, user filenames, vectors
   and credentials. Explicit CLI output is document data and must be handled accordingly.
 - If a secret is exposed, revoke or rotate it promptly and notify the maintainer privately.
   Deleting a file does not remove previous commits, logs or artifacts containing it.
-- Run `make audit`. Gitleaks scans current files; pip-audit skips editable workspace packages
+- Run `make audit`. Gitleaks scans all fetched Git history; inspect uncommitted files separately; pip-audit skips editable workspace packages
   and cannot audit the two spaCy model wheels outside PyPI. Passing these tools is limited evidence,
   not a guarantee that a deployment is secure.

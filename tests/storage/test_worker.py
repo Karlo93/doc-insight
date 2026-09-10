@@ -64,6 +64,7 @@ def setup_worker():
 def test_full_pipeline_ack_duplicate_version_replacement_and_privacy(
     setup_worker, caplog, capsys
 ):
+    # A replay must preserve one complete indexed result before its stream entry is acknowledged.
     worker, record, event, key = setup_worker
     caplog.set_level("INFO")
     worker.run_once()

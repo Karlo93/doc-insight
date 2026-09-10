@@ -94,6 +94,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
     ["text_en.pdf", "text_hr.pdf", "text_long.pdf", "scanned.png", "mixed.pdf"],
 )
 def test_model_fixture_equivalence(filename: str, window: int, overlap: int) -> None:
+    # Compare against the preserved algorithm before accepting a faster token-counting path.
     settings = Settings(chunk_tokens=window, chunk_overlap=overlap)
     tokenizer = HfTokenizer(settings)
     source = extract(FIXTURES / filename)

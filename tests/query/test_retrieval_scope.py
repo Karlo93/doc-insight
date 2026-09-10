@@ -5,6 +5,7 @@ from doc_insight.query.retrieval import named_scope
 
 
 def test_filename_scope_tolerates_typo_and_ignores_unrelated_document():
+    # A misspelled document reference should narrow retrieval without favoring unrelated files.
     diagram, overview = UUID(int=1), UUID(int=2)
     names = [
         (diagram, "doc-insight-architecture-v2_1.png"),

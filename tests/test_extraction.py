@@ -35,6 +35,7 @@ def settings(monkeypatch: pytest.MonkeyPatch):
 def test_text_layers_preserve_words_and_unicode(
     filename: str, words: list[str]
 ) -> None:
+    # Text-layer extraction must preserve Unicode and word boundaries without invoking OCR.
     result = extract(FIXTURES / filename)
     assert result.media_type == "application/pdf"
     assert result.page_count == 1

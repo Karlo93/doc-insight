@@ -18,6 +18,7 @@ async def empty_body():
 
 
 async def test_shared_client_never_replays_session_cookie():
+    # A shared upstream client must never carry one user's session cookie into another request.
     observed = []
 
     def handler(request):

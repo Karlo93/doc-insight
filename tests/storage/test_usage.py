@@ -17,6 +17,7 @@ def ledger(request):
 
 
 def test_atomic_concurrent_reservations(ledger):
+    # Reservations must serialize in storage so concurrent requests cannot overspend the same budget.
     tenant = uuid4().hex
 
     def reserve(_):
