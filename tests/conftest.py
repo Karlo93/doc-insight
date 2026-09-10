@@ -1,5 +1,6 @@
 import os
 import socket
+import sys
 
 import psycopg
 import pytest
@@ -35,7 +36,16 @@ def offline_by_default(request: pytest.FixtureRequest, monkeypatch: pytest.Monke
     def blocked(*args, **kwargs):
         raise AssertionError("Network access is forbidden in the default test suite")
 
-    monkeypatch.setattr(socket.socket, "connect", blocked)
+    original_connect = socket.socket.connect
+
+    def guarded_connect(*args, **kwargs):
+        # Windows implements asyncio's private socketpair using a loopback connect.
+        pair = getattr(socket, "_fallback_socketpair", None)
+        if pair is not None and sys._getframe(1).f_code is pair.__code__:
+            return original_connect(*args, **kwargs)
+        return blocked(*args, **kwargs)
+
+    monkeypatch.setattr(socket.socket, "connect", guarded_connect)
     monkeypatch.setattr(socket, "getaddrinfo", blocked)
     # libpq can open sockets in C, bypassing Python's socket guard.
     monkeypatch.setattr(psycopg, "connect", blocked)

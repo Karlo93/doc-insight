@@ -1,5 +1,9 @@
 # Pipeline: files to searchable documents
 
+The [ingest service](ingest.md) accepts tenant-scoped uploads, retains original bytes
+in encrypted object storage and publishes an atomic outbox through Redis Streams.
+Processing that stream belongs to the worker consumer; the CLI path below remains available.
+
 `di extract` is the file-to-text edge of the worker. It reads local PDF, PNG,
 JPEG and TIFF files; it does not contact a service or persist a document.
 `di analyze` adds page languages, named entities and chunks with exact page offsets.

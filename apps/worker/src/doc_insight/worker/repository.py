@@ -10,6 +10,7 @@ from doc_insight.contracts.storage import (
     validate_vector,
 )
 from doc_insight.contracts.structure import Chunk, Document, Entity
+from doc_insight.worker.uploads import UploadRepository
 from pgvector.sqlalchemy import VECTOR
 from sqlalchemy import Connection, Engine, MetaData, Table, func, select, text
 from sqlalchemy.dialects.postgresql import insert
@@ -22,13 +23,13 @@ def _set_tenant(connection: Connection, tenant_id: str) -> None:
     )
 
 
-class PostgresRepository:
+class PostgresRepository(UploadRepository):
     def __init__(self, engine: Engine) -> None:
         self.engine = engine
         metadata = MetaData()
-        self.docs, self.chunks, self.entities = (
+        self.docs, self.chunks, self.entities, self.outbox = (
             Table(name, metadata, autoload_with=engine)
-            for name in ("documents", "chunks", "entities")
+            for name in ("documents", "chunks", "entities", "outbox")
         )
         self.dimension = cast(int, cast(VECTOR, self.chunks.c.embedding.type).dim)
 
@@ -64,7 +65,9 @@ class PostgresRepository:
         self, tenant_id: str, filename: str, document: Document
     ) -> StoredDocument:
         record = prepare_document(tenant_id, filename, document)
-        values = record.model_dump(exclude={"chunks", "entities"})
+        values = record.model_dump(
+            exclude={"chunks", "entities", "size_bytes", "object_key"}
+        )
         values["processed_at"] = func.clock_timestamp()
         statement = insert(self.docs).values(**values)
         updates = {

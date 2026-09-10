@@ -160,7 +160,7 @@ def test_rls_migration_downgrade_and_upgrade(empty_database, migrate_schema):
             policies = connection.execute(
                 text(
                     "SELECT tablename, policyname, cmd, qual, with_check FROM pg_policies "
-                    "WHERE schemaname = 'public'"
+                    "WHERE schemaname = 'public' AND tablename != 'outbox'"
                 )
             ).all()
             assert len(policies) == (3 if enabled else 0)

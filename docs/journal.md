@@ -27,6 +27,16 @@ CI reuses the MinIO Compose definition because Actions services cannot pass its
 server command. Postgres and Redis use declarative services. ADR-0006 records
 the alternatives; application code and pipeline output are unchanged.
 
+## Upload service and outbox
+
+Migration 0003 stores uploads before processing and registers their events atomically.
+The receiver bounds multipart bytes before storage writes. Shared fake/real contracts
+cover object storage, event publishing and upload repository methods. Restricted-login
+tests cover rollback, replay, tenant isolation and competing SKIP LOCKED relays.
+MinIO tests verify SSE-S3 on the stored object. Redis tests consume the event through
+a temporary consumer group. ADR-0007 records delivery and orphan-object tradeoffs.
+The relay requires an explicit tenant and handles shutdown between bounded batches.
+
 ## Shared observability
 
 Added process-owned OpenTelemetry providers behind the stage observer contract.

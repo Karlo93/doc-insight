@@ -38,7 +38,7 @@ target-version = "py312"
 python_version = "3.12"
 strict = true
 explicit_package_bases = true
-mypy_path = ["apps/worker/src", "packages/contracts/src", "packages/testing/src", "packages/observability/src"]
+mypy_path = ["apps/ingest/src", "apps/worker/src", "packages/contracts/src", "packages/testing/src", "packages/observability/src"]
 
 [[tool.mypy.overrides]]
 module = ["pypdfium2.*", "pytesseract.*"]

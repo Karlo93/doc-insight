@@ -2,6 +2,15 @@
 name = "doc-insight-ingest"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
+dependencies = [
+    "doc-insight-contracts", "doc-insight-worker", "doc-insight-observability",
+    "fastapi>=0.135,<1", "uvicorn[standard]>=0.41,<1",
+    "python-multipart>=0.0.22,<1", "boto3>=1.42,<2", "boto3-stubs[s3]>=1.42,<2",
+    "redis>=7.2,<8", "pydantic-settings>=2.15,<3", "sqlalchemy>=2,<3",
+]
+
+[project.scripts]
+di-ingest = "doc_insight.ingest.cli:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -9,3 +18,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/doc_insight"]
+
+[tool.uv.sources]
+doc-insight-contracts = { workspace = true }
+doc-insight-worker = { workspace = true }
+doc-insight-observability = { workspace = true }
