@@ -39,8 +39,14 @@ Each ranking retrieves up to `DI_QUERY_TOP_K_MAX` candidates. Cosine kNN and
 PostgreSQL full-text search run with the same tenant and filters in one repeatable-read
 snapshot, including source-document metadata. Generation starts after the transaction
 closes. Full-text uses `to_tsvector('simple', text)` with `websearch_to_tsquery` and
-descending `ts_rank_cd`; no index migration is included. Natural-language questions
-can produce no full-text matches because every unquoted term is required.
+descending `ts_rank_cd`; no index migration is included. The query service removes
+common question words and joins content terms with OR, so a natural-language question
+does not require every word to occur in a passage. Repository/CLI websearch syntax
+is unchanged. Before retrieval, distinctive filename words can narrow an all-library
+question to a named document; a similarity ratio of at least 0.86 tolerates small
+spelling errors. Explicit document filters take precedence and language filters remain.
+Only tenant-owned IDs/names are read, in the same snapshot. Name resolution currently
+scans the tenant's filename metadata; benchmark large catalogs before scaling this path.
 The snapshot binds `app.tenant_id` once for FORCE row-level security. Use restricted
 runtime credentials; reserve `DI_MIGRATION_DATABASE_URL` for schema changes and the
 temporary-database test harness. Never run the service as the migration superuser.
@@ -54,13 +60,19 @@ gap between the first and last retained fused score: `(first - last) / first`.
 Clamp it to 0–1; a singleton gets zero margin. Let `L` be the fraction of distinct
 answer words present in cited passages, after case folding and removal of common
 English/Croatian function words. If the generator reports support and valid citations,
-confidence is `(0.7 + 0.3 * M) * L`; otherwise it is zero. Abstain below
-`DI_ABSTAIN_THRESHOLD`, on zero confidence, or without support. Equality to a positive
-threshold is accepted. Cosine similarity does not enter the formula.
+confidence is `(0.7 + 0.3 * M) * L`; otherwise it is zero. This lexical score gates
+extractive answers only: abstain below `DI_ABSTAIN_THRESHOLD`, on zero confidence,
+or without support. Hosted paraphrases use the model's support decision, a nonempty
+answer and validated citations; word overlap is informational and does not veto them.
+The browser displays passage counts instead of presenting lexical overlap as evidence
+quality. Model support and valid indexes do not prove factual entailment; inspect the
+cited passages for important answers. Cosine similarity does not enter the formula.
 
 With an API key, OpenAI receives only the question and numbered passage text, never
 tenant/document metadata. The Responses API uses `store: false`, an output token cap,
-and a strict JSON schema for answer, support and zero-based citation indexes.
+and a strict JSON schema for answer, support and zero-based citation indexes. Each
+request restricts citation values to an enum of its actual passage indexes; parser
+validation remains a second check. Filenames and tenant metadata stay local.
 Refusals, incomplete output and invalid citations trigger extractive fallback.
 An explicitly unsupported answer is a successful generation and causes abstention.
 The circuit admits one recovery probe after cooldown; epoch tickets prevent older
@@ -103,7 +115,7 @@ adapters are reused from the worker package. Pipeline version remains 6.
 | `DI_LLM_TIMEOUT_SECONDS` | `10` | Positive HTTP timeout |
 | `DI_LLM_BREAKER_FAILURES` | `3` | Consecutive failures before opening |
 | `DI_LLM_BREAKER_SECONDS` | `30` | Positive cooldown before one probe |
-| `DI_ABSTAIN_THRESHOLD` | `0.6` | Minimum positive confidence to answer |
+| `DI_ABSTAIN_THRESHOLD` | `0.6` | Minimum positive lexical confidence for extractive answers |
 | `DI_RRF_K` | `60` | Positive fusion rank constant |
 | `DI_QUERY_TOP_K_MAX` | `20` | Candidate depth and request limit, 1–20 |
 | `DI_EMBED_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Fixed embedding profile |

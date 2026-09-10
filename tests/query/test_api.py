@@ -228,3 +228,65 @@ def test_entities_deduplicate_normalized_spelling_per_document(service):
     assert (
         len(entities) == 1 and entities[0].text == "pharmacy" and entities[0].count == 2
     )
+
+
+def test_hosted_paraphrase_is_not_rejected_by_word_overlap(service):
+    # Same meaning as the fixture, with deliberately different vocabulary.
+    answer = "A clinical dispensary keeps immunizations chilled."
+    service.generator = FallbackGenerator(
+        Mock(
+            generate=Mock(
+                return_value=Generation(
+                    answer=answer,
+                    supported=True,
+                    cited_passage_indexes=[0],
+                )
+            )
+        )
+    )
+    response = service.query(
+        "demo", QueryRequest(question="How are vaccines kept cold?")
+    )
+    assert response.confidence < service.settings.abstain_threshold
+    assert not response.abstained and response.answer == answer
+    assert (
+        response.sources[0].text
+        == "The pharmacy stores vaccines in monitored refrigerators."
+    )
+    assert response.generation.provider == "openai"
+
+
+@pytest.mark.parametrize(
+    "answer,supported,indexes",
+    [
+        ("", True, [0]),
+        ("   ", True, [0]),
+        ("answer", False, [0]),
+        ("answer", True, []),
+        ("answer", True, [0, 999]),
+    ],
+)
+def test_hosted_support_still_requires_nonempty_answer_and_valid_citations(
+    service, answer, supported, indexes
+):
+    service.generator = FallbackGenerator(
+        Mock(
+            generate=Mock(
+                return_value=Generation(
+                    answer=answer,
+                    supported=supported,
+                    cited_passage_indexes=indexes,
+                )
+            )
+        )
+    )
+    response = service.query("demo", QueryRequest(question="vaccines"))
+    assert response.abstained and response.answer == "" and response.entities == []
+
+
+def test_question_words_do_not_disable_exact_label_retrieval(service):
+    from doc_insight.query.ranking import lexical_query
+
+    query = lexical_query("What does the pharmacy do?")
+    assert service.repository.search_text("demo", query, 5)
+    assert service.repository.search_text("other", query, 5) == []

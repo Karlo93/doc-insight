@@ -18,6 +18,7 @@ Copy `.env.example` to `.env` and configure before creating volumes:
 | --- | --- |
 | `COMPOSE_PROJECT_NAME` | Unique, stable project name |
 | `IMAGE_TAG` | Immutable release identifier |
+| `QUERY_IMAGE_TAG` | Optional query-only release override; empty inherits `IMAGE_TAG` |
 | `POSTGRES_PASSWORD` | Generated administrator password |
 | `DI_DB_RUNTIME_PASSWORD` | Different generated runtime password |
 | `DI_CONTAINER_DATABASE_URL` | `postgresql+psycopg://di_app:PASSWORD@db:5432/di` |

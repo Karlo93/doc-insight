@@ -14,6 +14,24 @@ from scripts.eval_query import fixture, measure
 
 
 @pytest.mark.integration
+def test_question_search_finds_diagram_label_without_function_words(database, document):
+    from doc_insight.query.ranking import lexical_query
+
+    repository = PostgresRepository(database)
+    tenant = "diagram-" + uuid4().hex
+    copy = document.model_copy(deep=True)
+    copy.chunks[
+        0
+    ].text = "Worker: PDF parsing, Tesseract OCR, language detection, NER, embeddings."
+    stored = repository.upsert_document(tenant, "architecture.png", copy)
+    query = lexical_query("What does the worker do?")
+    hits = repository.search_text(tenant, query, 5)
+    assert hits and hits[0].document_id == stored.id and "Worker" in hits[0].chunk.text
+    assert repository.search_text(tenant + "-other", query, 5) == []
+    assert repository.search_text(tenant, query, 5, QueryFilter(document_ids=[])) == []
+
+
+@pytest.mark.integration
 def test_query_end_to_end_and_evaluation(database):
     document, embedder, cases = fixture(Settings(), "keyword")
     tenant = "query-" + uuid4().hex
@@ -80,6 +98,8 @@ def test_query_snapshot_contract(repository, document):
     tenant = "reader-" + uuid4().hex
     stored = repository.upsert_document(tenant, "fixture.pdf", document)
     with repository.snapshot(tenant) as reader:
+        assert reader.document_names(tenant) == [(stored.id, "fixture.pdf")]
+        assert reader.document_names(tenant + "-other") == []
         assert reader.nearest_chunks(tenant, document.chunks[0].embedding, 5)
         assert reader.search_text(tenant, "astronomy", 5)
         assert reader.get_document(tenant, stored.id).id == stored.id
@@ -91,6 +111,7 @@ def test_snapshot_cannot_switch_to_another_populated_tenant(repository, document
     repository.upsert_document(first, "first.pdf", document)
     other = repository.upsert_document(second, "second.pdf", document)
     with repository.snapshot(first) as reader:
+        assert reader.document_names(second) == []
         assert reader.nearest_chunks(first, document.chunks[0].embedding, 5)
         assert reader.nearest_chunks(second, document.chunks[0].embedding, 5) == []
         assert reader.search_text(second, "astronomy", 5) == []

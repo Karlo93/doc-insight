@@ -32,6 +32,10 @@ class Generator(Protocol):
 
 
 class QueryReader(Protocol):
+    def document_names(self, tenant_id: str) -> list[tuple[UUID, str]]:
+        """Return tenant-owned IDs and filenames only, within this read snapshot."""
+        ...
+
     def nearest_chunks(
         self,
         tenant_id: str,

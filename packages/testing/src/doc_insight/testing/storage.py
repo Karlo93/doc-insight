@@ -20,7 +20,25 @@ from doc_insight.contracts.storage import (
 from doc_insight.contracts.structure import Chunk, Document, Entity
 
 
+def text_score(query: str, text: str) -> float:
+    """Model conjunction and generated OR terms; real tests own full websearch grammar."""
+    present = set(re.findall(r"[^\W_]+", text.casefold()))
+    alternatives = [
+        set(re.findall(r"[^\W_]+", part.casefold())) for part in query.split(" OR ")
+    ]
+    return float(
+        sum(len(terms) for terms in alternatives if terms and terms <= present)
+    )
+
+
 class InMemoryRepository:
+    def document_names(self, tenant_id: str) -> list[tuple[UUID, str]]:
+        return [
+            (identifier, doc.filename)
+            for (tenant, identifier), doc in self.documents.items()
+            if tenant == tenant_id
+        ]
+
     def list_documents(
         self, tenant_id: str, limit: int = 50, offset: int = 0
     ) -> list[StoredDocument]:
@@ -190,8 +208,6 @@ class InMemoryRepository:
     ) -> list[SearchHit]:
         if k < 1:
             raise ValueError("k must be positive")
-        # Simple conjunction fake; PostgreSQL tests own websearch grammar and ts_rank_cd.
-        terms = set(re.findall(r"[^\W_]+", query.casefold()))
         candidates = self.nearest_chunks(
             tenant_id,
             [1.0] + [0.0] * (self.dimension - 1),
@@ -199,9 +215,9 @@ class InMemoryRepository:
             filter,
         )
         hits = [
-            hit.model_copy(update={"score": float(len(terms))})
+            hit.model_copy(update={"score": score})
             for hit in candidates
-            if terms and terms <= set(re.findall(r"[^\W_]+", hit.chunk.text.casefold()))
+            if (score := text_score(query, hit.chunk.text)) > 0
         ]
         hits.sort(key=lambda hit: (-hit.score, hit.document_id, hit.chunk.ord))
         return hits[:k]

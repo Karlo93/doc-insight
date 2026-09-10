@@ -4,7 +4,7 @@ import pytest
 from doc_insight.contracts.storage import SearchHit
 from doc_insight.contracts.structure import Chunk
 from doc_insight.query.extractive import ExtractiveGenerator
-from doc_insight.query.ranking import confidence, fuse, should_abstain
+from doc_insight.query.ranking import confidence, fuse, lexical_query, should_abstain
 
 
 def hit(ordinal, score=0.45):
@@ -63,6 +63,16 @@ def test_abstain_threshold_boundary():
     assert should_abstain(0.59, 0.6, True)
     assert should_abstain(1, 0, False)
     assert should_abstain(0, 0, True)
+
+
+def test_natural_language_lexical_terms_are_disjunctive_and_operators_are_inert():
+    assert lexical_query("What does the worker do?") == '"worker"'
+    assert (
+        lexical_query("Explain decimal base operations please")
+        == '"base" OR "decimal" OR "operations"'
+    )
+    assert lexical_query('"worker" OR --database') == '"database" OR "worker"'
+    assert lexical_query("What is it?") == ""
 
 
 def test_extractive_selects_contiguous_window_and_rejects_irrelevant_question():

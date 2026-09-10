@@ -17,7 +17,8 @@ from doc_insight.contracts.query import (
 from doc_insight.contracts.storage import SearchHit, StoredDocument
 from doc_insight.observability import stage
 from doc_insight.query.generation import FallbackGenerator
-from doc_insight.query.ranking import confidence, fuse, should_abstain
+from doc_insight.query.ranking import assess_generation
+from doc_insight.query.retrieval import retrieve
 from doc_insight.query.settings import Settings
 
 
@@ -95,12 +96,14 @@ class QueryService:
             raise QuestionTooLong("Question exceeds 126 content tokens") from exc
         # Rank up to the service cap before cutting to top_k, even for top_k=1.
         with stage("query.retrieve"), self.repository.snapshot(tenant) as reader:
-            k = self.settings.query_top_k_max
-            rankings = [
-                reader.nearest_chunks(tenant, vector, k, request.filter),
-                reader.search_text(tenant, request.question, k, request.filter),
-            ]
-            hits = fuse(rankings, self.settings.rrf_k)[: request.top_k]
+            hits = retrieve(
+                reader,
+                tenant,
+                request,
+                vector,
+                self.settings.query_top_k_max,
+                self.settings.rrf_k,
+            )
             documents = [
                 document
                 for doc_id in dict.fromkeys(hit.document_id for hit in hits)
@@ -124,18 +127,8 @@ class QueryService:
         started: float,
     ) -> QueryResponse:
         """Validate citations and evidence strength before exposing a supported answer."""
-        indexes = list(dict.fromkeys(generation.cited_passage_indexes))
-        # Never let one out-of-range citation produce a partially trusted answer.
-        valid = bool(indexes) and all(0 <= i < len(hits) for i in indexes)
-        cited = [hits[i] for i in indexes] if valid else []
-        value = confidence(
-            [h.score for h in hits],
-            generation.supported and valid,
-            generation.answer,
-            [h.chunk.text for h in cited],
-        )
-        abstained = should_abstain(
-            value, self.settings.abstain_threshold, generation.supported and valid
+        value, abstained, cited = assess_generation(
+            generation, provider, hits, self.settings.abstain_threshold
         )
         # Abstention preserves retrieved evidence for inspection, without asserting a citation.
         returned = hits if abstained else cited

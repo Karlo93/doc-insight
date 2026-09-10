@@ -5,6 +5,13 @@ under a version and an ISO date when a release is cut.
 
 ## [Unreleased]
 
+### Fixed
+
+- Retrieve natural-language content terms and recognize document names with minor
+  misspellings; preserve tenant isolation and explicit search filters.
+- Stop rejecting hosted paraphrases on lexical-overlap scores, constrain generated
+  citation IDs to available passages, and show passage counts in the browser.
+
 ### Added
 
 - Clarify service and adapter contracts with concise function docstrings, inline

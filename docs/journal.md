@@ -34,6 +34,30 @@ separately and retains per-run timings.
 Review also exposed the offset-ordering assumption: reversed offsets can reject a valid
 window. A once-per-page monotonicity check now selects the reference when starts or ends
 move backwards, with separate regressions for reversed and nested offsets.
+
+## Real-document retrieval and hosted-answer corrections (2026-09-10)
+
+User testing with an electronics book and an architecture PNG exposed gaps in the
+small fixture acceptance suite. OpenAI was being called, but lexical answer/source
+overlap suppressed useful paraphrases. Full-question conjunction search contributed
+few matches, and a requirements PDF outranked the diagram. The provider could also
+emit an out-of-range citation because the strict schema constrained only its type.
+
+Use content-term OR retrieval, tenant-scoped filename resolution with conservative
+fuzzy matching, and request-specific citation enums. Preserve parser validation,
+explicit unsupported answers, empty-answer rejection and extractive thresholds.
+Hosted support uses the model decision with valid citations, not lexical similarity;
+this remains a heuristic grounding boundary, not an entailment proof. Browser passage
+counts replace the misleading percentage. Added paraphrase, invalid-output, spelling,
+filter and real-database tenant tests. Private document data remains outside Git.
+The earlier load report describes the pre-correction release; filename metadata
+lookup adds per-query work and needs a new large-catalog benchmark before scaling.
+Validation: 486 default tests (92.79% coverage), 69 integration tests, strict types,
+lint and security checks passed. Fresh local uploads of the actual PDF, architecture
+PNG and competing assignment PDF passed both supported questions, including the
+original misspellings, plus an unsupported-question check using real OpenAI calls.
+See [ADR-0013](adr/0013-query-grounding-and-document-context.md).
+
 ## Inline code documentation (2026-09-10)
 
 Added 72 function/protocol docstrings across 23 Python modules and concise JSDoc

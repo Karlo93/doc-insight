@@ -103,7 +103,7 @@ services:
       DI_CONTAINER_ROLE: relay
   query:
     <<: *app
-    image: ghcr.io/karlo93/doc-insight-query:${IMAGE_TAG:-local}
+    image: ghcr.io/karlo93/doc-insight-query:${QUERY_IMAGE_TAG:-${IMAGE_TAG:-local}}
     build:
       context: .
       args: {APP: query}

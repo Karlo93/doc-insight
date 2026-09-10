@@ -10,6 +10,7 @@ from doc_insight.query.generation import FallbackGenerator
 from doc_insight.query.openai_provider import (
     OpenAIGenerator,
     ProviderFailure,
+    answer_schema,
     parse_response,
 )
 from doc_insight.query.settings import Settings
@@ -131,6 +132,9 @@ def test_success_schema_and_usage():
         assert str(request.url) == "https://api.openai.com/v1/responses"
         assert data["store"] is False and data["max_output_tokens"] == 700
         assert data["text"]["format"]["strict"] is True
+        assert data["text"]["format"]["schema"]["properties"]["cited_passage_indexes"][
+            "items"
+        ]["enum"] == [0]
         assert "tenant" not in data["input"]
         return httpx.Response(
             200, json=response(), headers={"x-request-id": "request-1"}
@@ -152,6 +156,20 @@ def test_success_schema_and_usage():
                 generator.generate("vaccines", ["vaccines"])[1].fallback_reason
                 == "busy"
             )
+
+
+def test_citation_schema_is_request_local_and_never_allows_nonexistent_indexes():
+    five = answer_schema(5)
+    one = answer_schema(1)
+
+    def indexes(schema):
+        return schema["properties"]["cited_passage_indexes"]["items"]["enum"]
+
+    assert indexes(five) == [0, 1, 2, 3, 4]
+    assert indexes(one) == [0]
+    assert indexes(five) == [0, 1, 2, 3, 4]
+    with pytest.raises(ValueError):
+        answer_schema(0)
 
 
 def test_concurrent_calls_are_allowed_up_to_limit():

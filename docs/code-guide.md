@@ -22,6 +22,7 @@ Paths below are relative to the repository. Within an application,
 | Model adapters | `apps/worker`: `providers.py`, `embedder.py` | Lazy cached Lingua, spaCy, tokenizer and CPU ONNX models; enforce input limits |
 | Persistence | `apps/worker`: `repository.py`, `query_repository.py`, `uploads.py`; `migrations/versions/` | Atomic replacement, tenant-bound transactions, consistent query snapshots and SQL schema |
 | Question answering | `apps/query`: `main.py`, `runtime.py`, `service.py`, `ranking.py` | Validate request, own clients, combine vector/text rankings, select citations, score confidence and abstain |
+| Document selection | `apps/query`: `retrieval.py` | Recognize document names with small spelling errors, preserve explicit filters, and retrieve content terms within one tenant snapshot |
 | Token accounting | `apps/query`: `usage.py`; `packages/contracts`: `usage.py`; migration 0004 | Atomic tenant/day reservations, idempotent settlement and conservative ambiguous-failure charging |
 | Answer providers | `apps/query`: `generation.py`, `openai_provider.py`, `extractive.py` | Optional OpenAI call with citation parsing and breaker; local sentence-window fallback |
 | Shared interfaces | `packages/contracts/src/doc_insight/contracts/` | Pydantic data shapes and Protocols for storage, embeddings, generation, streams, identity and telemetry |
