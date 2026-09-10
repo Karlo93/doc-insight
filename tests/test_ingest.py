@@ -204,3 +204,41 @@ def test_stream_parser_handles_single_byte_fragments():
     asyncio.run(upload.read(request))
     assert stream.read() == PDF and upload.prefix == PDF[:8]
     assert upload.digest.hexdigest() == sha256(PDF).hexdigest()
+
+
+@pytest.mark.parametrize("repeated", [False, True])
+@pytest.mark.parametrize("header_count,status", [(8, 202), (9, 400)])
+def test_multipart_header_count_bound(clients, repeated, header_count, status):
+    headers = [b'Content-Disposition: form-data; name="file"; filename="a.pdf"']
+    headers += [
+        f"X-{0 if repeated else index}: value".encode()
+        for index in range(header_count - 1)
+    ]
+    body = b"--x\r\n" + b"\r\n".join(headers) + b"\r\n\r\n" + PDF + b"\r\n--x--\r\n"
+    response = clients[0].post(
+        "/ingest",
+        content=body,
+        headers={
+            "X-Tenant-Id": "demo",
+            "Content-Type": "multipart/form-data; boundary=x",
+        },
+    )
+    assert response.status_code == status
+    if status == 400:
+        assert not clients[1].documents and not clients[2].objects
+
+
+@pytest.mark.parametrize("repeated", [False, True])
+def test_header_callbacks_enforce_limit_independently_of_parser(repeated):
+    from doc_insight.ingest.upload import UploadBody
+    from fastapi import HTTPException
+
+    upload = UploadBody(BytesIO(), 32)
+    for index in range(16):
+        field = f"x-{0 if repeated else index}".encode()
+        upload.header_field(field, 0, len(field))
+        upload.header_value(b"value", 0, 5)
+        upload.header_end()
+    with pytest.raises(HTTPException) as caught:
+        upload.header_end()
+    assert caught.value.status_code == 400

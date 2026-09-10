@@ -16,6 +16,7 @@ class UploadBody:
         self.prefix = b""
         self.filename = ""
         self.headers: dict[bytes, bytes] = {}
+        self.header_count = 0
         self.field = b""
         self.value = b""
         self.parts = 0
@@ -35,10 +36,13 @@ class UploadBody:
         self._bound_headers()
 
     def _bound_headers(self) -> None:
-        if len(self.field) + len(self.value) > 8192 or len(self.headers) > 16:
+        if len(self.field) + len(self.value) > 8192:
             raise HTTPException(400, "Multipart headers too large")
 
     def header_end(self) -> None:
+        self.header_count += 1
+        if self.header_count > 16:
+            raise HTTPException(400, "Too many multipart headers")
         self.headers[self.field] = self.value
         self.field = self.value = b""
 
