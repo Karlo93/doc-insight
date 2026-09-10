@@ -1,5 +1,16 @@
 # Engineering journal
 
+This journal records engineering decisions and verification notes by milestone. Each entry
+explains the boundary changed, the evidence used and any remaining limitation. Keep entries
+short; durable decisions and alternatives belong in ADRs, while release-facing changes belong
+in the changelog.
+
+## Contribution standards
+
+Recorded worktree and commit conventions, the eleven review checks, test tiers and migration
+discipline. Added ownership, review/issue templates and a private security-reporting path.
+Documentation-only changes do not require a new architecture decision.
+
 ## Documentation — current slice and service contracts
 
 Transcribed the reference system diagram into Mermaid and separated implemented worker/storage

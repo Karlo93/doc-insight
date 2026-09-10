@@ -161,5 +161,8 @@ See [architecture and trade-offs](docs/architecture.md) for the planned service 
 
 ## License
 
+See [Contributing](CONTRIBUTING.md) for contribution standards and [Security](SECURITY.md)
+for private vulnerability reporting.
+
 No project license has been selected or committed. The fixture font has its own
 [provenance](scripts/fonts/readme.md) and [license](scripts/fonts/ofl.txt).
