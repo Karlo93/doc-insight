@@ -5,6 +5,32 @@ explains the boundary changed, the evidence used and any remaining limitation. K
 short; durable decisions and alternatives belong in ADRs, while release-facing changes belong
 in the changelog.
 
+## Guarded page token counting
+
+The first page-offset chunker failed equality on page 239 of the 256-page demo book.
+A vertical tab was a Python word boundary but disappeared during tokenizer normalization.
+At 120/24, chunk ordinal 1599 differed as follows:
+
+| Field | Reference | Unguarded candidate |
+| --- | ---: | ---: |
+| char_start | 1370 | 1368 |
+| char_end | 1479 | 1479 |
+| token_count | 37 | 38 |
+
+The candidate added a period and newline; its isolated count was actually 39. A minimal
+`"a\x0b. b"` reproduction at 2/1 also exceeded the cap. The revised chunker chooses the
+reference for pages with control/format and related Unicode categories, retaining ordinary
+tab, LF, CR and NBSP on the fast path. It does not reproduce the tokenizer normalizer.
+The reference is preserved in both production and the equivalence tests. Pipeline version
+stays 6. [ADR-0002](adr/0002-structured-representation.md#token-counting-from-one-page-encoding)
+records the exact guard and its limits.
+
+Three benchmark runs now match all chunks in both books. Median chunking changed from
+17.304 to 16.196 seconds for 256 pages and from 47.785 to 36.028 seconds for 659 pages.
+The guard selects 242/256 and 400/659 pages, so the speedup is limited by fallback work.
+The six-page fixture has no guarded pages and improves from 0.369 to 0.012 seconds.
+The benchmark script reports extraction separately and retains per-run timings.
+
 ## Contribution standards
 
 Recorded worktree and commit conventions, the eleven review checks, test tiers and migration
