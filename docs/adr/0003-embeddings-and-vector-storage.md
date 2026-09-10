@@ -31,24 +31,49 @@ clear HTTP 400; the adapter's refusal to truncate must not become an HTTP 500.
 
 ## Evaluation and upgrade criterion
 
-Eight fixed questions target short substrings in the twelve-topic English fixture. The
+Eight fixed questions per language target short substrings in separate twelve-topic English
+and Croatian fixtures, each with six pages. Croatian topics have 95–100 words and differ
+from the English subjects; questions use paraphrases and inflected forms. Tests require
+each answer to occur exactly once in the source pages in both languages. The
 evaluation embeds once, ranks by cosine, and counts the first chunk containing the answer.
 Recall@5 is the fraction of questions answered in the top five; MRR averages the reciprocal
 first relevant rank across the full ranking, assigning zero when no chunk contains the answer.
 Ties retain input order, and overlapping copies of an answer do not earn extra credit.
 
-With 64/8 evaluation windows, the keyword baseline gives recall@5 0.875 and MRR 0.745 over
-30 whitespace-tokenized chunks. MiniLM gives 1.000 and 0.938 over 42 subword-tokenized chunks.
-These are regression checks, not a controlled comparison or evidence of Croatian retrieval
-quality: the chunk sets differ, the corpus is tiny, and questions reuse distinctive words.
+| Queries → corpus | Provider | Window/overlap | Chunks | Recall@5 | MRR |
+| --- | --- | --- | --- | --- | --- |
+| en → en | Keyword | 64/8 | 30 | 0.875 | 0.745 |
+| en → en | MiniLM | 64/8 | 42 | 1.000 | 0.938 |
+| en → en | Keyword | 120/24 | 18 | 1.000 | 0.729 |
+| en → en | MiniLM | 120/24 | 24 | 1.000 | 0.917 |
+| hr → hr | Keyword | 64/8 | 24 | 0.500 | 0.289 |
+| hr → hr | MiniLM | 64/8 | 42 | 1.000 | 0.581 |
+| hr → hr | Keyword | 120/24 | 12 | 0.750 | 0.388 |
+| hr → hr | MiniLM | 120/24 | 24 | 0.875 | 0.896 |
+| en → hr (translated questions) | MiniLM | 64/8 | 42 | 1.000 | 0.875 |
+| en → hr (translated questions) | MiniLM | 120/24 | 24 | 1.000 | 0.875 |
 
-At the shipped 120/24 defaults, MiniLM gives recall@5 1.000 and MRR 0.917 over 24 chunks.
-Reproduce with `uv run --locked --all-packages python scripts/eval_retrieval.py --provider fastembed --production`.
-Top five covers roughly a fifth of this corpus, so this only catches gross regressions.
-A separate bilingual-evaluation PR before M4 will add a generated Croatian multi-topic fixture
-and questions; the current single-chunk Croatian fixture does not establish retrieval quality.
+Reproduce with `uv run --locked --all-packages python scripts/eval_retrieval.py --language hr --provider all`;
+repeat with `--language en` and add `--production` for the shipped defaults.
+The English translations in `eval_hr.jsonl` ask about the same Croatian answers. These
+cross-lingual rows are report-only, with no gate. English fixture questions against the
+unrelated Croatian subjects, or the reverse, would not measure translation retrieval.
 
-Keep MiniLM while it passes the 0.8 recall@5 gate. If a separate representative English/Croatian
+Both languages gate MiniLM recall@5 at 0.8 with 64/8 windows. The English keyword gate
+stays at 0.75. The Croatian keyword score of 0.500 is below 0.75, so its explicit gate is
+0.5: whitespace hashing cannot match inflected forms or synonyms. This is a baseline
+limitation, not a reason to relax the model gate. Production scores are reported separately.
+
+These fixtures now establish a small bilingual retrieval regression check and measure
+English-to-Croatian retrieval on eight translated questions. They do not establish general
+Croatian accuracy, Croatian-to-English retrieval, or quality on unseen books and OCR.
+Keyword and MiniLM use different chunk sets. At production size, top five covers roughly
+a fifth of the model corpus; even perfect recall can hide poor ordering. The local book
+smoke reported in the PR exercises real input, but is not a representative benchmark.
+The bilingual evaluation promised before M4 was completed after M4; pipeline version stays 6
+because no stored output changes.
+
+Keep MiniLM while it passes the 0.8 recall@5 gate in both languages. If a separate representative English/Croatian
 holdout falls below 0.8, benchmark [multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)
 on the same frozen chunks/questions and measure latency and memory on the target machine.
 Adopt it only if it clears the gate within an agreed latency/memory budget. It has 1024

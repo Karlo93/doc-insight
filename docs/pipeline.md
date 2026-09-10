@@ -160,17 +160,29 @@ uv run --locked --all-packages di analyze tests/fixtures/text_hr.pdf --embed
 uv run --locked --all-packages python scripts/eval_retrieval.py
 uv run --locked --all-packages python scripts/eval_retrieval.py --provider fastembed
 uv run --locked --all-packages python scripts/eval_retrieval.py --provider fastembed --production
+uv run --locked --all-packages python scripts/eval_retrieval.py --language hr --provider all
+uv run --locked --all-packages python scripts/eval_retrieval.py --language hr --provider all --production
 uv run --locked --all-packages python scripts/make_eval_fixture.py
 ```
 
-The generated `eval.jsonl` contains eight fixed questions over `text_long.pdf`. Evaluation uses
+The generated `eval.jsonl` and `eval_hr.jsonl` each contain eight fixed questions over
+`text_long.pdf` and `text_long_hr.pdf`, respectively. The two six-page corpora cover distinct
+subjects. Each expected answer has at most five words and occurs exactly once in its source.
+Evaluation defaults to English; `--language hr` selects Croatian. `--provider all` runs
+both providers, while the default keyword run stays offline. Evaluation uses
 64/8 windows and reports recall@5 (any expected answer in the first five chunks) and MRR (mean
 reciprocal first-answer rank across the full ranking; absent answers score zero).
 The offline keyword run uses 30 whitespace-tokenized chunks: recall@5 0.875, MRR 0.745.
 The model run uses 42 subword-tokenized chunks: recall@5 1.000, MRR 0.938.
-`--production` uses configured chunk sizes (120/24 by default): 24 chunks, recall@5 1.000, MRR 0.917.
-Different chunk sets and eight English questions make this a regression fixture, not a general
-quality claim. See [ADR-0003](adr/0003-embeddings-and-vector-storage.md) for the upgrade criterion,
+`--production` uses configured chunk sizes (120/24 by default): English MiniLM has 24 chunks,
+recall@5 1.000, MRR 0.917; English keyword has 18 chunks, 1.000 and 0.729.
+Croatian keyword scores 0.500/0.289 (recall@5/MRR) at 64/8 over 24 chunks, and 0.750/0.388
+at 120/24 over 12 chunks. Croatian MiniLM scores 1.000/0.581 over 42 chunks and 0.875/0.896
+over 24 chunks, respectively. Its English-translated questions against the Croatian corpus
+score 1.000/0.875 at both sizes; these cross-lingual rows are report-only.
+Different chunk sets and eight questions per language make this a bilingual regression
+fixture, not a general quality claim or a Croatian-to-English evaluation.
+See [ADR-0003](adr/0003-embeddings-and-vector-storage.md) for the complete table, upgrade criterion,
 e5's tokenizer/input changes, migration cost, and the pgvector decision for M4.
 
 ## Storage and search (M4)
@@ -324,20 +336,24 @@ the Croatian fixture reports `hr`. Its JSON includes full pages, entity position
 `make test` uses fakes plus installed Lingua/spaCy models and blocks Python socket connections.
 It checks chunk slices, whole-word boundaries, token budgets, weighted language, entity counts and NER limits.
 `make test-models` exercises the real tokenizer, embeddings, readable boundaries and the 128-token
-limit including special tokens, and enforces model recall@5 ≥ 0.8; it may download files.
-`make test` also enforces keyword recall@5 ≥ 0.75 without network or database access.
+limit including special tokens, and enforces model recall@5 ≥ 0.8 for each language at 64/8;
+it may download files. `make test` also enforces keyword recall@5 ≥ 0.75 for English and
+≥ 0.5 for Croatian without network or database access. The lower Croatian baseline gate
+records the measured limit of whitespace hashing on inflected forms, not a model concession.
 That small subset disables coverage reporting; the full default suite enforces the 70% floor.
 
 Fixtures use a committed font subset, a fixed PDF creation date and twelve fixed
-topics across six pages; rerunning the generator recreates all five files.
+topics across six pages per long fixture; rerunning the generator recreates all six extraction files.
+The Croatian topics have 95–100 words each. Font coverage and extracted text round trips are
+tested; the existing English fixtures remain byte-identical after regeneration.
 See [font provenance](../scripts/fonts/readme.md) and [ADR-0001](adr/0001-text-extraction.md).
 
 ## Not yet
 
 Queue, HTTP services, gateway/JWT, LLM answers, hybrid retrieval and application
 containers remain later work. `DOCKER_DEV=no`: only Postgres runs in Docker here.
-The bilingual retrieval evaluation and M2 performance follow-ups are still pending;
-the real Croatian smoke test is not a retrieval-quality benchmark.
+M2 performance follow-ups are still pending; the bilingual fixtures and real Croatian smoke
+test do not replace a representative retrieval-quality benchmark.
 Extraction and analysis remain stateless; only index/show/search require a tenant.
 Multi-frame TIFF traversal, mixed text/image regions within one page, encrypted
 PDF passwords and parallel extraction are not implemented in M1.

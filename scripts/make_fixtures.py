@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pypdfium2 as pdfium
+from fixture_hr import PARAGRAPHS_HR
 from fpdf import FPDF
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -215,6 +216,7 @@ def main() -> None:
     make_pdf([ENGLISH]).output(FIXTURES / "text_en.pdf")
     make_pdf([CROATIAN]).output(FIXTURES / "text_hr.pdf")
     make_pdf(PARAGRAPHS).output(FIXTURES / "text_long.pdf")
+    make_pdf(PARAGRAPHS_HR).output(FIXTURES / "text_long_hr.pdf")
     with (
         pdfium.PdfDocument(FIXTURES / "text_en.pdf") as pdf,
         closing(pdf[0]) as page,
@@ -229,7 +231,7 @@ def main() -> None:
     total = sum(path.stat().st_size for path in FIXTURES.iterdir())
     if total > 300_000:
         raise ValueError(f"Fixtures exceed 300 KB: {total} bytes")
-    print(f"Generated five fixtures: {total} bytes")
+    print(f"Generated six extraction fixtures: {total} bytes")
 
 
 if __name__ == "__main__":

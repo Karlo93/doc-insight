@@ -9,6 +9,17 @@ stages keep their CLI durations; a process span counts each document attempt.
 Request middleware records route templates and status codes. It omits raw URLs,
 headers and exception messages before they can enter telemetry.
 
+## Bilingual retrieval evaluation
+
+Added twelve independent Croatian topics and eight paraphrased questions with English
+translations. Both languages require unique source answers and MiniLM recall@5 ≥ 0.8 at
+64/8. Croatian MiniLM measured 1.000 recall and 0.581 MRR; production 120/24 measured
+0.875 and 0.896. The Croatian keyword baseline measured 0.500 recall, so its gate is
+explicitly 0.5 because whitespace hashing misses inflected forms. English-to-Croatian
+retrieval measured 1.000 recall and 0.875 MRR at both sizes, reported without a gate.
+ADR-0003 records the complete results and limits. The committed font covers every Croatian
+diacritic; existing fixtures regenerate byte-identically. No stored output or pipeline version changes.
+
 ## M4 — persistent core
 
 Kept extraction and inference outside the write transaction; the unique tenant/hash upsert

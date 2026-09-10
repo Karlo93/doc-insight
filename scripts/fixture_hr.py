@@ -1,0 +1,141 @@
+"""Fixed Croatian topics, independent of the English retrieval corpus."""
+
+PARAGRAPHS_HR = [
+    (
+        "U paškoj solani morska voda prolazi kroz niz plitkih bazena. Sunce i vjetar "
+        "postupno je zgušnjavaju, a radnici otvaranjem ustava određuju kamo će teći. "
+        "Kad se na dnu pojave kristali, počinje pažljivo skupljanje soli. Za berbu "
+        "se upotrebljavaju drvene grablje jer ne oštećuju podlogu bazena. Sol se "
+        "zatim ostavlja na hrpama kako bi se ocijedila preostala voda. Radni dan "
+        "počinje rano, dok vrućina još nije prejaka. Posjetitelji promatraju posao "
+        "s označene staze i ne ulaze među bazene. Vodič im pokazuje razliku između "
+        "krupnih kristala i sitnog praha. Kiša prekida berbu jer razrjeđuje vodu "
+        "i otapa tek nastalu sol."
+    ),
+    (
+        "Na kamenitoj parceli iznad sela obnavlja se stari suhozid. Majstor najprije "
+        "razvrstava kamen prema veličini, a potom uklanja rastresitu zemlju s mjesta "
+        "na kojem će zid stajati. Najveći komadi polažu se pri dnu. Sitniji kamen "
+        "ispunjava praznine između dvaju vanjskih lica zida. Graditelji ne koriste "
+        "vezivo: stabilnost osiguravaju težina i pažljivo slaganje. Kroz takav zid "
+        "kišnica prolazi bez zadržavanja, pa ga bujica teže ruši. Učenici pokušavaju "
+        "pronaći položaj u kojem se pojedini kamen ne ljulja. Majstor im savjetuje "
+        "da ga okrenu prije nego što posegnu za čekićem. Završni red čine pločasti "
+        "komadi koji štite unutrašnjost od ispadanja."
+    ),
+    (
+        "Na malom otoku svjetioničarka svake večeri provjerava svjetlo iznad kuće. "
+        "Svjetionik se od susjednih razlikuje po ritmu bljeskova, a ne samo po "
+        "položaju. Njegov prepoznatljiv znak čine tri kratka bljeska nakon kojih "
+        "slijedi dulja stanka. Pomorci taj uzorak uspoređuju s oznakom na karti. "
+        "Stakla moraju biti čista jer naslage soli slabe vidljivost. Svjetioničarka "
+        "bilježi svaki kvar i provjerava rezervno napajanje prije najavljenog "
+        "nevremena. Opskrbni brod donosi namirnice kada more to dopušta. Za magle "
+        "se obala teško razaznaje čak i s vrha tornja. Posjetitelji se penju uskim "
+        "stubama, a vrata prema svjetlu ostaju zaključana tijekom obilaska."
+    ),
+    (
+        "U vlažnoj istarskoj šumi tartufarka vodi psa pokraj hrastova. Pas njuši "
+        "tlo i zastaje ondje gdje osjeti miris zrelog tartufa. Kada šapom označi "
+        "mjesto, vlasnica ga odmakne i pažljivo raskopa zemlju uskom lopaticom. "
+        "Pronađeni tartuf sprema u platnenu vrećicu, a rupu ponovno zatrpa. Tako "
+        "štiti korijenje i podzemne niti gljive od isušivanja. Psa nakon pronalaska "
+        "nagrađuje komadićem sira kako bi rado nastavio potragu. Nezreli primjerci "
+        "ostaju u zemlji jer još nemaju razvijen miris. Šetnja završava prije "
+        "podnevne vrućine. Kod kuće tartufarka četkicom uklanja ostatke zemlje, "
+        "važe ulov i bilježi u kojem ga je dijelu šume pronašla."
+    ),
+    (
+        "Tamburaški sastav okuplja se četvrtkom u društvenom domu. Prije prve "
+        "skladbe svirači usklađuju žice prema tonu koji daje elektronički ugađač. "
+        "Voditelj zatim traži da svi odsviraju isti kratki motiv. Ako se dionice "
+        "razilaze, proba se nastavlja sporije, uz brojanje naglas. Početnici često "
+        "stišću trzalicu prejako pa im ruka brzo otvrdne. Iskusnija članica pokazuje "
+        "kako opustiti zapešće i postići ravnomjeran zvuk. Note se drže na stalcima "
+        "kako nitko ne bi morao saginjati glavu. Nakon stanke sastav ponavlja "
+        "prijelaz iz tihe kitice u živahan pripjev. Na kraju glazbala spremaju "
+        "u kutije, a popis skladbi za sljedeću probu ostavljaju na oglasnoj ploči."
+    ),
+    (
+        "Lutkarsko kazalište priprema predstavu o djevojčici koja traži izgubljeni "
+        "kišobran. Glumci upravljaju marionetama s povišenog mosta, skrivenog iza "
+        "zastora. Pokrete prenose tanke niti pričvršćene za drveni križ. Jedan "
+        "pomak ruke može podignuti glavu lutke, a drugi je navesti da zakorači. "
+        "Na probama najviše vremena posvećuju hodu jer stopala moraju dodirivati "
+        "pozornicu u pravom trenutku. Scenograf izrađuje kućice dovoljno lagane "
+        "da ih glumci brzo premjeste između prizora. Šum kiše nastaje trešenjem "
+        "kutije sa sitnim zrncima. Djeca nakon izvedbe smiju izbliza pogledati "
+        "lutke i isprobati jednostavan naklon. Tek tada vide koliko strpljenja "
+        "treba za pokret koji je iz gledališta izgledao sasvim prirodno."
+    ),
+    (
+        "Geodet dolazi na livadu kako bi provjerio granicu između susjednih parcela. "
+        "Vlasnici mu pokazuju stare oznake, ali sjećanja na njihov položaj nisu "
+        "uvijek jednaka. Zato mjerenje uspoređuje s podacima iz katastarskog plana. "
+        "Instrument postavlja na tronožac i pažljivo ga poravnava. Pomoćnica drži "
+        "mjernu prizmu na točkama uz rub livade. Dogovorene krajnje točke na terenu "
+        "označavaju betonski međaši koji ostaju vidljivi iznad zemlje. Geodet "
+        "crta skicu i upisuje izmjerene udaljenosti. Oba susjeda pregledavaju "
+        "zapisnik prije potpisa. Ako postoji spor, samo mjerenje ne može zamijeniti "
+        "odluku nadležnog tijela. Kopija dokumentacije čuva se kako bi buduća "
+        "provjera mogla krenuti od istih podataka."
+    ),
+    (
+        "Košarač uz rijeku bere tanke vrbove šibe dok su dovoljno savitljive. "
+        "Prije pletenja razvrstava ih po debljini i uklanja bočne grančice. Suhe "
+        "šibe namače u vodi kako pri savijanju ne bi pucale. Dno započinje križem "
+        "od čvršćih prutova, a zatim oko njih provlači tanje. Kada dobije željenu "
+        "širinu, podiže uspravne nosače budućih stijenki. Rub završava prepletanjem "
+        "njihovih krajeva, bez metalnih spojnica. Za ručku odabire duži prut koji "
+        "može podnijeti težinu pune košare. Polaznici radionice najprije izrađuju "
+        "malu posudu za ključeve. Nepravilnosti ispravljaju dok je materijal još "
+        "vlažan. Gotove predmete suše u sjeni kako bi oblik ostao ujednačen."
+    ),
+    (
+        "U maloj pržionici kave zelena zrna stižu u označenim vrećama. Pržioničar "
+        "odvagne količinu za jednu turu i zagrije bubanj. Tijekom prženja prati "
+        "promjenu boje, miris i zvuk pucketanja. Ne oslanja se samo na sat jer "
+        "različita zrna ne gube vlagu jednakom brzinom. Kad postigne željeni okus, "
+        "zrna istresa u posudu kroz koju struji hladan zrak. Nakon odmora priprema "
+        "nekoliko šalica za kušanje. Vodu, omjer kave i način mljevenja drži "
+        "jednakima kako bi usporedba bila poštena. Na vrećicu upisuje datum "
+        "prženja i podrijetlo zrna. Kupcima savjetuje da kavu čuvaju dobro "
+        "zatvorenu, daleko od vlage i izravnog sunca."
+    ),
+    (
+        "Rukometna ekipa započinje trening laganim trčanjem i razgibavanjem ramena. "
+        "Trenerica zatim dijeli igračice u parove za dodavanje u kretanju. Lopta "
+        "treba stići suigračici ispred tijela kako ne bi morala zastati. Pri "
+        "vježbanju obrane naglasak je na bočnom koraku i suradnji, a ne na "
+        "grubom zaustavljanju protivnice. Vratarka uvježbava izlazak prema napadačici "
+        "i povratak na crtu. Kratka igra na kraju treninga počinje svaki put "
+        "drukčijim rasporedom napada. Nakon pogreške igra se zaustavlja samo "
+        "nakratko, da trenerica pokaže slobodan prostor. Igračice potom same "
+        "predlažu bolje rješenje. Prije odlaska skupljaju lopte i istežu mišiće "
+        "koji su tijekom treninga bili najopterećeniji."
+    ),
+    (
+        "Meteorološka postaja ujutro pušta balon s malim mjernim uređajem. Dok "
+        "se balon penje, uređaj šalje podatke o temperaturi, tlaku i vlažnosti "
+        "zraka. Promjena njegova položaja otkriva smjer i brzinu vjetra na "
+        "različitim visinama. Tehničarka prije puštanja provjerava bateriju i "
+        "radijsku vezu. Balon puni plinom na zaklonjenom mjestu, pazeći da "
+        "ga nalet vjetra ne pritisne uz ogradu. Zapis mjerenja nadopunjuje "
+        "opažanja s tla i pomaže u izradi prognoze. Na velikoj visini balon "
+        "pukne, a uređaj se spušta malim padobranom. Naljepnica objašnjava "
+        "nalazniku kome ga može predati. Svako puštanje dobiva svoju oznaku "
+        "kako se podaci ne bi zamijenili."
+    ),
+    (
+        "Na tečaju hrvatskoga znakovnog jezika polaznici sjede u polukrugu kako "
+        "bi se međusobno dobro vidjeli. Učiteljica započinje predstavljanjem "
+        "i jednostavnim pitanjima o svakodnevnim navikama. Značenje ne prenose "
+        "samo šake nego i izraz lica, položaj tijela te smjer pogleda. Polaznici "
+        "vježbaju u parovima, najprije bez žurbe, a zatim u kratkom razgovoru. "
+        "Kad netko pogriješi, učiteljica ponovi pokret i istakne razliku. Za "
+        "privlačenje pažnje dovoljan je blag dodir po ramenu ili mahanje "
+        "unutar vidnog polja. Prostorija mora biti ravnomjerno osvijetljena. "
+        "Kod kuće polaznici ponavljaju gradivo uz snimke. Na sljedećem susretu "
+        "pokušavaju prepričati događaj bez oslanjanja na izgovorene riječi."
+    ),
+]
