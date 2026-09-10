@@ -1,6 +1,6 @@
 # ADR-0003: Embeddings and vector storage
 
-Status: embedding decision implemented in M3; storage decision scheduled for M4.
+Status: embedding decision implemented in M3; storage decision implemented in M4.
 
 ## Decision
 
@@ -92,7 +92,8 @@ vector index and re-embedding every document. Equal dimensions alone do not make
 - Hashed keyword vectors: useful offline retrieval baseline, but miss paraphrases without shared words.
 - A generative model: useful for the later answer stage; not the retrieval embedding provider.
 
-Use [pgvector](https://github.com/pgvector/pgvector) in Postgres in M4, alongside documents,
+M4 implements [pgvector](https://github.com/pgvector/pgvector) in Postgres, alongside documents,
 entities and chunks. It supports cosine search while sharing transactions and backups with
 the relational data. A dedicated vector database would add another service and a consistency
-boundary before this workload demonstrates a need for it. No database dependency or schema in M3.
+boundary before this workload demonstrates a need for it. See [storage and search](../pipeline.md#storage-and-search-m4)
+for the implemented repository and migration; M3 itself added no database dependency or schema.

@@ -1,5 +1,12 @@
 # Engineering journal
 
+## Documentation — current slice and service contracts
+
+Transcribed the reference system diagram into Mermaid and separated implemented worker/storage
+behavior from the planned HTTP, queue and deployment contracts. The README starts with the
+current database/CLI flow. Token tooling, captured HTTP responses and telemetry screenshots
+remain dependent on the service implementations; contract examples are labeled as illustrative.
+
 ## Local infrastructure and telemetry
 
 Separated storage and telemetry profiles so neither requires application images.
@@ -28,7 +35,6 @@ explicitly 0.5 because whitespace hashing misses inflected forms. English-to-Cro
 retrieval measured 1.000 recall and 0.875 MRR at both sizes, reported without a gate.
 ADR-0003 records the complete results and limits. The committed font covers every Croatian
 diacritic; existing fixtures regenerate byte-identically. No stored output or pipeline version changes.
-
 ## M4 — persistent core
 
 Kept extraction and inference outside the write transaction; the unique tenant/hash upsert
