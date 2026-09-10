@@ -1,0 +1,18 @@
+# Documentation index
+
+- [Project README](../README.md): local setup, CLI commands, test tiers and repository layout.
+- [Architecture](architecture.md): system and sequence diagrams, responsibilities, boundaries and trade-offs.
+- [API contract](api.md): planned upload, status, question and stream payloads; delivery status is explicit.
+- [Configuration](configuration.md): current settings tables, defaults and Compose versus Python environment handling.
+- [Pipeline](pipeline.md): implemented extraction, OCR, structure, embeddings, storage and retrieval.
+- [CI](ci.md): lint, types, tests, security checks and repository protection setup.
+- [Engineering journal](journal.md): implementation notes by milestone.
+- [Lessons](lessons.md): concise observations from implementation and failure cases.
+- [ADR-0001](adr/0001-text-extraction.md): PDFium/Tesseract extraction and alternatives.
+- [ADR-0002](adr/0002-structured-representation.md): language, entities, chunk budgets and exact offsets.
+- [ADR-0003](adr/0003-embeddings-and-vector-storage.md): MiniLM, ONNX, pgvector and upgrade criteria.
+- [Changelog](../CHANGELOG.md): changes awaiting release.
+- [Fixture font provenance](../scripts/fonts/readme.md): generated fixture font and its license.
+
+Service runbooks and the final demo walkthrough will be linked here when their implementations
+merge. The current application runbook is [Pipeline](pipeline.md).
