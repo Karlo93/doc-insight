@@ -3,18 +3,25 @@
 from threading import Event
 
 from doc_insight.contracts.ingest import DocumentUploaded, EventPublisher
-from doc_insight.observability import extract, stage
+from doc_insight.observability import extract, inject, stage
 from doc_insight.worker.uploads import set_tenant
 from opentelemetry.context import attach, detach
 from sqlalchemy import Engine, MetaData, Table, func, select
 
 
 class OutboxRelay:
+    """Publish one tenant's outbox while holding skip-locked transaction row locks.
+
+    Publication precedes the SQL marker. A crash or rollback can publish the same
+    event again, so consumers must tolerate at-least-once delivery.
+    """
+
     def __init__(self, engine: Engine, publisher: EventPublisher) -> None:
         self.engine, self.publisher = engine, publisher
         self.outbox = Table("outbox", MetaData(), autoload_with=engine)
 
     def run_once(self, tenant_id: str, batch: int = 100) -> int:
+        """Publish a locked batch for one tenant and return its committed row count."""
         if batch < 1:
             raise ValueError("Batch must be positive")
         table = self.outbox
@@ -26,6 +33,7 @@ class OutboxRelay:
             )
             .order_by(table.c.created_at, table.c.id)
             .limit(batch)
+            # Concurrent relays claim other rows instead of waiting for this batch.
             .with_for_update(skip_locked=True)
         )
         with self.engine.begin() as connection:
@@ -36,7 +44,11 @@ class OutboxRelay:
                 token = attach(extract({"traceparent": event.traceparent or ""}))
                 try:
                     with stage("relay.publish"):
-                        self.publisher.publish(event)
+                        self.publisher.publish(
+                            event.model_copy(
+                                update={"traceparent": inject({}).get("traceparent")}
+                            )
+                        )
                 finally:
                     detach(token)
                 connection.execute(
@@ -50,6 +62,8 @@ class OutboxRelay:
             return len(rows)
 
     def run(self, tenant_id: str, batch: int, poll: float, stop: Event) -> None:
+        """Poll each configured tenant in its own transaction until shutdown."""
         while not stop.is_set():
-            self.run_once(tenant_id, batch)
+            for tenant in tenant_id.split(","):
+                self.run_once(tenant, batch)
             stop.wait(poll)

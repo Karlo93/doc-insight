@@ -21,6 +21,15 @@ from doc_insight.contracts.structure import Chunk, Document, Entity
 
 
 class InMemoryRepository:
+    def list_documents(
+        self, tenant_id: str, limit: int = 50, offset: int = 0
+    ) -> list[StoredDocument]:
+        if not 1 <= limit <= 100 or offset < 0:
+            raise ValueError("Invalid pagination")
+        rows = [v for (tenant, _), v in self.documents.items() if tenant == tenant_id]
+        rows.sort(key=lambda row: (-row.created_at.timestamp(), row.id))
+        return [v.model_copy(deep=True) for v in rows[offset : offset + limit]]
+
     def __init__(self, dimension: int) -> None:
         self.dimension = dimension
         self.documents: dict[tuple[str, UUID], StoredDocument] = {}

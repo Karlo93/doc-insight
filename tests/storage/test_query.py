@@ -20,7 +20,7 @@ def test_query_end_to_end_and_evaluation(database):
     repository = PostgresRepository(database)
     stored = repository.upsert_document(tenant, "text_long.pdf", document)
     service = QueryService(
-        repository, embedder, FallbackGenerator(), QuerySettings(llm_api_key="")
+        repository, embedder, FallbackGenerator(), QuerySettings(openai_api_key="")
     )
     with TestClient(create_app(service)) as client:
         for case in (cases[0], cases[3], cases[6]):

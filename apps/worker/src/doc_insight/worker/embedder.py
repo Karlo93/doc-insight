@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from functools import cache
 from math import sqrt
 from pathlib import Path
+from threading import Lock
 from typing import TYPE_CHECKING
 
 from doc_insight.contracts.settings import EmbeddingSettings
@@ -13,9 +14,13 @@ from huggingface_hub import snapshot_download
 if TYPE_CHECKING:
     from fastembed import TextEmbedding
 
+MODEL_LOCK = Lock()
+
 
 @cache
-def _model(model: str, repo: str, revision: str, cache_dir: Path) -> "TextEmbedding":
+def _model(
+    model: str, repo: str, revision: str, cache_dir: Path, threads: int
+) -> "TextEmbedding":
     # Importing ONNX probes hardware; text-only commands must not initialize it.
     from fastembed import TextEmbedding
 
@@ -30,6 +35,7 @@ def _model(model: str, repo: str, revision: str, cache_dir: Path) -> "TextEmbedd
         cache_dir=str(cache_dir),
         specific_model_path=path,
         providers=["CPUExecutionProvider"],
+        threads=threads,
     )
 
 
@@ -46,6 +52,7 @@ class FastEmbedEmbedder:
         return self.settings.embed_model
 
     def embed_passages(self, texts: list[str]) -> list[list[float]]:
+        """Validate the whole batch, then return unit vectors in input order."""
         if not texts:
             return []
         tokenizer = HfTokenizer(self.settings)
@@ -53,12 +60,15 @@ class FastEmbedEmbedder:
             raise ValueError(
                 "MiniLM input exceeds 126 content tokens; refusing truncation"
             )
-        model = _model(
-            self.model_id,
-            self.settings.embed_onnx_repo,
-            self.settings.embed_revision,
-            self.settings.model_cache,
-        )
+        # functools.cache alone permits duplicate construction on concurrent cold calls.
+        with MODEL_LOCK:
+            model = _model(
+                self.model_id,
+                self.settings.embed_onnx_repo,
+                self.settings.embed_revision,
+                self.settings.model_cache,
+                self.settings.embed_threads,
+            )
         # MiniLM uses identical query/passage formatting, without prefixes.
         return [
             (vector / sqrt(float(vector @ vector))).tolist()

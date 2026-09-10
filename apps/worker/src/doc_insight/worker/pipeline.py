@@ -16,6 +16,12 @@ from doc_insight.worker.structure import analyze
 
 @dataclass
 class Pipeline:
+    """Shared CLI/consumer pipeline with model providers owned by the caller.
+
+    Extraction and inference finish before the repository's atomic write. Timing
+    stages emit telemetry; ``index(report=True)`` additionally prints CLI timings.
+    """
+
     settings: Settings
     detector: LanguageDetector
     ner: NerExtractor
@@ -31,6 +37,7 @@ class Pipeline:
         *,
         report: bool = False,
     ) -> StoredDocument:
+        """Run all processing stages before atomically storing the complete result."""
         times = [perf_counter()]
         with stage("extract"):
             extracted = extract(path)

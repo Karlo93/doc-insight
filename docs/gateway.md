@@ -93,6 +93,7 @@ Export variables before startup. One cached Pydantic-settings object validates t
 | `DI_INGEST_URL` | `http://127.0.0.1:8001` | Ingest base URL |
 | `DI_QUERY_URL` | `http://127.0.0.1:8002` | Query base URL |
 | `DI_UPSTREAM_TIMEOUT_SECONDS` | `30` | Query deadline; ingest gets four times this value |
+| `DI_TENANTS` | Empty (Compose: `demo,other`) | Optional provisioned-tenant allowlist; must match the relay |
 | `DI_CORS_ORIGINS` | Empty | Comma-separated explicit HTTP(S) origins; no wildcard |
 | `DI_GATEWAY_HOST` | `127.0.0.1` | CLI bind address; container uses `0.0.0.0` |
 | `DI_GATEWAY_PORT` | `8000` | CLI listen port |
@@ -109,6 +110,7 @@ All gateway errors have `{"error":{"code":"...","message":"..."}}`.
 | --- | --- | --- |
 | 400 | `invalid_request` | Invalid body framing or disconnected upload |
 | 401 | `unauthorized` | Missing or invalid token; includes `WWW-Authenticate: Bearer` |
+| 403 | `tenant_unavailable` | Valid identity belongs to an unprovisioned tenant |
 | 404 | `not_found` | Development JWKS disabled |
 | 413 | `payload_too_large` | Declared or streamed request exceeds the limit |
 | 422 | `validation_error` | Invalid document UUID |

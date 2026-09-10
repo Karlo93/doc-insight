@@ -1,5 +1,8 @@
 # Documentation index
 
+- [Code walkthrough](code-guide.md): reading order, module responsibilities and extension points.
+- [Assignment review](assignment-review.md): requirement-by-requirement status and remaining evidence.
+- [Online readiness](online-readiness.md): local versus public deployment, credentials and token accounting.
 - [Project README](../README.md): local setup, CLI commands, test tiers and repository layout.
 - [Architecture](architecture.md): system and sequence diagrams, responsibilities, boundaries and trade-offs.
 - [Query service](query.md): implemented retrieval, cited answers, offline operation and settings.
@@ -9,7 +12,7 @@
 - [Pipeline](pipeline.md): implemented extraction, OCR, structure, embeddings, storage and retrieval.
 - [Worker](worker.md): sequential consumption, recovery, dead letters and manual object/event examples.
 - [Local stack](local-stack.md): Compose `infra` and `telemetry` profiles, ports, encryption and Grafana.
-- [Deployment](deploy.md): service images, local startup, pending activation, environment and Caddy TLS.
+- [Deployment](deploy.md): service images, local startup, environment and Caddy TLS.
 - [Observability](observability.md): the shared OpenTelemetry helper, emitted signals and attribute policy.
 - [Gateway](gateway.md): JWT/JWKS authentication, rate limits, proxy behavior and development token setup.
 - [CI](ci.md): lint, types, tests, security checks and repository protection setup.
@@ -34,5 +37,10 @@
 - [Task template](../.github/ISSUE_TEMPLATE/task.md): scope, acceptance criteria and validation.
 - [Fixture font provenance](../scripts/fonts/readme.md): generated fixture font and its license.
 
-The current application runbooks are [Pipeline](pipeline.md) and [Worker](worker.md).
-Additional service runbooks and the final demo walkthrough will be linked as they land.
+The service runbooks above describe the implemented stack. The assignment review records the historical gaps; the release evidence tracks their closure.
+
+- [Private deployment](private-deployment.md)
+- [OpenAI/private delivery decision](adr/0012-openai-private-delivery.md)
+
+- [Release evidence and assignment closure](evidence/README.md)
+- [Measured load-test report](../benchmark/README.md)

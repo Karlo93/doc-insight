@@ -6,6 +6,8 @@ Tenant IDs contain 1–64 letters, digits, dots, underscores or hyphens.
 `GET /healthz` checks process health. `GET /readyz` checks PostgreSQL, the schema
 and local embedding inference; unavailable dependencies return 503. The optional
 hosted generator is not required for readiness.
+For Docker credential injection, provider checks and token-usage limitations, see
+[online readiness](online-readiness.md#api-credentials-and-token-usage).
 
 ## Request and response
 
@@ -56,13 +58,21 @@ confidence is `(0.7 + 0.3 * M) * L`; otherwise it is zero. Abstain below
 `DI_ABSTAIN_THRESHOLD`, on zero confidence, or without support. Equality to a positive
 threshold is accepted. Cosine similarity does not enter the formula.
 
-With an API key, Mistral receives only the question and numbered passage text, never
-tenant/document metadata. Its instruction requires passage citations like `[1]` or
-exactly `INSUFFICIENT`. Invalid or missing citations fail parsing; `INSUFFICIENT`
-is a successful unsupported generation that causes abstention. The circuit opens
-after consecutive failures, waits for its cooldown, then admits one recovery probe.
-A successful response resets failures. One hosted call runs at a time; concurrent
-requests use the extractive fallback instead of waiting behind it.
+With an API key, OpenAI receives only the question and numbered passage text, never
+tenant/document metadata. The Responses API uses `store: false`, an output token cap,
+and a strict JSON schema for answer, support and zero-based citation indexes.
+Refusals, incomplete output and invalid citations trigger extractive fallback.
+An explicitly unsupported answer is a successful generation and causes abstention.
+The circuit admits one recovery probe after cooldown; epoch tickets prevent older
+in-flight requests from settling a newer probe. Up to four calls run concurrently;
+additional calls use the local fallback immediately. No hidden retries occur.
+
+Every hosted attempt first reserves an upper bound in PostgreSQL under tenant RLS.
+Known input/output/cache usage settles that reservation once, including billed
+invalid output. A timeout with unknown usage charges its full reservation. An
+interrupted process leaves its reservation held until UTC day rollover; this
+conservatively reduces availability rather than allowing overspend. See
+[ADR-0012](adr/0012-openai-private-delivery.md) for the accounting trade-off.
 
 Without a key, on timeout/HTTP/parse failure, or while the circuit is open/busy,
 the response reports provider `extractive`, model `sentence-window-v1`. It returns
@@ -83,8 +93,13 @@ adapters are reused from the worker package. Pipeline version remains 6.
 | --- | --- | --- |
 | `DI_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@localhost:5432/di` | PostgreSQL connection |
 | `DI_MIGRATION_DATABASE_URL` | `postgresql+psycopg://di:di@localhost:5432/di` | Migration/test harness only; not read by query |
-| `DI_LLM_MODEL` | `mistral-small-latest` | Hosted generation model |
-| `DI_LLM_API_KEY` | empty | Enables hosted generation; empty selects extractive |
+| `DI_OPENAI_MODEL` | `gpt-4.1-mini-2025-04-14` | Hosted generation model |
+| `DI_OPENAI_API_KEY` | empty | Enables hosted generation; empty selects extractive |
+| `DI_OPENAI_API_KEY_FILE` | unset | Optional mounted UTF-8 secret; nonempty file takes precedence |
+| `DI_LLM_DAILY_TOKENS` | `250000` | Per-tenant UTC-day charged plus reserved token ceiling |
+| `DI_LLM_MAX_OUTPUT_TOKENS` | `700` | Maximum output tokens, 64–4096 |
+| `DI_LLM_CONCURRENCY` | `4` | Concurrent hosted calls per query process, 1–32 |
+| `DI_EMBED_THREADS` | `2` | ONNX threads; avoids oversubscribing a shared CPU host |
 | `DI_LLM_TIMEOUT_SECONDS` | `10` | Positive HTTP timeout |
 | `DI_LLM_BREAKER_FAILURES` | `3` | Consecutive failures before opening |
 | `DI_LLM_BREAKER_SECONDS` | `30` | Positive cooldown before one probe |
@@ -114,7 +129,7 @@ From the repository root in PowerShell:
 ```powershell
 $env:UV_OFFLINE='1'
 $env:HF_HUB_OFFLINE='1'
-$env:DI_LLM_API_KEY=''
+$env:DI_OPENAI_API_KEY=''
 $env:POSTGRES_PORT='55434'
 $env:COMPOSE_PROJECT_NAME='doc-insight-query'
 $env:DI_DATABASE_URL='postgresql+psycopg://di_app:di_app@127.0.0.1:55434/di'

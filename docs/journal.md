@@ -34,6 +34,67 @@ separately and retains per-run timings.
 Review also exposed the offset-ordering assumption: reversed offsets can reject a valid
 window. A once-per-page monotonicity check now selects the reference when starts or ends
 move backwards, with separate regressions for reversed and nested offsets.
+## Inline code documentation (2026-09-10)
+
+Added 72 function/protocol docstrings across 23 Python modules and concise JSDoc
+for browser helpers. Inline comments explain tenant-bound transactions, duplicate
+delivery handling, upload bounds, conservative token charging, citation validation
+and stale browser responses. Kept existing detailed pipeline documentation and
+avoided boilerplate on straightforward accessors and route wrappers.
+
+Compared Python ASTs after removing docstrings and compared browser source after
+removing standalone comments against `e91c4cf`: executable content is unchanged in
+all 27 edited source files. Changed Python functions remain at most 40 lines and
+modules at most 250 lines. This documentation pass requires no runtime deployment.
+Validation: 473 default tests passed (91 deselected), 92.76% coverage; Ruff checks,
+strict mypy, browser syntax, Bandit, dependency audit and tracked-source/history
+secret scans passed. The dependency audit excludes editable packages and the two
+spaCy model wheels that have no PyPI advisory entry.
+
+## Private browser release and measured capacity (2026-09-10)
+
+Replaced Mistral with a structured OpenAI Responses adapter using a pinned small
+model, bounded concurrency, a concurrency-safe breaker and a forced-RLS token ledger.
+Reservations cap tenant/day usage across concurrent processes and survive ambiguous
+failures. Added document listing and a native JavaScript browser workspace; credentials
+stay server-side and app JWTs stay in browser memory. The relay now covers every
+provisioned tenant. Gateway/relay context injection produces connected HTTP/async
+traces, including the OpenAI span. Query readiness warms models before traffic;
+native inference is capped at two threads. Pipeline version remains 6.
+
+The initial four-core server runs sustained 100 metadata RPS and 25 extractive query
+RPS. At 100 query RPS, CPU saturation and client drops are explicit in the committed
+report. A ten-minute soak exposed one Caddy EOF/502; shortened proxy keepalive below
+Uvicorn's timeout and retained the original measurement for comparison. Linux driver
+dispatch measurements ruled out the earlier Windows generator as a capacity source.
+
+Local and server OpenAI EN/HR/abstention acceptance passed. An encrypted snapshot was
+restored into isolated containers: six original hashes, 29 chunks, 60 entities,
+usage, stream events and signing keys verified. Final images were exported from the
+local build and loaded on the private host. No internet-facing app was enabled.
+Follow-up review hardened malformed provider usage and preserved conservative
+charging. Signing-key refresh now has its own HTTP pool after overload exposed
+query-pool starvation. Repeat soaks passed 12,000/12,000 and 6,000/6,000 requests;
+compatible image rollback and return to the final version passed locally. The owner
+retains manual control of publication; repository visibility remains private.
+See [release evidence](evidence/README.md), [load report](../benchmark/README.md) and
+[ADR-0012](adr/0012-openai-private-delivery.md) for limitations and reproducibility.
+
+## Repository documentation and readiness review (2026-09-10)
+
+Reviewed the four-page assignment against main `3ec103b`, after discovering the local
+checkout was still at the earlier storage milestone. Added a code reading guide,
+requirement/evidence matrix and credential/deployment runbook; corrected stale
+gateway/image/migration claims and a deployment ADR link. Fourteen Python modules
+received docstrings only (96 added application lines, no executable AST changes).
+Compose now forwards optional LLM/query settings only to query; dummy/empty-key
+configuration checks confirm credential scope without any provider calls.
+
+The current default suite passed 463 tests at 93.93% coverage; Ruff, format, mypy,
+Compose validation and relative Markdown file links passed. Remaining work includes
+gateway trace propagation, real-stack E2E evidence, load testing, token accounting
+and production configuration. This review did not deploy, publish, add credentials
+or claim hosted-provider verification. See [assignment review](assignment-review.md).
 
 ## Contribution standards
 

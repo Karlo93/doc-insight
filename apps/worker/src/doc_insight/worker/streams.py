@@ -8,8 +8,9 @@ from redis.exceptions import ResponseError
 
 
 class RedisStreamConsumer:
-    def __init__(self, client: Redis) -> None:
+    def __init__(self, client: Redis, heartbeat_seconds: int = 30) -> None:
         self.client = client
+        self.heartbeat_seconds = heartbeat_seconds
 
     def xgroup_create(self, stream: str, group: str) -> None:
         try:
@@ -62,4 +63,4 @@ class RedisStreamConsumer:
         return int(rows[0]["times_delivered"]) if rows else 0
 
     def heartbeat(self, consumer: str) -> None:
-        self.client.set(f"di:worker:{consumer}", "ready", ex=30)
+        self.client.set(f"di:worker:{consumer}", "ready", ex=self.heartbeat_seconds)

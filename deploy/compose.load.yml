@@ -1,0 +1,7 @@
+# Never include the provider secret overlay for a load test.
+# /dev/null also overrides a key-file path inherited from other configuration.
+services:
+  query:
+    environment:
+      DI_OPENAI_API_KEY: ""
+      DI_OPENAI_API_KEY_FILE: /dev/null

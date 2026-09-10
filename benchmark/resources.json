@@ -1,0 +1,2882 @@
+[
+  {
+    "utc": "2026-09-10T10:44:42Z",
+    "service": "query",
+    "cpu_percent": 0.1,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:44:42Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:44:42Z",
+    "service": "gateway",
+    "cpu_percent": 10.08,
+    "memory": "67.97MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:44:42Z",
+    "service": "db",
+    "cpu_percent": 0.87,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:44:52Z",
+    "service": "query",
+    "cpu_percent": 50.86,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:44:52Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:44:52Z",
+    "service": "gateway",
+    "cpu_percent": 8.42,
+    "memory": "67.97MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:44:52Z",
+    "service": "db",
+    "cpu_percent": 0.78,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:02Z",
+    "service": "query",
+    "cpu_percent": 9.52,
+    "memory": "1.052GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:02Z",
+    "service": "worker",
+    "cpu_percent": 36.77,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:02Z",
+    "service": "gateway",
+    "cpu_percent": 8.16,
+    "memory": "68.45MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:02Z",
+    "service": "db",
+    "cpu_percent": 0.73,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:12Z",
+    "service": "query",
+    "cpu_percent": 0.21,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:12Z",
+    "service": "worker",
+    "cpu_percent": 29.24,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:12Z",
+    "service": "gateway",
+    "cpu_percent": 9.08,
+    "memory": "67.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:12Z",
+    "service": "db",
+    "cpu_percent": 0.71,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:22Z",
+    "service": "query",
+    "cpu_percent": 0.21,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:22Z",
+    "service": "worker",
+    "cpu_percent": 71.82,
+    "memory": "164.3MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:22Z",
+    "service": "gateway",
+    "cpu_percent": 8.62,
+    "memory": "67.95MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:22Z",
+    "service": "db",
+    "cpu_percent": 0.93,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:32Z",
+    "service": "query",
+    "cpu_percent": 0.22,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:32Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:32Z",
+    "service": "gateway",
+    "cpu_percent": 9.03,
+    "memory": "67.93MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:32Z",
+    "service": "db",
+    "cpu_percent": 0.73,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:42Z",
+    "service": "query",
+    "cpu_percent": 0.21,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:42Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:42Z",
+    "service": "gateway",
+    "cpu_percent": 8.95,
+    "memory": "67.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:42Z",
+    "service": "db",
+    "cpu_percent": 0.77,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:52Z",
+    "service": "query",
+    "cpu_percent": 0.21,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:52Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:52Z",
+    "service": "gateway",
+    "cpu_percent": 7.99,
+    "memory": "67.87MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:45:52Z",
+    "service": "db",
+    "cpu_percent": 0.78,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:02Z",
+    "service": "query",
+    "cpu_percent": 0.23,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:02Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:02Z",
+    "service": "gateway",
+    "cpu_percent": 7.99,
+    "memory": "67.93MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:02Z",
+    "service": "db",
+    "cpu_percent": 0.78,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:12Z",
+    "service": "query",
+    "cpu_percent": 0.22,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:12Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:12Z",
+    "service": "gateway",
+    "cpu_percent": 8.59,
+    "memory": "67.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:12Z",
+    "service": "db",
+    "cpu_percent": 0.8,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:22Z",
+    "service": "query",
+    "cpu_percent": 0.23,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:22Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:22Z",
+    "service": "gateway",
+    "cpu_percent": 9.4,
+    "memory": "67.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:22Z",
+    "service": "db",
+    "cpu_percent": 0.76,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:32Z",
+    "service": "query",
+    "cpu_percent": 0.27,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:32Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:32Z",
+    "service": "gateway",
+    "cpu_percent": 36.51,
+    "memory": "67.93MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:32Z",
+    "service": "db",
+    "cpu_percent": 0.77,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:42Z",
+    "service": "query",
+    "cpu_percent": 0.2,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:42Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:42Z",
+    "service": "gateway",
+    "cpu_percent": 67.35,
+    "memory": "68.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:42Z",
+    "service": "db",
+    "cpu_percent": 2.41,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:52Z",
+    "service": "query",
+    "cpu_percent": 0.2,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:52Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:52Z",
+    "service": "gateway",
+    "cpu_percent": 63.65,
+    "memory": "68.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:46:52Z",
+    "service": "db",
+    "cpu_percent": 2.48,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:02Z",
+    "service": "query",
+    "cpu_percent": 0.23,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:02Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:02Z",
+    "service": "gateway",
+    "cpu_percent": 36.4,
+    "memory": "74.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:02Z",
+    "service": "db",
+    "cpu_percent": 2.44,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:12Z",
+    "service": "query",
+    "cpu_percent": 0.26,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:12Z",
+    "service": "worker",
+    "cpu_percent": 32.75,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:12Z",
+    "service": "gateway",
+    "cpu_percent": 31.21,
+    "memory": "68.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:12Z",
+    "service": "db",
+    "cpu_percent": 2.61,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:22Z",
+    "service": "query",
+    "cpu_percent": 0.22,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:22Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:22Z",
+    "service": "gateway",
+    "cpu_percent": 35.11,
+    "memory": "68.69MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:22Z",
+    "service": "db",
+    "cpu_percent": 2.83,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:32Z",
+    "service": "query",
+    "cpu_percent": 0.22,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:32Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:32Z",
+    "service": "gateway",
+    "cpu_percent": 30.15,
+    "memory": "68.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:32Z",
+    "service": "db",
+    "cpu_percent": 7.85,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:42Z",
+    "service": "query",
+    "cpu_percent": 0.2,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:42Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:42Z",
+    "service": "gateway",
+    "cpu_percent": 30.93,
+    "memory": "68.4MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:42Z",
+    "service": "db",
+    "cpu_percent": 7.8,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:52Z",
+    "service": "query",
+    "cpu_percent": 0.2,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:52Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:52Z",
+    "service": "gateway",
+    "cpu_percent": 30.11,
+    "memory": "68.68MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:47:52Z",
+    "service": "db",
+    "cpu_percent": 2.42,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:02Z",
+    "service": "query",
+    "cpu_percent": 0.1,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:02Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:02Z",
+    "service": "gateway",
+    "cpu_percent": 29.81,
+    "memory": "68.67MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:02Z",
+    "service": "db",
+    "cpu_percent": 2.66,
+    "memory": "65.74MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:12Z",
+    "service": "query",
+    "cpu_percent": 0.09,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:12Z",
+    "service": "worker",
+    "cpu_percent": 0.0,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:12Z",
+    "service": "gateway",
+    "cpu_percent": 29.32,
+    "memory": "68.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:12Z",
+    "service": "db",
+    "cpu_percent": 7.94,
+    "memory": "65.74MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:22Z",
+    "service": "query",
+    "cpu_percent": 0.09,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:22Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:22Z",
+    "service": "gateway",
+    "cpu_percent": 30.3,
+    "memory": "69.17MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:22Z",
+    "service": "db",
+    "cpu_percent": 2.71,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:32Z",
+    "service": "query",
+    "cpu_percent": 1.09,
+    "memory": "1.044GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:32Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:32Z",
+    "service": "gateway",
+    "cpu_percent": 27.94,
+    "memory": "68.7MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:32Z",
+    "service": "db",
+    "cpu_percent": 7.93,
+    "memory": "65.99MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:42Z",
+    "service": "query",
+    "cpu_percent": 246.51,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:42Z",
+    "service": "worker",
+    "cpu_percent": 0.07,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:42Z",
+    "service": "gateway",
+    "cpu_percent": 9.55,
+    "memory": "68.45MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:42Z",
+    "service": "db",
+    "cpu_percent": 13.97,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:52Z",
+    "service": "query",
+    "cpu_percent": 240.29,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:52Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:52Z",
+    "service": "gateway",
+    "cpu_percent": 9.05,
+    "memory": "67.84MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:48:52Z",
+    "service": "db",
+    "cpu_percent": 15.04,
+    "memory": "65.75MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:02Z",
+    "service": "query",
+    "cpu_percent": 240.7,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:02Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:02Z",
+    "service": "gateway",
+    "cpu_percent": 8.8,
+    "memory": "67.92MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:02Z",
+    "service": "db",
+    "cpu_percent": 16.16,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:12Z",
+    "service": "query",
+    "cpu_percent": 286.17,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:12Z",
+    "service": "worker",
+    "cpu_percent": 78.61,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:12Z",
+    "service": "gateway",
+    "cpu_percent": 9.92,
+    "memory": "67.92MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:12Z",
+    "service": "db",
+    "cpu_percent": 15.56,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:22Z",
+    "service": "query",
+    "cpu_percent": 283.48,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:22Z",
+    "service": "worker",
+    "cpu_percent": 22.22,
+    "memory": "153MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:22Z",
+    "service": "gateway",
+    "cpu_percent": 9.47,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:22Z",
+    "service": "db",
+    "cpu_percent": 15.95,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:32Z",
+    "service": "query",
+    "cpu_percent": 276.64,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:32Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:32Z",
+    "service": "gateway",
+    "cpu_percent": 10.03,
+    "memory": "67.92MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:32Z",
+    "service": "db",
+    "cpu_percent": 20.4,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:42Z",
+    "service": "query",
+    "cpu_percent": 241.91,
+    "memory": "1.047GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:42Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:42Z",
+    "service": "gateway",
+    "cpu_percent": 8.59,
+    "memory": "68.16MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:42Z",
+    "service": "db",
+    "cpu_percent": 14.96,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:52Z",
+    "service": "query",
+    "cpu_percent": 240.16,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:52Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:52Z",
+    "service": "gateway",
+    "cpu_percent": 8.66,
+    "memory": "67.92MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:49:52Z",
+    "service": "db",
+    "cpu_percent": 15.0,
+    "memory": "65.96MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:03Z",
+    "service": "query",
+    "cpu_percent": 249.28,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:03Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:03Z",
+    "service": "gateway",
+    "cpu_percent": 8.95,
+    "memory": "67.92MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:03Z",
+    "service": "db",
+    "cpu_percent": 14.75,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:13Z",
+    "service": "query",
+    "cpu_percent": 245.42,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:13Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:13Z",
+    "service": "gateway",
+    "cpu_percent": 8.84,
+    "memory": "67.93MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:13Z",
+    "service": "db",
+    "cpu_percent": 15.08,
+    "memory": "65.77MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:23Z",
+    "service": "query",
+    "cpu_percent": 249.41,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:23Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:23Z",
+    "service": "gateway",
+    "cpu_percent": 9.56,
+    "memory": "67.93MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:23Z",
+    "service": "db",
+    "cpu_percent": 16.25,
+    "memory": "65.74MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:33Z",
+    "service": "query",
+    "cpu_percent": 261.06,
+    "memory": "1.047GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:33Z",
+    "service": "worker",
+    "cpu_percent": 0.09,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:33Z",
+    "service": "gateway",
+    "cpu_percent": 18.27,
+    "memory": "67.98MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:33Z",
+    "service": "db",
+    "cpu_percent": 14.65,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:43Z",
+    "service": "query",
+    "cpu_percent": 398.26,
+    "memory": "1.062GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:43Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:43Z",
+    "service": "gateway",
+    "cpu_percent": 77.82,
+    "memory": "70.67MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:43Z",
+    "service": "db",
+    "cpu_percent": 21.48,
+    "memory": "87.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:53Z",
+    "service": "query",
+    "cpu_percent": 373.75,
+    "memory": "1.059GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:53Z",
+    "service": "worker",
+    "cpu_percent": 0.09,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:53Z",
+    "service": "gateway",
+    "cpu_percent": 61.69,
+    "memory": "70.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:50:53Z",
+    "service": "db",
+    "cpu_percent": 21.72,
+    "memory": "87.69MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:03Z",
+    "service": "query",
+    "cpu_percent": 393.22,
+    "memory": "1.073GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:03Z",
+    "service": "worker",
+    "cpu_percent": 8.47,
+    "memory": "150.5MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:03Z",
+    "service": "gateway",
+    "cpu_percent": 48.24,
+    "memory": "70.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:03Z",
+    "service": "db",
+    "cpu_percent": 25.72,
+    "memory": "84.8MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:13Z",
+    "service": "query",
+    "cpu_percent": 390.52,
+    "memory": "1.061GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:13Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:13Z",
+    "service": "gateway",
+    "cpu_percent": 61.72,
+    "memory": "71.1MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:13Z",
+    "service": "db",
+    "cpu_percent": 19.9,
+    "memory": "85.29MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:23Z",
+    "service": "query",
+    "cpu_percent": 384.41,
+    "memory": "1.061GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:23Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:23Z",
+    "service": "gateway",
+    "cpu_percent": 116.79,
+    "memory": "71.14MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:23Z",
+    "service": "db",
+    "cpu_percent": 19.4,
+    "memory": "86.27MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:33Z",
+    "service": "query",
+    "cpu_percent": 405.68,
+    "memory": "1.061GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:33Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:33Z",
+    "service": "gateway",
+    "cpu_percent": 129.22,
+    "memory": "71.19MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:33Z",
+    "service": "db",
+    "cpu_percent": 25.66,
+    "memory": "84.8MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:43Z",
+    "service": "query",
+    "cpu_percent": 374.39,
+    "memory": "1.062GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:43Z",
+    "service": "worker",
+    "cpu_percent": 0.15,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:43Z",
+    "service": "gateway",
+    "cpu_percent": 59.12,
+    "memory": "78.47MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:43Z",
+    "service": "db",
+    "cpu_percent": 24.98,
+    "memory": "87.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:53Z",
+    "service": "query",
+    "cpu_percent": 423.22,
+    "memory": "1.063GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:53Z",
+    "service": "worker",
+    "cpu_percent": 0.1,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:53Z",
+    "service": "gateway",
+    "cpu_percent": 75.39,
+    "memory": "71.13MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:51:53Z",
+    "service": "db",
+    "cpu_percent": 23.34,
+    "memory": "87.46MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:03Z",
+    "service": "query",
+    "cpu_percent": 389.84,
+    "memory": "1.061GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:03Z",
+    "service": "worker",
+    "cpu_percent": 0.09,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:03Z",
+    "service": "gateway",
+    "cpu_percent": 74.34,
+    "memory": "71.22MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:03Z",
+    "service": "db",
+    "cpu_percent": 19.81,
+    "memory": "88.11MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:13Z",
+    "service": "query",
+    "cpu_percent": 407.21,
+    "memory": "1.061GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:13Z",
+    "service": "worker",
+    "cpu_percent": 0.08,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:13Z",
+    "service": "gateway",
+    "cpu_percent": 46.09,
+    "memory": "71.04MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:13Z",
+    "service": "db",
+    "cpu_percent": 23.83,
+    "memory": "88.1MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:23Z",
+    "service": "query",
+    "cpu_percent": 407.46,
+    "memory": "1.06GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:23Z",
+    "service": "worker",
+    "cpu_percent": 0.07,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:23Z",
+    "service": "gateway",
+    "cpu_percent": 75.18,
+    "memory": "71.1MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:23Z",
+    "service": "db",
+    "cpu_percent": 25.25,
+    "memory": "88.13MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:33Z",
+    "service": "query",
+    "cpu_percent": 384.78,
+    "memory": "1.072GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:33Z",
+    "service": "worker",
+    "cpu_percent": 7.14,
+    "memory": "145.5MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:33Z",
+    "service": "gateway",
+    "cpu_percent": 62.9,
+    "memory": "71.15MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:33Z",
+    "service": "db",
+    "cpu_percent": 21.96,
+    "memory": "88.4MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:43Z",
+    "service": "query",
+    "cpu_percent": 0.15,
+    "memory": "1.057GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:43Z",
+    "service": "worker",
+    "cpu_percent": 0.16,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:43Z",
+    "service": "gateway",
+    "cpu_percent": 1.2,
+    "memory": "70.45MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:43Z",
+    "service": "db",
+    "cpu_percent": 22.25,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:53Z",
+    "service": "query",
+    "cpu_percent": 210.27,
+    "memory": "1.053GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:53Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:53Z",
+    "service": "gateway",
+    "cpu_percent": 7.75,
+    "memory": "70.31MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:52:53Z",
+    "service": "db",
+    "cpu_percent": 10.51,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:03Z",
+    "service": "query",
+    "cpu_percent": 213.06,
+    "memory": "1.053GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:03Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:03Z",
+    "service": "gateway",
+    "cpu_percent": 7.25,
+    "memory": "70.23MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:03Z",
+    "service": "db",
+    "cpu_percent": 11.1,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:13Z",
+    "service": "query",
+    "cpu_percent": 212.63,
+    "memory": "1.047GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:13Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:13Z",
+    "service": "gateway",
+    "cpu_percent": 7.39,
+    "memory": "68.14MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:13Z",
+    "service": "db",
+    "cpu_percent": 10.24,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:23Z",
+    "service": "query",
+    "cpu_percent": 208.5,
+    "memory": "1.047GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:23Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:23Z",
+    "service": "gateway",
+    "cpu_percent": 7.06,
+    "memory": "68.11MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:23Z",
+    "service": "db",
+    "cpu_percent": 14.88,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:33Z",
+    "service": "query",
+    "cpu_percent": 213.67,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:33Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:33Z",
+    "service": "gateway",
+    "cpu_percent": 8.51,
+    "memory": "68.04MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:33Z",
+    "service": "db",
+    "cpu_percent": 15.01,
+    "memory": "65.96MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:43Z",
+    "service": "query",
+    "cpu_percent": 206.19,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:43Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:43Z",
+    "service": "gateway",
+    "cpu_percent": 7.26,
+    "memory": "67.98MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:43Z",
+    "service": "db",
+    "cpu_percent": 11.09,
+    "memory": "65.75MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:53Z",
+    "service": "query",
+    "cpu_percent": 205.3,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:53Z",
+    "service": "worker",
+    "cpu_percent": 0.07,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:53Z",
+    "service": "gateway",
+    "cpu_percent": 7.0,
+    "memory": "67.95MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:53:53Z",
+    "service": "db",
+    "cpu_percent": 16.96,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:03Z",
+    "service": "query",
+    "cpu_percent": 205.5,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:03Z",
+    "service": "worker",
+    "cpu_percent": 0.07,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:03Z",
+    "service": "gateway",
+    "cpu_percent": 7.1,
+    "memory": "68.2MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:03Z",
+    "service": "db",
+    "cpu_percent": 15.32,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:13Z",
+    "service": "query",
+    "cpu_percent": 205.64,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:13Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:13Z",
+    "service": "gateway",
+    "cpu_percent": 7.17,
+    "memory": "67.95MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:13Z",
+    "service": "db",
+    "cpu_percent": 16.34,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:23Z",
+    "service": "query",
+    "cpu_percent": 210.04,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:23Z",
+    "service": "worker",
+    "cpu_percent": 19.83,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:23Z",
+    "service": "gateway",
+    "cpu_percent": 6.98,
+    "memory": "67.95MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:23Z",
+    "service": "db",
+    "cpu_percent": 16.17,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:33Z",
+    "service": "query",
+    "cpu_percent": 208.12,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:33Z",
+    "service": "worker",
+    "cpu_percent": 80.1,
+    "memory": "166.2MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:33Z",
+    "service": "gateway",
+    "cpu_percent": 8.32,
+    "memory": "67.95MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:33Z",
+    "service": "db",
+    "cpu_percent": 11.32,
+    "memory": "65.77MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:43Z",
+    "service": "query",
+    "cpu_percent": 200.34,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:43Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:43Z",
+    "service": "gateway",
+    "cpu_percent": 6.94,
+    "memory": "67.95MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:43Z",
+    "service": "db",
+    "cpu_percent": 11.6,
+    "memory": "65.74MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:53Z",
+    "service": "query",
+    "cpu_percent": 204.75,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:53Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:53Z",
+    "service": "gateway",
+    "cpu_percent": 6.67,
+    "memory": "67.95MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:54:53Z",
+    "service": "db",
+    "cpu_percent": 11.1,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:03Z",
+    "service": "query",
+    "cpu_percent": 210.47,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:03Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:03Z",
+    "service": "gateway",
+    "cpu_percent": 8.14,
+    "memory": "67.95MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:03Z",
+    "service": "db",
+    "cpu_percent": 10.63,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:13Z",
+    "service": "query",
+    "cpu_percent": 208.07,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:13Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:13Z",
+    "service": "gateway",
+    "cpu_percent": 7.29,
+    "memory": "67.93MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:13Z",
+    "service": "db",
+    "cpu_percent": 10.54,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:23Z",
+    "service": "query",
+    "cpu_percent": 210.54,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:23Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:23Z",
+    "service": "gateway",
+    "cpu_percent": 7.77,
+    "memory": "67.93MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:23Z",
+    "service": "db",
+    "cpu_percent": 16.59,
+    "memory": "65.79MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:33Z",
+    "service": "query",
+    "cpu_percent": 203.55,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:33Z",
+    "service": "worker",
+    "cpu_percent": 0.03,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:33Z",
+    "service": "gateway",
+    "cpu_percent": 7.58,
+    "memory": "67.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:33Z",
+    "service": "db",
+    "cpu_percent": 11.43,
+    "memory": "66.03MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:43Z",
+    "service": "query",
+    "cpu_percent": 202.34,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:43Z",
+    "service": "worker",
+    "cpu_percent": 0.07,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:43Z",
+    "service": "gateway",
+    "cpu_percent": 6.79,
+    "memory": "67.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:43Z",
+    "service": "db",
+    "cpu_percent": 11.81,
+    "memory": "65.77MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:53Z",
+    "service": "query",
+    "cpu_percent": 202.69,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:53Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:53Z",
+    "service": "gateway",
+    "cpu_percent": 7.54,
+    "memory": "67.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:55:53Z",
+    "service": "db",
+    "cpu_percent": 11.39,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:03Z",
+    "service": "query",
+    "cpu_percent": 244.69,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:03Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:03Z",
+    "service": "gateway",
+    "cpu_percent": 46.46,
+    "memory": "67.94MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:03Z",
+    "service": "db",
+    "cpu_percent": 11.53,
+    "memory": "65.8MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:13Z",
+    "service": "query",
+    "cpu_percent": 247.52,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:13Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:13Z",
+    "service": "gateway",
+    "cpu_percent": 37.89,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:13Z",
+    "service": "db",
+    "cpu_percent": 10.35,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:24Z",
+    "service": "query",
+    "cpu_percent": 256.21,
+    "memory": "1.059GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:24Z",
+    "service": "worker",
+    "cpu_percent": 63.26,
+    "memory": "164.5MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:24Z",
+    "service": "gateway",
+    "cpu_percent": 40.24,
+    "memory": "80.95MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:24Z",
+    "service": "db",
+    "cpu_percent": 11.99,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:34Z",
+    "service": "query",
+    "cpu_percent": 210.43,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:34Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:34Z",
+    "service": "gateway",
+    "cpu_percent": 7.19,
+    "memory": "67.93MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:34Z",
+    "service": "db",
+    "cpu_percent": 11.32,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:44Z",
+    "service": "query",
+    "cpu_percent": 203.77,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:44Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:44Z",
+    "service": "gateway",
+    "cpu_percent": 6.53,
+    "memory": "67.92MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:44Z",
+    "service": "db",
+    "cpu_percent": 10.33,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:54Z",
+    "service": "query",
+    "cpu_percent": 205.29,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:54Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:54Z",
+    "service": "gateway",
+    "cpu_percent": 6.72,
+    "memory": "67.92MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:56:54Z",
+    "service": "db",
+    "cpu_percent": 10.41,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:04Z",
+    "service": "query",
+    "cpu_percent": 204.71,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:04Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:04Z",
+    "service": "gateway",
+    "cpu_percent": 6.8,
+    "memory": "68.42MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:04Z",
+    "service": "db",
+    "cpu_percent": 10.02,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:14Z",
+    "service": "query",
+    "cpu_percent": 202.1,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:14Z",
+    "service": "worker",
+    "cpu_percent": 0.03,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:14Z",
+    "service": "gateway",
+    "cpu_percent": 6.83,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:14Z",
+    "service": "db",
+    "cpu_percent": 10.12,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:24Z",
+    "service": "query",
+    "cpu_percent": 205.88,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:24Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:24Z",
+    "service": "gateway",
+    "cpu_percent": 6.97,
+    "memory": "68.16MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:24Z",
+    "service": "db",
+    "cpu_percent": 10.22,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:34Z",
+    "service": "query",
+    "cpu_percent": 203.58,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:34Z",
+    "service": "worker",
+    "cpu_percent": 0.08,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:34Z",
+    "service": "gateway",
+    "cpu_percent": 6.66,
+    "memory": "67.92MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:34Z",
+    "service": "db",
+    "cpu_percent": 10.04,
+    "memory": "65.96MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:44Z",
+    "service": "query",
+    "cpu_percent": 203.21,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:44Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:44Z",
+    "service": "gateway",
+    "cpu_percent": 6.65,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:44Z",
+    "service": "db",
+    "cpu_percent": 10.28,
+    "memory": "65.78MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:54Z",
+    "service": "query",
+    "cpu_percent": 201.99,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:54Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:54Z",
+    "service": "gateway",
+    "cpu_percent": 6.52,
+    "memory": "68.16MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:57:54Z",
+    "service": "db",
+    "cpu_percent": 10.31,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:04Z",
+    "service": "query",
+    "cpu_percent": 201.97,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:04Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:04Z",
+    "service": "gateway",
+    "cpu_percent": 6.63,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:04Z",
+    "service": "db",
+    "cpu_percent": 10.32,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:14Z",
+    "service": "query",
+    "cpu_percent": 203.26,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:14Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:14Z",
+    "service": "gateway",
+    "cpu_percent": 6.71,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:14Z",
+    "service": "db",
+    "cpu_percent": 11.88,
+    "memory": "65.77MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:24Z",
+    "service": "query",
+    "cpu_percent": 204.47,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:24Z",
+    "service": "worker",
+    "cpu_percent": 32.03,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:24Z",
+    "service": "gateway",
+    "cpu_percent": 6.64,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:24Z",
+    "service": "db",
+    "cpu_percent": 10.93,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:34Z",
+    "service": "query",
+    "cpu_percent": 206.49,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:34Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:34Z",
+    "service": "gateway",
+    "cpu_percent": 6.76,
+    "memory": "67.88MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:34Z",
+    "service": "db",
+    "cpu_percent": 10.44,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:44Z",
+    "service": "query",
+    "cpu_percent": 204.67,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:44Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:44Z",
+    "service": "gateway",
+    "cpu_percent": 6.37,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:44Z",
+    "service": "db",
+    "cpu_percent": 10.7,
+    "memory": "65.97MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:54Z",
+    "service": "query",
+    "cpu_percent": 205.22,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:54Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:54Z",
+    "service": "gateway",
+    "cpu_percent": 6.54,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:58:54Z",
+    "service": "db",
+    "cpu_percent": 10.22,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:04Z",
+    "service": "query",
+    "cpu_percent": 208.59,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:04Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:04Z",
+    "service": "gateway",
+    "cpu_percent": 7.47,
+    "memory": "68.14MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:04Z",
+    "service": "db",
+    "cpu_percent": 11.35,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:14Z",
+    "service": "query",
+    "cpu_percent": 204.15,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:14Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:14Z",
+    "service": "gateway",
+    "cpu_percent": 6.9,
+    "memory": "68.15MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:14Z",
+    "service": "db",
+    "cpu_percent": 10.45,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:24Z",
+    "service": "query",
+    "cpu_percent": 209.12,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:24Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:24Z",
+    "service": "gateway",
+    "cpu_percent": 6.75,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:24Z",
+    "service": "db",
+    "cpu_percent": 10.34,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:34Z",
+    "service": "query",
+    "cpu_percent": 205.44,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:34Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:34Z",
+    "service": "gateway",
+    "cpu_percent": 6.82,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:34Z",
+    "service": "db",
+    "cpu_percent": 10.96,
+    "memory": "65.78MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:44Z",
+    "service": "query",
+    "cpu_percent": 201.24,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:44Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:44Z",
+    "service": "gateway",
+    "cpu_percent": 6.39,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:44Z",
+    "service": "db",
+    "cpu_percent": 12.03,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:54Z",
+    "service": "query",
+    "cpu_percent": 203.48,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:54Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:54Z",
+    "service": "gateway",
+    "cpu_percent": 6.6,
+    "memory": "68.16MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T10:59:54Z",
+    "service": "db",
+    "cpu_percent": 16.49,
+    "memory": "65.81MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:04Z",
+    "service": "query",
+    "cpu_percent": 206.42,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:04Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:04Z",
+    "service": "gateway",
+    "cpu_percent": 7.71,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:04Z",
+    "service": "db",
+    "cpu_percent": 10.87,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:14Z",
+    "service": "query",
+    "cpu_percent": 202.4,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:14Z",
+    "service": "worker",
+    "cpu_percent": 37.03,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:14Z",
+    "service": "gateway",
+    "cpu_percent": 7.0,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:14Z",
+    "service": "db",
+    "cpu_percent": 10.48,
+    "memory": "65.79MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:24Z",
+    "service": "query",
+    "cpu_percent": 226.33,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:24Z",
+    "service": "worker",
+    "cpu_percent": 65.57,
+    "memory": "163.9MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:24Z",
+    "service": "gateway",
+    "cpu_percent": 7.74,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:24Z",
+    "service": "db",
+    "cpu_percent": 13.06,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:34Z",
+    "service": "query",
+    "cpu_percent": 217.1,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:34Z",
+    "service": "worker",
+    "cpu_percent": 67.72,
+    "memory": "164MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:34Z",
+    "service": "gateway",
+    "cpu_percent": 8.07,
+    "memory": "68.14MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:34Z",
+    "service": "db",
+    "cpu_percent": 18.64,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:44Z",
+    "service": "query",
+    "cpu_percent": 234.59,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:44Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:44Z",
+    "service": "gateway",
+    "cpu_percent": 7.69,
+    "memory": "68.14MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:44Z",
+    "service": "db",
+    "cpu_percent": 17.16,
+    "memory": "65.97MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:54Z",
+    "service": "query",
+    "cpu_percent": 249.13,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:54Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:54Z",
+    "service": "gateway",
+    "cpu_percent": 6.77,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:00:54Z",
+    "service": "db",
+    "cpu_percent": 16.73,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:04Z",
+    "service": "query",
+    "cpu_percent": 239.38,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:04Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:04Z",
+    "service": "gateway",
+    "cpu_percent": 6.47,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:04Z",
+    "service": "db",
+    "cpu_percent": 11.04,
+    "memory": "65.73MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:14Z",
+    "service": "query",
+    "cpu_percent": 212.41,
+    "memory": "1.053GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:14Z",
+    "service": "worker",
+    "cpu_percent": 0.07,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:14Z",
+    "service": "gateway",
+    "cpu_percent": 35.62,
+    "memory": "80.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:14Z",
+    "service": "db",
+    "cpu_percent": 15.84,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:24Z",
+    "service": "query",
+    "cpu_percent": 214.7,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:24Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:24Z",
+    "service": "gateway",
+    "cpu_percent": 43.5,
+    "memory": "68.15MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:24Z",
+    "service": "db",
+    "cpu_percent": 11.3,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:34Z",
+    "service": "query",
+    "cpu_percent": 215.1,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:34Z",
+    "service": "worker",
+    "cpu_percent": 0.08,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:34Z",
+    "service": "gateway",
+    "cpu_percent": 42.74,
+    "memory": "67.93MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:34Z",
+    "service": "db",
+    "cpu_percent": 18.87,
+    "memory": "65.96MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:44Z",
+    "service": "query",
+    "cpu_percent": 216.9,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:44Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:44Z",
+    "service": "gateway",
+    "cpu_percent": 31.59,
+    "memory": "80.85MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:44Z",
+    "service": "db",
+    "cpu_percent": 17.23,
+    "memory": "65.72MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:54Z",
+    "service": "query",
+    "cpu_percent": 212.52,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:54Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:54Z",
+    "service": "gateway",
+    "cpu_percent": 6.65,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:01:54Z",
+    "service": "db",
+    "cpu_percent": 11.08,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:04Z",
+    "service": "query",
+    "cpu_percent": 215.32,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:04Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:04Z",
+    "service": "gateway",
+    "cpu_percent": 6.74,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:04Z",
+    "service": "db",
+    "cpu_percent": 16.34,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:14Z",
+    "service": "query",
+    "cpu_percent": 207.4,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:14Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:14Z",
+    "service": "gateway",
+    "cpu_percent": 6.72,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:14Z",
+    "service": "db",
+    "cpu_percent": 11.94,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:24Z",
+    "service": "query",
+    "cpu_percent": 219.69,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:24Z",
+    "service": "worker",
+    "cpu_percent": 79.44,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:24Z",
+    "service": "gateway",
+    "cpu_percent": 7.17,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:24Z",
+    "service": "db",
+    "cpu_percent": 11.77,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:34Z",
+    "service": "query",
+    "cpu_percent": 206.12,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:34Z",
+    "service": "worker",
+    "cpu_percent": 21.57,
+    "memory": "154.2MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:34Z",
+    "service": "gateway",
+    "cpu_percent": 6.37,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:34Z",
+    "service": "db",
+    "cpu_percent": 10.8,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:44Z",
+    "service": "query",
+    "cpu_percent": 205.42,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:44Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:44Z",
+    "service": "gateway",
+    "cpu_percent": 6.52,
+    "memory": "67.91MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:44Z",
+    "service": "db",
+    "cpu_percent": 11.23,
+    "memory": "65.74MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:54Z",
+    "service": "query",
+    "cpu_percent": 0.13,
+    "memory": "1.046GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:54Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:54Z",
+    "service": "gateway",
+    "cpu_percent": 0.09,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:02:54Z",
+    "service": "db",
+    "cpu_percent": 0.03,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:04Z",
+    "service": "query",
+    "cpu_percent": 0.12,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:04Z",
+    "service": "worker",
+    "cpu_percent": 0.05,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:04Z",
+    "service": "gateway",
+    "cpu_percent": 0.1,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:04Z",
+    "service": "db",
+    "cpu_percent": 0.04,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:14Z",
+    "service": "query",
+    "cpu_percent": 0.31,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:14Z",
+    "service": "worker",
+    "cpu_percent": 0.08,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:14Z",
+    "service": "gateway",
+    "cpu_percent": 0.82,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:14Z",
+    "service": "db",
+    "cpu_percent": 0.13,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:24Z",
+    "service": "query",
+    "cpu_percent": 0.24,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:24Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:24Z",
+    "service": "gateway",
+    "cpu_percent": 0.1,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:24Z",
+    "service": "db",
+    "cpu_percent": 0.04,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:34Z",
+    "service": "query",
+    "cpu_percent": 0.11,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:34Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:34Z",
+    "service": "gateway",
+    "cpu_percent": 0.13,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:34Z",
+    "service": "db",
+    "cpu_percent": 0.05,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:45Z",
+    "service": "query",
+    "cpu_percent": 0.11,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:45Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:45Z",
+    "service": "gateway",
+    "cpu_percent": 0.13,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:45Z",
+    "service": "db",
+    "cpu_percent": 0.04,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:55Z",
+    "service": "query",
+    "cpu_percent": 0.44,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:55Z",
+    "service": "worker",
+    "cpu_percent": 0.04,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:55Z",
+    "service": "gateway",
+    "cpu_percent": 0.11,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:03:55Z",
+    "service": "db",
+    "cpu_percent": 0.04,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:05Z",
+    "service": "query",
+    "cpu_percent": 0.18,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:05Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:05Z",
+    "service": "gateway",
+    "cpu_percent": 0.15,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:05Z",
+    "service": "db",
+    "cpu_percent": 0.04,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:15Z",
+    "service": "query",
+    "cpu_percent": 0.39,
+    "memory": "1.045GiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:15Z",
+    "service": "worker",
+    "cpu_percent": 0.06,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:15Z",
+    "service": "gateway",
+    "cpu_percent": 0.86,
+    "memory": "67.9MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:15Z",
+    "service": "db",
+    "cpu_percent": 0.04,
+    "memory": "65.71MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:25Z",
+    "service": "query",
+    "cpu_percent": 37.09,
+    "memory": "924MiB / 2GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:25Z",
+    "service": "worker",
+    "cpu_percent": 43.63,
+    "memory": "141.4MiB / 3GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:25Z",
+    "service": "gateway",
+    "cpu_percent": 0.17,
+    "memory": "67.89MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:25Z",
+    "service": "db",
+    "cpu_percent": 0.05,
+    "memory": "57.63MiB / 30.99GiB"
+  },
+  {
+    "utc": "2026-09-10T11:04:35Z",
+    "service": "query",
+    "cpu_percent": 0.0,
+    "memory": "0B / 0B"
+  },
+  {
+    "utc": "2026-09-10T11:04:35Z",
+    "service": "worker",
+    "cpu_percent": 0.0,
+    "memory": "0B / 0B"
+  },
+  {
+    "utc": "2026-09-10T11:04:35Z",
+    "service": "gateway",
+    "cpu_percent": 0.0,
+    "memory": "0B / 0B"
+  },
+  {
+    "utc": "2026-09-10T11:04:35Z",
+    "service": "db",
+    "cpu_percent": 0.52,
+    "memory": "38.16MiB / 30.99GiB"
+  }
+]

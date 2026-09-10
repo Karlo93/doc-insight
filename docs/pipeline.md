@@ -262,7 +262,7 @@ From the repository root, with Docker running:
 make db-up
 make migrate
 # A fresh Compose volume creates the restricted di_app login automatically
-# (deploy/postgres/init-runtime-role.sql). For a volume created before that script
+# (deploy/postgres/init-runtime-role.sh). For a volume created before that script
 # existed, run the same two statements once, or recreate the volume with `make db-down`
 # followed by `docker compose down -v`:
 docker compose exec db psql -U di -d di -c "CREATE ROLE di_app LOGIN NOSUPERUSER NOBYPASSRLS NOINHERIT PASSWORD 'di_app'"

@@ -163,9 +163,9 @@ def test_rls_migration_downgrade_and_upgrade(empty_database, migrate_schema):
                     "WHERE schemaname = 'public' AND tablename != 'outbox'"
                 )
             ).all()
-            assert len(policies) == (3 if enabled else 0)
+            assert len(policies) == (5 if enabled else 0)
             for policy in policies:
-                assert policy.tablename in TABLES
+                assert policy.tablename in (*TABLES, "llm_usage", "llm_budgets")
                 assert policy.policyname == "tenant_isolation" and policy.cmd == "ALL"
                 assert policy.qual == policy.with_check
 

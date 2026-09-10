@@ -1,11 +1,11 @@
 # CI gates
 
-Every PR and push to `main` runs three independent verification jobs; superseded
+Every PR and every branch push runs three independent verification jobs; superseded
 runs are cancelled. Successful main pushes also run the image publication job.
 
 ```mermaid
 flowchart LR
-    trigger[PR or push to main] --> quality[quality: lint + types]
+    trigger[PR or branch push] --> quality[quality: lint + types]
     trigger --> test[test: tests + coverage]
     trigger --> security[security: audit]
     quality --> required[All three required checks pass]
@@ -17,7 +17,7 @@ flowchart LR
 | Step | What | Why it exists | What a failure means |
 | --- | --- | --- | --- |
 | Setup | Sync every workspace member from uv.lock | Reproduce the same environment | Lockfile, download or installation failed |
-| quality | `make lint` + `make typecheck` + `docker compose --profile infra --profile telemetry config --quiet` | Catch style, type and Compose configuration errors | Fix the reported code, formatting or configuration |
+| quality | `make lint` + `make typecheck` + base/private Compose validation + JavaScript syntax checks | Catch style, type and Compose configuration errors | Fix the reported code, formatting or configuration |
 | test | `make test`, then `make test-integration`; upload coverage.xml for 7 days | Enforce 70% unit coverage and prove the real storage contract | Behavior, migration, isolation or coverage failed |
 | Postgres | Healthy pgvector/Postgres 16 service | Exercise transactions, tenant constraints and vector retrieval | Service startup or database assertions failed |
 | Redis | Pinned Redis 7 service, checked with `redis-cli ping` | Provide the queue backend for integration tests | Service startup failed |

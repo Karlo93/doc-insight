@@ -18,6 +18,8 @@ def test_migration_from_empty_and_downgrade(empty_database, migrate_schema):
         "chunks",
         "entities",
         "outbox",
+        "llm_usage",
+        "llm_budgets",
     }
     with engine.connect() as connection:
         indexes = (

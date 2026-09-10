@@ -5,6 +5,7 @@ from typing import Annotated, Literal, Protocol
 from uuid import UUID
 
 from doc_insight.contracts.storage import QueryFilter, SearchHit, StoredDocument
+from doc_insight.contracts.usage import TokenUsage
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 __all__ = ["QueryFilter"]
@@ -21,10 +22,13 @@ class Generation(BaseModel):
     answer: str
     supported: bool
     cited_passage_indexes: list[int] = Field(default_factory=list)
+    usage: TokenUsage | None = None
 
 
 class Generator(Protocol):
-    def generate(self, question: str, passages: list[str]) -> Generation: ...
+    def generate(self, question: str, passages: list[str]) -> Generation:
+        """Answer from passages using zero-based citations, or return unsupported output."""
+        ...
 
 
 class QueryReader(Protocol):
@@ -48,7 +52,9 @@ class QueryReader(Protocol):
 
 
 class QueryRepository(Protocol):
-    def snapshot(self, tenant_id: str) -> AbstractContextManager[QueryReader]: ...
+    def snapshot(self, tenant_id: str) -> AbstractContextManager[QueryReader]:
+        """Own a consistent tenant read scope until the context manager exits."""
+        ...
 
 
 class Source(BaseModel):
@@ -75,8 +81,10 @@ class RetrievalInfo(BaseModel):
 
 
 class GenerationInfo(BaseModel):
-    provider: Literal["mistral", "extractive"]
+    provider: Literal["openai", "extractive"]
     model: str
+    usage: TokenUsage | None = None
+    fallback_reason: str | None = None
 
 
 class QueryResponse(BaseModel):

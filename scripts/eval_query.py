@@ -90,7 +90,7 @@ def answer_metrics(
     cases: list[EvaluationCase],
 ) -> None:
     service = QueryService(
-        repository, embedder, FallbackGenerator(), QuerySettings(llm_api_key="")
+        repository, embedder, FallbackGenerator(), QuerySettings(openai_api_key="")
     )
     results = [
         service.query(tenant, QueryRequest(question=case.question)) for case in cases

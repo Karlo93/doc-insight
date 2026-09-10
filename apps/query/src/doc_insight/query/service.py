@@ -22,12 +22,14 @@ from doc_insight.query.settings import Settings
 
 
 def normalized(text: str) -> str:
+    """Normalize spelling for entity matching without changing returned source text."""
     return " ".join(normalize("NFKC", text).casefold().split())
 
 
 def cited_entities(
     hits: list[SearchHit], documents: list[StoredDocument]
 ) -> list[CitedEntity]:
+    """Keep unique stored entities whose text appears in a cited document passage."""
     result: dict[tuple[str, str, str], CitedEntity] = {}
     for document in documents:
         passages = [
@@ -50,6 +52,7 @@ def cited_entities(
 
 
 def source(hit: SearchHit) -> Source:
+    """Expose the stored passage and offsets without rewriting citation evidence."""
     return Source(
         document_id=hit.document_id,
         page=hit.chunk.page,
@@ -66,6 +69,12 @@ class QuestionTooLong(ValueError):
 
 
 class QueryService:
+    """Retrieve under one tenant snapshot, then generate and validate an answer.
+
+    The database transaction ends before provider I/O. Final citation/grounding
+    checks may abstain after generation, including after a billable hosted call.
+    """
+
     def __init__(
         self,
         repository: QueryRepository,
@@ -77,6 +86,7 @@ class QueryService:
         self.generator, self.settings = generator, settings
 
     def query(self, tenant: str, request: QueryRequest) -> QueryResponse:
+        """Retrieve a consistent tenant snapshot, then generate outside the transaction."""
         started = perf_counter()
         try:
             with stage("query.embed"):
@@ -98,7 +108,9 @@ class QueryService:
             ]
         with stage("query.generate"):
             generation, provider = self.generator.generate(
-                request.question, [h.chunk.text for h in hits]
+                request.question,
+                [h.chunk.text for h in hits],
+                tenant=tenant,
             )
         return self._response(request, hits, documents, generation, provider, started)
 
@@ -111,7 +123,9 @@ class QueryService:
         provider: GenerationInfo,
         started: float,
     ) -> QueryResponse:
+        """Validate citations and evidence strength before exposing a supported answer."""
         indexes = list(dict.fromkeys(generation.cited_passage_indexes))
+        # Never let one out-of-range citation produce a partially trusted answer.
         valid = bool(indexes) and all(0 <= i < len(hits) for i in indexes)
         cited = [hits[i] for i in indexes] if valid else []
         value = confidence(

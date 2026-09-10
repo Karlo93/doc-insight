@@ -95,3 +95,17 @@ Run `uv run --locked --all-packages pytest tests/observability --no-cov` for
 in-memory SDK, propagation, configuration, HTTP privacy and pipeline wiring tests.
 The normal offline suite needs no collector. See [ADR-0004](adr/0004-opentelemetry.md)
 for alternatives. See [pipeline setup](pipeline.md) for the existing CLI prerequisites.
+
+## Release trace paths
+
+The gateway injects its active span into outbound service requests and discards
+caller baggage. The relay injects its active publication span into the durable
+event before publishing. The consumer restores that context and detaches it after
+processing, so ordinary clients need not supply a trace header. OpenAI calls have
+an `openai.responses` child span with model, outcome and token-count metadata;
+request bodies, responses and provider credentials are excluded.
+
+See [captured traces and dashboard](evidence/README.md). To reproduce, upload a new
+generated fixture, find its gateway trace in Tempo, and expand the ingest/relay/worker
+spans. Replayed uploads may return before any new worker processing and therefore
+are not suitable evidence of the asynchronous chain.

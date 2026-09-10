@@ -5,17 +5,21 @@ doc-insight extracts text from PDFs and images, detects language and entities, a
 The worker CLI stores documents and 384-dimensional embeddings in tenant-scoped Postgres tables.
 The internal ingest and query services accept uploads and return cited answers or abstain.
 `di worker run` consumes uploaded originals from Redis with crash recovery; see the [worker runbook](docs/worker.md).
-The authenticating gateway is the next service layer; the [architecture](docs/architecture.md) distinguishes implemented behavior from planned contracts.
+The gateway authenticates and rate-limits requests; Docker Compose runs the complete local API behind Caddy HTTPS.
+The browser supports uploads, processing status, filtered questions, citations and token usage.
+Start with the [code walkthrough](docs/code-guide.md), [assignment review](docs/assignment-review.md),
+and [online readiness and API credentials](docs/online-readiness.md).
+Read the [load-test report](benchmark/README.md) and [release evidence](docs/evidence/README.md)
+for measured capacity, test results, traces and recovery verification.
 
 ## Start with Docker
 
-With Docker Compose v2.24+, Buildx, GNU Make, Bash and curl installed:
+With Docker Compose v2.24.4+, Buildx, GNU Make, Bash and curl installed:
 
 ```sh
 git clone https://github.com/Karlo93/doc-insight.git
 cd doc-insight
 make local-run
-make local-stop
 ```
 
 Then, from the same directory:
@@ -23,7 +27,7 @@ Then, from the same directory:
 ```sh
 TOKEN=$(make -s dev-token)
 curl -fkSs -H "Authorization: Bearer $TOKEN" -F file=@tests/fixtures/text_hr.pdf https://localhost/ingest
-curl -fkSs -H "Authorization: Bearer $TOKEN" https://localhost/documents/<document_id>
+curl -fkSs -H "Authorization: Bearer $TOKEN" https://localhost/documents/REPLACE_WITH_DOCUMENT_ID
 curl -fkSs -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"question":"Gdje živi Marko Marić?","top_k":3}' https://localhost/query
 ```
 
@@ -32,9 +36,17 @@ reserves some ranges, often port 80; see [deployment](docs/deploy.md#tls-and-pub
 `local-run` builds the four service images, starts storage, telemetry and the
 applications, migrates the database, publishes a development JWKS from a private
 issuer volume and checks `https://localhost/healthz` through Caddy. `dev-token` mints
-a token for tenant `demo`, the tenant the relay serves (`DI_DEMO_TENANT`). Wait for
+a token for tenant `demo`, the tenant the relay serves (`DI_TENANTS`). Wait for
 status `processed` before asking. See [deployment](docs/deploy.md) for TLS, image
 names, environment settings and the deferred Kubernetes path.
+Run `make local-stop` when finished; it preserves data volumes.
+
+No paid model key is needed for local OCR, embeddings, search or extractive answers.
+OpenAI generation is optional: set `DI_OPENAI_API_KEY` in your untracked `.env` and
+recreate the query container as described in [API credentials](docs/online-readiness.md#api-credentials-and-token-usage).
+The query service records token usage and atomically enforces a per-tenant daily token budget.
+Open the browser interface at `http://localhost` (or your configured `CADDY_HTTP_PORT`)
+and paste a token from `make -s dev-token`. See the [private deployment runbook](docs/private-deployment.md).
 
 ## CLI prerequisites
 
@@ -87,7 +99,7 @@ uv run --locked --all-packages di search "Gdje se nalazi Zagreb?" --tenant demo 
 
 `db-up` starts the `infra` profile and runs the smoke script, which waits for health; on a
 fresh volume the database creates the restricted `di_app` login automatically. `make migrate`
-applies `0001_core_tables` and `0002_row_level_security` using the migration URL.
+applies all three migrations (core tables, row-level security, and ingest/outbox) using the migration URL.
 One recorded indexing run printed the following; UUID and durations vary by run:
 
 ```text
@@ -120,9 +132,9 @@ The [gateway](docs/gateway.md) implements RS256/JWKS authentication, Redis rate 
 streaming proxy routes and development token tooling.
 The full service sequence is mint a development token → `POST /ingest` →
 `GET /documents/{id}` until processed → `POST /query`.
-See the [API contract](docs/api.md) for payloads, status codes and planned curl calls.
+See the [API contract](docs/api.md) for payloads, status codes and example curl calls.
 The gateway runbook includes token commands and an optional development Compose overlay.
-Full pipeline examples still depend on the upstream services running together.
+The Docker startup above runs the services together; direct host commands require their dependencies separately.
 
 ## CLI
 
@@ -177,7 +189,7 @@ Postgres stores metadata, entities, chunks and pgvector embeddings in one transa
 Tenant filters, composite foreign keys and forced row-level security isolate the storage slice;
 the runtime login cannot bypass or disable the policy. Optional OpenTelemetry export gives
 stage and request timings without document data.
-See [architecture and trade-offs](docs/architecture.md) for the planned service paths and the ADRs.
+See [architecture and trade-offs](docs/architecture.md) for the service paths and the ADRs.
 
 ## Repository layout
 

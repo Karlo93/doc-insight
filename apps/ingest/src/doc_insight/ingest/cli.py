@@ -49,8 +49,9 @@ def main() -> None:
     commands.add_parser("serve")
     commands.add_parser("relay").add_argument("--tenant", required=True)
     args = parser.parse_args()
-    if args.command == "relay" and not re.fullmatch(
-        r"[A-Za-z0-9._-]{1,64}", args.tenant
+    if args.command == "relay" and not all(
+        re.fullmatch(r"[A-Za-z0-9._-]{1,64}", tenant)
+        for tenant in args.tenant.split(",")
     ):
         parser.error("Invalid tenant")
     try:

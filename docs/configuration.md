@@ -3,12 +3,16 @@
 The current worker uses one cached Pydantic-settings object with `env_prefix="DI_"`.
 Values are validated at process startup. Export variables before invoking the CLI;
 its settings class does not configure `.env` loading. Compose reads `.env` separately.
+Reading `.env` for Compose substitution does not pass every variable to containers:
+only entries mapped in `docker-compose.yml` reach each service. Query's hosted-model
+and retrieval settings are explicitly mapped; other host tuning values may need a
+Compose override. See [online readiness](online-readiness.md).
 
 | Settings | Defaults and purpose |
 | --- | --- |
 | OCR: `DI_OCR_MIN_CHARS`, `DI_OCR_DPI`, `DI_OCR_LANGS`, `DI_TESSERACT_CMD` | [Extraction table](pipeline.md#pipeline-files-to-searchable-documents) |
 | Language, NER, chunking, tokenizer and cache | [Structure table](pipeline.md#structure-m2) |
-| Query: `DI_LLM_*`, `DI_ABSTAIN_THRESHOLD`, `DI_RRF_K`, `DI_QUERY_TOP_K_MAX` | [Query settings](query.md#settings); shares the embedding profile with worker |
+| Query: `DI_OPENAI_*`, `DI_LLM_*`, `DI_ABSTAIN_THRESHOLD`, `DI_RRF_K`, `DI_QUERY_TOP_K_MAX` | [Query settings](query.md#settings); shares the embedding profile with worker |
 | Embedding batch and pinned ONNX snapshot | [Embedding table](pipeline.md#embeddings-m3) |
 | Redis, S3 and `DI_WORKER_*` | [Worker settings](worker.md#settings): stream reads, reclaim, attempts and original object storage |
 | Gateway JWT/JWKS, Redis quotas, upload limits, upstreams and CORS | [Gateway settings](gateway.md#settings) |
@@ -34,3 +38,9 @@ The observability package validates its own `DI_OTEL_*` settings once at `config
 Keep credentials out of tracked files. The checked-in database values are for local
 development. Model-cache paths must be absolute in containers. Warm the pinned snapshots
 before enabling `HF_HUB_OFFLINE=1`; see [embedding operation](pipeline.md#embeddings-m3).
+
+Release additions: `DI_EMBED_THREADS` defaults to 2 native inference threads;
+`DI_TENANTS` defaults to `demo,other` in Compose and must match the relay/issued
+identities. `DI_DB_RUNTIME_PASSWORD` initializes the restricted database role on a
+fresh volume. `OPENAI_SECRET_FILE` selects the query-only bind mount. Private-server
+ports and resource limits are documented in [private deployment](private-deployment.md).

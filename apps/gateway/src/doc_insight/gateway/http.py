@@ -19,6 +19,7 @@ async def stream(
     headers: dict[str, str] | None = None,
     body: AsyncIterator[bytes] | None = None,
 ) -> AsyncIterator[httpx.Response]:
+    """Own response cleanup while streaming a request through the shared client."""
     request = client.build_request(
         method, url, timeout=timeout, headers=headers, content=body
     )
@@ -32,6 +33,7 @@ async def stream(
 
 
 async def bounded_read(response: httpx.Response, limit: int) -> bytes:
+    """Bound decoded response bytes, including compressed upstream responses."""
     result = bytearray()
     async for chunk in response.aiter_bytes():
         if len(result) + len(chunk) > limit:
@@ -45,6 +47,7 @@ class HttpJwksSource:
         self.client, self.url = client, url
 
     async def fetch(self) -> dict[str, Any]:
+        """Fetch a size-limited JWKS object within a total five-second deadline."""
         async with (
             asyncio.timeout(5),
             stream(self.client, "GET", self.url, 5) as r,
@@ -74,7 +77,9 @@ class HttpUpstream:
         body: AsyncIterator[bytes],
         timeout: float,
     ) -> UpstreamReply:
+        """Stream uploads out, then buffer only a bounded upstream response."""
         async with (
+            # Bound the whole exchange, not just individual socket operations.
             asyncio.timeout(timeout),
             stream(
                 self.client, method, self.url + path, timeout, headers, body

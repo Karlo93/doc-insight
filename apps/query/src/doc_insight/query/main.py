@@ -43,6 +43,7 @@ def create_app(service: QueryService | None = None) -> FastAPI:
     app.add_api_route("/healthz", health, methods=["GET"])
     app.add_api_route("/readyz", ready, methods=["GET"])
     app.add_api_route("/query", query, methods=["POST"], response_model=QueryResponse)
+    app.add_api_route("/usage", usage, methods=["GET"])
     instrument_app(app)
     return app
 
@@ -64,6 +65,17 @@ async def unexpected_error(request: Request, exc: Exception) -> JSONResponse:
 
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+def usage(
+    request: Request, x_tenant_id: str | None = Header(default=None)
+) -> JSONResponse:
+    if (
+        x_tenant_id is None
+        or re.fullmatch(r"[A-Za-z0-9._-]{1,64}", x_tenant_id) is None
+    ):
+        return error(400, "invalid_tenant", "A valid X-Tenant-Id header is required")
+    return JSONResponse(request.app.state.runtime.ledger.summary(x_tenant_id))
 
 
 def ready(request: Request) -> JSONResponse:

@@ -50,7 +50,8 @@ def test_http_probes_the_service_health_endpoint(monkeypatch, app, port, status)
             check()
     else:
         check()
-    request.assert_called_once_with(f"http://127.0.0.1:{port}/healthz", timeout=3)
+    route = "readyz" if app == "query" else "healthz"
+    request.assert_called_once_with(f"http://127.0.0.1:{port}/{route}", timeout=3)
 
 
 @pytest.mark.parametrize("command", [b"python\0di-ingest\0relay\0", b"python\0other\0"])

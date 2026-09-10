@@ -1,5 +1,6 @@
 """Validated process-wide gateway configuration."""
 
+import re
 from functools import cache
 from pathlib import Path
 from typing import Self
@@ -31,6 +32,16 @@ class Settings(BaseSettings):
     cors_origins: str = ""
     gateway_host: str = "127.0.0.1"
     gateway_port: int = Field(default=8000, ge=1, le=65535)
+    tenants: str = ""
+
+    @field_validator("tenants")
+    @classmethod
+    def provisioned_tenants(cls, value: str) -> str:
+        if value and not all(
+            re.fullmatch(r"[A-Za-z0-9._-]{1,64}", tenant) for tenant in value.split(",")
+        ):
+            raise ValueError("Expected comma-separated tenant identifiers")
+        return value
 
     @model_validator(mode="after")
     def cache_covers_refresh_cooldown(self) -> Self:

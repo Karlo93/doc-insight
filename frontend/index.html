@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Doc Insight · Private workspace</title>
+        <link rel="stylesheet" href="/style.css" />
+        <script src="/app.js" type="module"></script>
+    </head>
+    <body>
+        <aside class="rail">
+            <a class="brand" href="/" aria-label="Doc Insight home"
+                ><span class="mark">di</span> Doc Insight</a
+            >
+            <div class="rail-label">YOUR WORKSPACE</div>
+            <a class="nav active" href="#workspace"
+                >▧ &nbsp; Documents & answers</a
+            >
+            <div class="rail-bottom">
+                <span class="private-dot"></span> Private workspace
+                <p>Your documents. Grounded answers.</p>
+            </div>
+        </aside>
+        <main id="workspace">
+            <header>
+                <div>
+                    <span class="eyebrow">DOCUMENT INTELLIGENCE</span>
+                    <h1>From documents to understanding.</h1>
+                    <p class="muted">
+                        Bring your sources. Ask a question. Follow the evidence.
+                    </p>
+                </div>
+                <button id="signout" class="quiet" hidden>Disconnect</button>
+            </header>
+            <section id="auth" class="card auth">
+                <div>
+                    <h2>Connect to your workspace</h2>
+                    <p>
+                        Enter the workspace access token issued by your
+                        administrator. It stays in memory until you close or
+                        refresh this page.
+                    </p>
+                </div>
+                <form id="auth-form">
+                    <label for="token">Workspace access token</label
+                    ><input
+                        id="token"
+                        type="password"
+                        autocomplete="off"
+                        spellcheck="false"
+                        required
+                        placeholder="Paste your access token"
+                    /><button class="primary">
+                        Connect workspace <span>→</span></button
+                    ><small
+                        >This is your app access token, not your OpenAI API
+                        key.</small
+                    >
+                </form>
+            </section>
+            <div id="notice" role="status" aria-live="polite"></div>
+            <div id="connected" hidden>
+                <div class="summary">
+                    <div>
+                        <span class="eyebrow">LIBRARY</span
+                        ><strong id="document-count">0 documents</strong>
+                    </div>
+                    <div>
+                        <span class="eyebrow">TODAY’S MODEL USAGE · UTC</span
+                        ><strong id="usage-count">—</strong
+                        ><small id="usage-detail"></small>
+                    </div>
+                    <div class="session">
+                        <span class="private-dot"></span
+                        ><span id="session-label">Connected</span>
+                    </div>
+                </div>
+                <div class="columns">
+                    <section class="library">
+                        <div class="section-title">
+                            <h2>Your documents</h2>
+                            <button
+                                id="refresh"
+                                class="quiet"
+                                aria-label="Refresh documents"
+                            >
+                                ↻ Refresh
+                            </button>
+                        </div>
+                        <form id="upload-form" class="upload card">
+                            <span class="upload-symbol">↥</span>
+                            <h3>Add a source</h3>
+                            <p>PDF, PNG, or JPEG · up to 50 MiB</p>
+                            <label class="file-label" for="file"
+                                >Choose a document</label
+                            ><input
+                                id="file"
+                                type="file"
+                                accept="application/pdf,image/png,image/jpeg"
+                                required
+                            /><span id="file-name">No file selected</span
+                            ><button
+                                id="upload-button"
+                                class="primary"
+                                disabled
+                            >
+                                Upload document</button
+                            ><progress
+                                id="upload-progress"
+                                max="100"
+                                value="0"
+                                hidden
+                                aria-label="Upload progress"
+                            ></progress>
+                        </form>
+                        <div
+                            id="documents"
+                            class="documents"
+                            aria-live="polite"
+                        ></div>
+                        <div class="pagination">
+                            <button id="prev" class="quiet" disabled>
+                                ← Previous</button
+                            ><span id="page-number">Page 1</span
+                            ><button id="next" class="quiet" disabled>
+                                Next →
+                            </button>
+                        </div>
+                    </section>
+                    <section class="conversation">
+                        <div class="section-title">
+                            <h2>Ask your library</h2>
+                            <span class="pill">Cited answers</span>
+                        </div>
+                        <div class="card question-card">
+                            <form id="query-form">
+                                <label for="question"
+                                    >What would you like to understand?</label
+                                ><textarea
+                                    id="question"
+                                    rows="4"
+                                    maxlength="4000"
+                                    required
+                                    placeholder="What are the main findings across my documents?"
+                                ></textarea>
+                                <div class="query-options">
+                                    <label for="scope"
+                                        >Search in<select id="scope">
+                                            <option value="">
+                                                All documents
+                                            </option>
+                                        </select></label
+                                    ><label for="language"
+                                        >Language<select id="language">
+                                            <option value="">
+                                                Any language
+                                            </option>
+                                            <option value="en">English</option>
+                                            <option value="hr">Croatian</option>
+                                        </select></label
+                                    >
+                                </div>
+                                <button id="ask-button" class="primary">
+                                    Find an answer <span>↗</span>
+                                </button>
+                            </form>
+                        </div>
+                        <div id="answer" class="card answer" aria-live="polite">
+                            <div class="empty-symbol">✳</div>
+                            <h3>Answers start with your sources.</h3>
+                            <p>
+                                Upload a document and ask a question. Every
+                                supported answer links back to the passages it
+                                used.
+                            </p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <footer>
+                Doc Insight
+                <span
+                    >Private by design. Verify important answers against their
+                    sources.</span
+                >
+            </footer>
+        </main>
+    </body>
+</html>

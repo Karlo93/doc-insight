@@ -78,7 +78,7 @@ def database(migration_database):
         connection.execute(
             text(
                 f"GRANT SELECT, INSERT, UPDATE, DELETE ON"
-                f" documents, chunks, entities, outbox TO {role}"
+                f" documents, chunks, entities, outbox, llm_usage, llm_budgets TO {role}"
             )
         )
     engine = create_engine(

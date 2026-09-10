@@ -11,6 +11,8 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 def _finish(
     scope: Scope, span: Span, status: int, started: float, telemetry: runtime.Telemetry
 ) -> None:
+    """Record the resolved route template and status without raw URLs or query strings."""
+    # Routing fills this after dispatch; raw paths would leak IDs and inflate cardinality.
     route = getattr(scope.get("route"), "path", "unmatched")
     span.update_name(route)
     span.set_attribute("http.route", route)
@@ -27,6 +29,7 @@ class RequestTelemetry:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """Trace HTTP lifetime while excluding payloads and exception messages."""
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return

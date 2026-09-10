@@ -13,6 +13,7 @@ from doc_insight.contracts.gateway import (
 from doc_insight.gateway.auth import Authenticator, InvalidToken
 from doc_insight.gateway.responses import error, upstream_response
 from doc_insight.gateway.settings import Settings
+from doc_insight.observability import inject
 from opentelemetry.trace import get_current_span
 from starlette.requests import ClientDisconnect, Request
 from starlette.responses import Response
@@ -23,6 +24,7 @@ class UploadTooLarge(Exception):
 
 
 def check_length(request: Request, limit: int) -> None:
+    """Reject ambiguous or oversized declared lengths before reading the body."""
     lengths = request.headers.getlist("content-length")
     if not lengths:
         return
@@ -33,6 +35,7 @@ def check_length(request: Request, limit: int) -> None:
 
 
 async def limited_body(request: Request, limit: int) -> AsyncIterator[bytes]:
+    """Enforce the byte limit even when Content-Length is absent or misleading."""
     total = 0
     async for chunk in request.stream():
         total += len(chunk)
@@ -42,9 +45,14 @@ async def limited_body(request: Request, limit: int) -> AsyncIterator[bytes]:
 
 
 def forwarded_headers(request: Request, identity: Identity) -> dict[str, str]:
+    """Allowlist request headers and replace identity with verified JWT claims.
+
+    Inject the active gateway context so ordinary clients also get one connected
+    trace. Caller baggage and credentials never cross the boundary.
+    """
     headers = {
         name: request.headers[name]
-        for name in ("content-type", "accept", "traceparent")
+        for name in ("content-type", "accept")
         if name in request.headers
     }
     headers.update(
@@ -55,11 +63,17 @@ def forwarded_headers(request: Request, identity: Identity) -> dict[str, str]:
             "accept-encoding": "identity",
         }
     )
-    return headers
+    return inject(headers)
 
 
 @dataclass
 class Gateway:
+    """Authenticate and charge per-user quota before forwarding a bounded body.
+
+    Internal upstreams trust these identity headers and must remain private.
+    This class does not authenticate service-to-service peers.
+    """
+
     settings: Settings
     auth: Authenticator
     limiter: RateLimiter
@@ -67,6 +81,7 @@ class Gateway:
     query: Upstream
 
     async def quota(self, identity: Identity) -> Response | int | None:
+        """Return remaining quota, an error response, or None when failing open."""
         try:
             decision = await self.limiter.consume(identity)
         except BackendUnavailable:
@@ -81,6 +96,7 @@ class Gateway:
         return response
 
     async def proxy(self, request: Request, path: str, ingest: bool) -> Response:
+        """Authenticate and enforce tenant access and quota before upstream I/O."""
         try:
             authorization = request.headers.getlist("authorization")
             if len(authorization) != 1:
@@ -90,6 +106,10 @@ class Gateway:
             response: Response = error(401, "unauthorized", "invalid token")
             response.headers["www-authenticate"] = "Bearer"
             return response
+        if self.settings.tenants and identity.tenant not in self.settings.tenants.split(
+            ","
+        ):
+            return error(403, "tenant_unavailable", "tenant is not provisioned")
         span = get_current_span()
         span.set_attributes({"tenant.id": identity.tenant, "user.id": identity.user})
         quota = await self.quota(identity)
@@ -103,6 +123,7 @@ class Gateway:
     async def forward(
         self, request: Request, path: str, ingest: bool, identity: Identity
     ) -> Response:
+        """Stream a bounded request and translate transport failures to safe errors."""
         try:
             check_length(request, self.settings.max_upload_bytes)
             upstream = self.ingest if ingest else self.query
