@@ -78,7 +78,7 @@ def database(migration_database):
         connection.execute(
             text(
                 f"GRANT SELECT, INSERT, UPDATE, DELETE ON"
-                f" documents, chunks, entities TO {role}"
+                f" documents, chunks, entities, outbox TO {role}"
             )
         )
     engine = create_engine(
@@ -147,3 +147,32 @@ def empty_database():
 @pytest.fixture
 def migrate_schema():
     return migrate
+
+
+from doc_insight.ingest.adapters import S3ObjectStore
+from doc_insight.ingest.settings import Settings as IngestSettings
+from redis import Redis
+
+
+@pytest.fixture
+def storage_settings():
+    return IngestSettings()
+
+
+@pytest.fixture
+def s3(storage_settings):
+    objects = S3ObjectStore.from_settings(storage_settings)
+    yield objects
+    objects.client.close()
+
+
+@pytest.fixture
+def redis_client(storage_settings):
+    client = Redis.from_url(
+        storage_settings.redis_url,
+        decode_responses=True,
+        socket_connect_timeout=3,
+        socket_timeout=3,
+    )
+    yield client
+    client.close()

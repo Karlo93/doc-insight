@@ -17,6 +17,7 @@ def test_migration_from_empty_and_downgrade(empty_database, migrate_schema):
         "documents",
         "chunks",
         "entities",
+        "outbox",
     }
     with engine.connect() as connection:
         indexes = (
@@ -28,9 +29,10 @@ def test_migration_from_empty_and_downgrade(empty_database, migrate_schema):
         )
         assert any("hnsw" in item and "vector_cosine_ops" in item for item in indexes)
     for table in ("documents", "chunks", "entities"):
-        assert all(
-            not column["nullable"] for column in inspect(engine).get_columns(table)
-        )
+        if table != "documents":
+            assert all(
+                not column["nullable"] for column in inspect(engine).get_columns(table)
+            )
         assert any(
             index["column_names"] == ["tenant_id"]
             for index in inspect(engine).get_indexes(table)

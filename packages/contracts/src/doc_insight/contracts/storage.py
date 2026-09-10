@@ -5,6 +5,7 @@ from math import isfinite
 from typing import Protocol
 from uuid import UUID, uuid4
 
+from doc_insight.contracts.ingest import DocumentStatus
 from doc_insight.contracts.structure import Chunk, Document, Entity
 from pydantic import BaseModel
 
@@ -15,13 +16,16 @@ class StoredDocument(BaseModel):
     filename: str
     sha256: str
     media_type: str
-    page_count: int
-    language: str
-    status: str = "processed"
-    pipeline_version: str
-    embed_model: str
+    page_count: int | None = None
+    language: str | None = None
+    status: DocumentStatus = "processed"
+    pipeline_version: str | None = None
+    embed_model: str | None = None
+    size_bytes: int | None = None
+    object_key: str | None = None
+    error: str | None = None
     created_at: datetime
-    processed_at: datetime
+    processed_at: datetime | None = None
     chunks: list[Chunk] = []
     entities: list[Entity] = []
 
@@ -57,6 +61,23 @@ def prepare_document(
 
 
 class DocumentRepository(Protocol):
+    def register_upload(
+        self,
+        tenant_id: str,
+        filename: str,
+        sha256: str,
+        media_type: str,
+        size_bytes: int,
+        object_key: str,
+    ) -> StoredDocument: ...
+    def find_by_sha256(self, tenant_id: str, sha256: str) -> StoredDocument | None: ...
+    def mark_status(
+        self,
+        tenant_id: str,
+        document_id: UUID,
+        status: DocumentStatus,
+        error: str | None = None,
+    ) -> None: ...
     def upsert_document(
         self, tenant_id: str, filename: str, document: Document
     ) -> StoredDocument: ...

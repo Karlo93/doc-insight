@@ -8,6 +8,8 @@ under a version and an ISO date when a release is cut.
 ### Added
 
 - Document the current CLI setup, target architecture and planned API contracts.
+- Add tenant-scoped uploads, encrypted object storage, document status and an atomic outbox with a Redis Streams relay.
+- Enforce FORCE row-level security with transaction-local tenant context and separate runtime/migration credentials.
 - Add independent infrastructure and telemetry Compose profiles, encrypted local S3,
   provisioned Grafana dashboards, health/version smoke checks and Redis/MinIO in CI.
 - Add Croatian retrieval fixtures, bilingual recall gates and English-to-Croatian evaluation reports; pipeline version stays 6.

@@ -1,0 +1,126 @@
+"""SQL operations shared by ingestion and processing repositories."""
+
+from datetime import UTC, datetime
+from uuid import UUID, uuid4
+
+from doc_insight.contracts.ingest import DocumentStatus, DocumentUploaded
+from doc_insight.contracts.storage import StoredDocument
+from doc_insight.observability import inject
+from sqlalchemy import Connection, Engine, Table, select, text
+from sqlalchemy.dialects.postgresql import insert
+
+
+def set_tenant(connection: Connection, tenant_id: str) -> None:
+    connection.execute(
+        text("SELECT set_config('app.tenant_id', :tenant, true)"), {"tenant": tenant_id}
+    )
+
+
+class UploadRepository:
+    engine: Engine
+    docs: Table
+    outbox: Table
+
+    def find_by_sha256(self, tenant_id: str, sha256: str) -> StoredDocument | None:
+        with self.engine.begin() as connection:
+            set_tenant(connection, tenant_id)
+            row = (
+                connection.execute(
+                    select(self.docs).filter_by(tenant_id=tenant_id, sha256=sha256)
+                )
+                .mappings()
+                .one_or_none()
+            )
+            return StoredDocument.model_validate(row) if row else None
+
+    def register_upload(
+        self,
+        tenant_id: str,
+        filename: str,
+        sha256: str,
+        media_type: str,
+        size_bytes: int,
+        object_key: str,
+    ) -> StoredDocument:
+        record = StoredDocument(
+            id=uuid4(),
+            tenant_id=tenant_id,
+            filename=filename,
+            sha256=sha256,
+            media_type=media_type,
+            size_bytes=size_bytes,
+            object_key=object_key,
+            status="uploaded",
+            created_at=datetime.now(UTC),
+        )
+        return self._register(record)
+
+    def _register(self, record: StoredDocument) -> StoredDocument:
+        statement = (
+            insert(self.docs)
+            .values(**record.model_dump(exclude={"chunks", "entities"}))
+            .on_conflict_do_nothing(index_elements=["tenant_id", "sha256"])
+            .returning(self.docs)
+        )
+        with self.engine.begin() as connection:
+            set_tenant(connection, record.tenant_id)
+            row = connection.execute(statement).mappings().one_or_none()
+            if row is None:
+                row = (
+                    connection.execute(
+                        select(self.docs).filter_by(
+                            tenant_id=record.tenant_id, sha256=record.sha256
+                        )
+                    )
+                    .mappings()
+                    .one()
+                )
+            else:
+                self._enqueue(connection, record)
+            return StoredDocument.model_validate(row)
+
+    def _enqueue(self, connection: Connection, record: StoredDocument) -> None:
+        event = DocumentUploaded(
+            tenant_id=record.tenant_id,
+            document_id=record.id,
+            sha256=record.sha256,
+            media_type=record.media_type,
+            size_bytes=record.size_bytes or 0,
+            object_key=record.object_key or "",
+            occurred_at=record.created_at,
+            traceparent=inject({}).get("traceparent"),
+        )
+        connection.execute(
+            self.outbox.insert().values(
+                id=event.event_id,
+                tenant_id=record.tenant_id,
+                aggregate_id=record.id,
+                type=event.type,
+                payload=event.model_dump(mode="json", exclude_none=True),
+                created_at=event.occurred_at,
+            )
+        )
+
+    def mark_status(
+        self,
+        tenant_id: str,
+        document_id: UUID,
+        status: DocumentStatus,
+        error: str | None = None,
+    ) -> None:
+        # Callers supply a sanitized error class/summary, never exception text.
+        if status not in {"uploaded", "processing", "processed", "failed"}:
+            raise ValueError("Invalid document status")
+        with self.engine.begin() as connection:
+            set_tenant(connection, tenant_id)
+            found = connection.execute(
+                self.docs.update()
+                .where(
+                    self.docs.c.tenant_id == tenant_id,
+                    self.docs.c.id == document_id,
+                )
+                .values(status=status, error=error if status == "failed" else None)
+                .returning(self.docs.c.id)
+            ).scalar_one_or_none()
+            if found is None:
+                raise LookupError("Document not found for tenant")
