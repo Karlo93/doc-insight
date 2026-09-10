@@ -131,7 +131,11 @@ class QueryService:
             abstained=abstained,
             sources=[source(hit) for hit in returned],
             entities=[] if abstained else cited_entities(cited, documents),
-            retrieval=RetrievalInfo(top_k=request.top_k, hits=len(hits)),
+            # Scripted callers bypass the HTTP 422; report the depth applied.
+            retrieval=RetrievalInfo(
+                top_k=min(request.top_k, self.settings.query_top_k_max),
+                hits=len(hits),
+            ),
             generation=provider,
             latency_ms=int((perf_counter() - started) * 1000),
         )

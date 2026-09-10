@@ -72,3 +72,8 @@ once and misses once. Retrieval recall does not imply answer correctness.
   measured quality gains meet an agreed latency/memory budget.
 - Hosted RAG services: add data transfer, credentials and service dependence;
   conflict with the required offline operating path.
+- Entity-only reads for citations: the service hydrates each hit document,
+  chunk embeddings included, inside the retrieval snapshot because the snapshot
+  is released before generation. A reader method returning only entities is
+  deferred until measured latency on large documents justifies the extra
+  contract surface.

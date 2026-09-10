@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 from doc_insight.contracts.extraction import Page
-from doc_insight.contracts.query import Generation
+from doc_insight.contracts.query import Generation, QueryRequest
 from doc_insight.contracts.structure import Chunk, Document, Entity
 from doc_insight.query.generation import FallbackGenerator
 from doc_insight.query.main import create_app
@@ -190,6 +190,13 @@ def test_health_independent_from_readiness_and_sanitized_failure():
 def test_settings_validate(setting, value):
     with pytest.raises(ValueError):
         Settings(**{setting: value})
+
+
+def test_service_reports_effective_top_k(service):
+    service.settings.query_top_k_max = 1
+    question = "Where does the pharmacy store vaccines?"
+    response = service.query("demo", QueryRequest(question=question, top_k=3))
+    assert response.retrieval.top_k == 1 and response.retrieval.hits == 1
 
 
 def test_unexpected_errors_keep_error_envelope(service, caplog):
