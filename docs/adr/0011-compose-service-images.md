@@ -33,7 +33,7 @@ Images publish with immutable commit tags plus `main`, attached SBOMs and
 provenance after required CI checks. Registry write permission exists only in the
 main-push image job. Pull requests, including forks, cannot publish.
 
-Kubernetes manifests, ingress and autoscaling remain wave B. Starting there would
+Kubernetes manifests, ingress and autoscaling are not implemented. Starting there would
 add cluster setup before the local reviewer path works. Compose proves image
 entrypoints, dependency ordering and TLS; it does not supply production HA,
 network policies, secret rotation or rolling deployment guarantees.

@@ -1,216 +1,106 @@
 # doc-insight
 [![CI](https://github.com/Karlo93/doc-insight/actions/workflows/ci.yml/badge.svg)](https://github.com/Karlo93/doc-insight/actions/workflows/ci.yml)
 
-doc-insight extracts text from PDFs and images, detects language and entities, and builds searchable passages.
-The worker CLI stores documents and 384-dimensional embeddings in tenant-scoped Postgres tables.
-The internal ingest and query services accept uploads and return cited answers or abstain.
-`di worker run` consumes uploaded originals from Redis with crash recovery; see the [worker runbook](docs/worker.md).
-The gateway authenticates and rate-limits requests; Docker Compose runs the complete local API behind Caddy HTTPS.
-The browser supports uploads, processing status, filtered questions, citations and token usage.
-Start with the [code walkthrough](docs/code-guide.md), [assignment review](docs/assignment-review.md),
-and [online readiness and API credentials](docs/online-readiness.md).
-Read the [load-test report](benchmark/README.md) and [release evidence](docs/evidence/README.md)
-for measured capacity, test results, traces and recovery verification.
+Upload PDFs and images, search their contents, and ask questions with page-level
+citations. doc-insight combines local OCR and multilingual embeddings with optional
+OpenAI answer generation. A browser workspace provides uploads, processing status,
+document filters, source passages and token usage.
 
-## Start with Docker
+The services run with Docker Compose. PostgreSQL row-level security isolates tenant
+data; Redis Streams and a transactional outbox provide recoverable processing.
+OpenTelemetry connects HTTP requests, background processing and model calls.
 
-With Docker Compose v2.24.4+, Buildx, GNU Make, Bash and curl installed:
+## Quick start
+
+Install Docker Compose v2.24.4+, Buildx, GNU Make, Bash and curl, then:
 
 ```sh
 git clone https://github.com/Karlo93/doc-insight.git
 cd doc-insight
 make local-run
+make -s dev-token
 ```
 
-Then, from the same directory:
+Open [the browser](http://localhost) and paste the generated workspace token.
+Upload a PDF, PNG or JPEG, wait for **processed**, then ask a question. Tokens stay
+in browser memory; refresh or expiry requires reconnecting. Cold startup downloads
+and warms the local models and can take several minutes.
 
-```sh
-TOKEN=$(make -s dev-token)
-curl -fkSs -H "Authorization: Bearer $TOKEN" -F file=@tests/fixtures/text_hr.pdf https://localhost/ingest
-curl -fkSs -H "Authorization: Bearer $TOKEN" https://localhost/documents/REPLACE_WITH_DOCUMENT_ID
-curl -fkSs -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"question":"Gdje živi Marko Marić?","top_k":3}' https://localhost/query
-```
+Configure free ports in an untracked `.env` if needed. The browser uses
+`CADDY_HTTP_PORT`; HTTPS uses `CADDY_HTTPS_PORT`.
+See [deployment](docs/deploy.md) for startup details and
+[private hosting](docs/private-deployment.md) for protected server access.
+`make local-stop` stops the stack while preserving data volumes.
 
-Choose free ports in `.env` first if needed; `CADDY_HTTPS_PORT` changes the URL (Windows
-reserves some ranges, often port 80; see [deployment](docs/deploy.md#tls-and-public-calls)).
-`local-run` builds the four service images, starts storage, telemetry and the
-applications, migrates the database, publishes a development JWKS from a private
-issuer volume and checks `https://localhost/healthz` through Caddy. `dev-token` mints
-a token for tenant `demo`, the tenant the relay serves (`DI_TENANTS`). Wait for
-status `processed` before asking. See [deployment](docs/deploy.md) for TLS, image
-names, environment settings and the deferred Kubernetes path.
-Run `make local-stop` when finished; it preserves data volumes.
+## Answer generation
 
-No paid model key is needed for local OCR, embeddings, search or extractive answers.
-OpenAI generation is optional: set `DI_OPENAI_API_KEY` in your untracked `.env` and
-recreate the query container as described in [API credentials](docs/online-readiness.md#api-credentials-and-token-usage).
-The query service records token usage and atomically enforces a per-tenant daily token budget.
-Open the browser interface at `http://localhost` (or your configured `CADDY_HTTP_PORT`)
-and paste a token from `make -s dev-token`. See the [private deployment runbook](docs/private-deployment.md).
+OCR, embeddings, search and extractive answers run without paid API credentials.
+For OpenAI answers, configure the query service with a server-side API key using
+the [credential instructions](docs/private-deployment.md#api-credentials-and-token-usage).
+Never paste the provider key into the browser.
 
-## CLI prerequisites
+Answers include their actual provider, model and token usage. Daily tenant budgets
+bound hosted usage. The app abstains when retrieved passages do not support an
+answer. Citations identify evidence; they do not guarantee that every generated
+statement follows from it. Image retrieval uses OCR text, so diagram layout and
+arrows may need interpretation beyond the extracted text.
 
-- Git, uv, Python 3.12 (selected by uv), GNU Make and Go 1.24.11+ for the security gate.
-- Docker with Compose v2 for Postgres/pgvector, Redis, MinIO and the optional telemetry stack; Bash (Git Bash on Windows) for the smoke script.
-- Tesseract with English (`eng`) and Croatian (`hrv`) data; verify with `tesseract --list-langs`.
-- Network access for dependency installation and the first tokenizer/embedding download (about 0.22 GB for weights).
-
-See [Windows and WSL/Linux setup](docs/pipeline.md#run-it-wsl2linux) for OCR installation.
-
-## Local CLI setup
-
-The host CLI can use the Compose `infra` profile (Postgres/pgvector, Redis,
-MinIO) without building images; telemetry is optional. See [local stack](docs/local-stack.md)
-for ports, profiles and encryption. Run from a clone:
-
-```sh
-git clone https://github.com/Karlo93/doc-insight.git
-cd doc-insight
-make setup
-```
-
-Choose a free database port and export it for both Compose and Python. The runtime URL uses
-the restricted `di_app` login; migrations use the privileged `di` login. For Bash:
-
-```sh
-export POSTGRES_PORT=55432
-export DI_DATABASE_URL=postgresql+psycopg://di_app:di_app@127.0.0.1:55432/di
-export DI_MIGRATION_DATABASE_URL=postgresql+psycopg://di:di@127.0.0.1:55432/di
-```
-
-For PowerShell:
-
-```powershell
-$env:POSTGRES_PORT = '55432'
-$env:DI_DATABASE_URL = 'postgresql+psycopg://di_app:di_app@127.0.0.1:55432/di'
-$env:DI_MIGRATION_DATABASE_URL = 'postgresql+psycopg://di:di@127.0.0.1:55432/di'
-```
-
-Alternatively copy `.env.example` to `.env` for Compose and export the matching `DI_` values.
-
-Then, in either shell:
-
-```sh
-make db-up
-make migrate
-uv run --locked --all-packages di index tests/fixtures/text_hr.pdf --tenant demo
-uv run --locked --all-packages di search "Gdje se nalazi Zagreb?" --tenant demo -k 5
-```
-
-`db-up` starts the `infra` profile and runs the smoke script, which waits for health; on a
-fresh volume the database creates the restricted `di_app` login automatically. `make migrate`
-applies all three migrations (core tables, row-level security, and ingest/outbox) using the migration URL.
-One recorded indexing run printed the following; UUID and durations vary by run:
+## Architecture and operations
 
 ```text
-extract=0.004s analyze=1.919s embed=3.356s store=0.319s
-Document: a503d377-53db-4141-85f0-fd2921ecf163 | Chunks: 1 | Tenant: demo
+Browser → Caddy → Gateway → Ingest → Object storage + PostgreSQL outbox
+                    │                         ↓
+                    │                   Relay → Redis → Worker
+                    │                                     ↓
+                    └──────→ Query ← PostgreSQL / pgvector index
+                               └──→ OpenAI (optional)
 ```
 
-Search returned that document on page 1 with cosine score `0.746` and the Croatian passage.
-It prints document UUID, page, cosine score and passage text. Copy your returned UUID:
+- [Architecture](docs/architecture.md) and [code guide](docs/code-guide.md)
+- [API](docs/api.md), [configuration](docs/configuration.md) and [runbooks](docs/README.md)
+- [Metrics and distributed tracing](docs/observability.md), with [captured examples](docs/evidence/README.md)
+- [100 req/s benchmark report and graph](benchmark/README.md)
+
+The recorded single-server benchmark sustained 100 document-list requests/s and
+25 extractive queries/s on a small generated corpus. At 100 offered queries/s the
+query service saturated. These are historical measurements, not an OpenAI
+throughput guarantee or a benchmark of subsequent query changes.
+
+The app currently uses operator-issued JWTs. Self-service accounts, multi-node
+availability and Kubernetes deployment are not implemented.
+
+## Development
+
+Install uv, Python 3.12, GNU Make, Go 1.24.11+ and Tesseract with English/Croatian
+language data. See [platform setup](docs/pipeline.md#run-it-wsl2linux).
 
 ```sh
-uv run --locked --all-packages di show <document-id> --tenant demo
-```
-
-Replace `<document-id>` before running. Re-indexing the same bytes for `demo` preserves
-the UUID and replaces the stored output atomically; it still runs extraction and inference.
-`make db-down` stops the `infra` profile and keeps its named volumes.
-
-Compose publishes infrastructure on loopback: Postgres, Redis and MinIO in `infra`,
-and the OpenTelemetry collector, Prometheus, Tempo and Grafana in `telemetry`
-(`make telemetry-up`). `make local-run` builds the application images and starts the whole
-stack behind Caddy TLS ([deployment](docs/deploy.md)). Kubernetes manifests are wave B.
-
-## API status and examples
-
-The [query service](docs/query.md) implements `POST /query` on port 8002, with offline
-extractive answers, citations and abstention. Start it with `di-query serve` after indexing
-a fixture. The [ingest service](docs/ingest.md) accepts uploads and serves status on port 8001.
-The [gateway](docs/gateway.md) implements RS256/JWKS authentication, Redis rate limits,
-streaming proxy routes and development token tooling.
-The full service sequence is mint a development token → `POST /ingest` →
-`GET /documents/{id}` until processed → `POST /query`.
-See the [API contract](docs/api.md) for payloads, status codes and example curl calls.
-The gateway runbook includes token commands and an optional development Compose overlay.
-The Docker startup above runs the services together; direct host commands require their dependencies separately.
-
-## CLI
-
-Prefix each command with `uv run --locked --all-packages`:
-
-| Command | Result |
-| --- | --- |
-| `di extract tests/fixtures/mixed.pdf` | Text layer or OCR per page; previews |
-| `di extract tests/fixtures/text_hr.pdf --json` | Full extraction JSON |
-| `di analyze tests/fixtures/text_hr.pdf` | Languages, entities and chunk statistics |
-| `di analyze tests/fixtures/text_hr.pdf --embed --json` | Structured output plus vectors |
-| `di index tests/fixtures/text_hr.pdf --tenant demo` | Process and persist atomically |
-| `di show <document-id> --tenant demo` | Stored metadata, chunks and entities |
-| `di search "Zagreb" --tenant demo -k 5` | Nearest tenant-owned passages |
-
-`extract` and `analyze` are stateless. Storage commands require a nonblank tenant supplied by
-the caller; the current CLI does not authenticate it. CLI previews/JSON are document data,
-not logs; keep redirected output in ignored `inputs/` or `.cache/`.
-
-## Tests
-
-```sh
+make setup
+uv run --locked pre-commit install
 make check
-make test-models
+make db-up
 make test-integration
 ```
 
-`check` runs Ruff, strict mypy, the default tests with a 70% coverage floor, Bandit,
-pip-audit and gitleaks. Default tests block network connections and need installed OCR data.
-`test-models` may download pinned tokenizer/embedding snapshots; `test-integration` needs
-`make db-up` and creates disposable databases using the exported migration URL. Neither tier replaces
-the default coverage gate. See [CI](docs/ci.md) for individual commands and prerequisites.
+Default tests run offline; integration tests use disposable service-backed databases.
+Model-download tests are opt-in with `make test-models`.
+See [CONTRIBUTING](CONTRIBUTING.md), [CI](docs/ci.md), [security](SECURITY.md)
+and [support](SUPPORT.md).
 
-## Configuration
-
-The cached worker settings read `DI_` environment variables at process startup.
-See the [settings index](docs/configuration.md) for defaults and links to every settings table.
-Compose reads `.env`; Python currently requires exported variables, including `DI_DATABASE_URL`.
-The checked-in `.env.example` contains the database, Redis, S3 and telemetry settings; other
-worker options are in the tables.
-
-## Design summary
-
-The worker keeps extraction and model I/O at provider boundaries.
-Protocols live in `packages/contracts`; deterministic fakes live in `packages/testing`.
-PDFium reads PDF text, with Tesseract OCR below the configured threshold.
-Lingua detects language and spaCy extracts English/Croatian entities.
-Chunks retain exact page offsets and use 120 tokens with up to 24 overlap.
-FastEmbed runs pinned multilingual MiniLM weights on CPU through ONNX.
-Queries and passages reject more than 126 content tokens instead of truncating.
-Postgres stores metadata, entities, chunks and pgvector embeddings in one transaction.
-Tenant filters, composite foreign keys and forced row-level security isolate the storage slice;
-the runtime login cannot bypass or disable the policy. Optional OpenTelemetry export gives
-stage and request timings without document data.
-See [architecture and trade-offs](docs/architecture.md) for the service paths and the ADRs.
-
-## Repository layout
-
-| Path | Purpose |
+| Directory | Purpose |
 | --- | --- |
-| `apps/worker` | Extraction, analysis, embedding, storage and CLI |
-| `apps/query` | Internal hybrid retrieval and grounded answers |
-| `apps/ingest` | Upload validation, object storage, outbox relay and status reads |
-| `apps/gateway` | Public authentication, rate limits and streaming proxy |
-| `packages/{contracts,testing}` | Shared types, Protocols and fakes |
-| `packages/observability` | OpenTelemetry setup, stage spans, request metrics and trace propagation |
-| `packages/domain` | Reserved shared package |
-| `migrations` | Alembic revisions containing raw SQL |
-| `infra`, `deploy`, `docker-compose.yml` | Collector, Prometheus, Tempo and Grafana configuration; Postgres init script; Compose profiles |
-| `tests`, `scripts` | Contract tests, generated fixtures and retrieval evaluation |
-| `docs` | [Documentation index](docs/README.md), architecture and ADRs |
+| `apps/` | Gateway, ingest, query and worker services |
+| `packages/` | Shared contracts, telemetry and test fakes |
+| `frontend/` | Static browser application |
+| `migrations/` | Database schema changes |
+| `deploy/`, `infra/` | Compose overlays and telemetry configuration |
+| `tests/` | Tests and generated document fixtures |
+| `benchmark/` | Reproducible performance results and plotting source |
+| `docs/` | Architecture, API, runbooks and design decisions |
 
 ## License
 
-See [Contributing](CONTRIBUTING.md) for contribution standards and [Security](SECURITY.md)
-for private vulnerability reporting.
-
-No project license has been selected or committed. The fixture font has its own
-[provenance](scripts/fonts/readme.md) and [license](scripts/fonts/ofl.txt).
+Project code is available under [PolyForm Noncommercial 1.0.0](LICENSE.md).
+Noncommercial use, modification and sharing are permitted under those terms.
+Commercial use requires separate written permission from [Karlo93](https://github.com/Karlo93).
+Third-party components retain their respective licenses.

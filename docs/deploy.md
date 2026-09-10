@@ -123,7 +123,7 @@ Compose maps `DI_OPENAI_API_KEY`, `DI_OPENAI_MODEL`, `DI_LLM_TIMEOUT_SECONDS`,
 Defaults match [query settings](query.md#settings). An empty key selects extractive
 answers; adding it enables outbound OpenAI requests with question/passage content.
 Recreate query after changing these values; a container restart retains its old environment.
-See [credential setup and remaining deployment work](online-readiness.md).
+See [credential setup and remaining deployment work](private-deployment.md).
 
 ## API smoke calls
 

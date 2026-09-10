@@ -18,17 +18,20 @@ disclosure with the maintainer; no response-time guarantee is currently defined.
 | Current `main` (development) | Maintained |
 | Earlier commits and unreleased snapshots | No separate backports; update to current `main` |
 
-There is no stable-release support schedule yet. The current runnable slice is a local CLI
-with loopback Postgres, Redis and MinIO. The database enforces row-level security for the
-restricted runtime login. Authentication and the service deployment land with the service
-lanes and must be checked against their implementation before using the system for
-sensitive documents.
+There is no stable-release support schedule yet. The deployed stack uses a JWT/JWKS
+gateway, per-user quotas, tenant-scoped queries and forced PostgreSQL row-level
+security. Internal services trust the isolated Compose network and must not be
+exposed directly. The development issuer is for operator-managed workspaces;
+self-service identity lifecycle and multi-node availability are not implemented.
+See [private deployment](docs/private-deployment.md) for credentials, backups and
+network boundaries. Hosted generation sends selected passages and questions to
+the provider; local extraction and embeddings do not require a hosted API.
 
 ## Secrets and document data
 
 - Keep secrets in environment variables or ignored local files. Never commit private keys,
   tokens, database credentials, real document samples or private infrastructure details.
-- `.env`, `*.pem`, `*.key`, `inputs/` and `.cache/` are ignored; inspect the staged diff anyway.
+- `.env`, `*.pem`, `*.key`, `inputs/`, `.cache/` and `.local/` are ignored; inspect the staged diff anyway.
   Local example database credentials are not deployment credentials.
 - Logs and review attachments must exclude document text, questions, user filenames, vectors
   and credentials. Explicit CLI output is document data and must be handled accordingly.

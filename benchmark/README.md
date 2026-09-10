@@ -1,98 +1,76 @@
-# HTTP load-test report — 2026-09-10
+# HTTP performance report
 
-The private server sustains **100 document-list requests/second** and **25 complete
-extractive queries/second** on the generated fixture corpus. At 100 offered query
-RPS, the four-core query allocation saturates: only 25.62% of offered work completes,
-and successful p95 latency rises to 11.86 seconds. This is a measured capacity limit,
-not a claim of 100 successful LLM answers/second.
+Measured on 2026-09-10: **100 document-list requests/s succeeded; 100 offered
+extractive queries/s overloaded the query service.** The sustainable tested query
+rate was 25 req/s on a small generated corpus.
+
+These measurements predate the document-name retrieval and hosted-answer fixes in
+PR #18. They describe the recorded builds below, not a fresh benchmark of current
+main. OpenAI generation was disabled throughout the load tests.
+
+## 100 req/s results
+
+Each endpoint received 12,000 scheduled requests over 120 seconds.
+
+| Endpoint | HTTP 200 | Client drops | Successful req/s, including drain | Successful p95 |
+| --- | ---: | ---: | ---: | ---: |
+| `GET /documents` | 12,000 (100%) | 0 | 100.00 | 11.32 ms |
+| `POST /query` | 3,075 (25.62%) | 8,925 | 23.74 | 11,858.59 ms |
+
+There were no HTTP 429 or 5xx responses in these stages. Client drops mean the
+driver's 256-request concurrency ceiling was reached; they are failed offered
+work, not server successes. Query drain extended the run to 129.54 seconds.
+Successful-response latency excludes dropped work, which is reported separately.
+
+![Throughput, delivery and latency at 100 requests per second](capacity.png)
+
+For comparison, 25 req/s returned 3,000/3,000 successful queries, p50/p95/p99
+63.13/103.58/113.72 ms. Query CPU reached approximately four cores while memory
+stayed around 1.05 GiB of the 2-GiB cap. CPU inference was the first observed limit.
+The 30-second ramps at 10/25/50/100 req/s showed the same saturation boundary.
 
 ## Environment and method
 
-- Linux host: 16 logical CPUs, 30.99 GiB RAM, encrypted local SSD; shared with other
-  applications. Docker 29.6.1 / Compose 5.3.0. Query is capped at 4 CPUs / 2 GiB;
-  worker at 4 CPUs / 3 GiB. One query process, two native embedding threads.
-- Real Caddy → JWT/quota gateway → ingest/query → PostgreSQL/pgvector and Redis.
-  Query uses pinned CPU MiniLM embeddings, hybrid retrieval and extractive generation.
-  All services and model caches were warm. Telemetry remained enabled.
-- Six generated documents, 29 chunks and 60 entities across two tenants; the query
-  tenant owns five documents. This small corpus cannot establish large-corpus scaling.
-- An isolated Linux container on the same server generated open-loop traffic through
-  Caddy's internal HTTP endpoint. Forty identities distribute requests below the
-  gateway's normal per-user 5-RPS quota. This measures server capacity, excluding
-  WAN/Tailscale/TLS overhead. Interactive HTTPS acceptance ran separately from the PC.
-- Ramps: 10/25/50/100 RPS for 30 seconds each, separately for metadata and query.
-  Confirmation: 25/100 RPS for 120 seconds each. Soak: 20 query RPS for 600 seconds.
-- Driver ceiling: 256 concurrent requests; excess scheduled work is counted as
-  `client_dropped`, never silently removed. HTTP timeout: 30 seconds. No retries.
-  Latency starts at the scheduled dispatch time; percentiles cover successful HTTP
-  responses. Throughput includes drain time. Failures and dropped work are reported
-  separately, preventing the latency distribution from hiding missed offered work.
-- Hosted generation was explicitly disabled. Preflight requires extractive output.
-  No 100-RPS workload was sent to OpenAI. The API key is restored for normal use.
+- Shared Linux server: 16 logical CPUs, 30.99 GiB RAM, encrypted SSD.
+  Docker 29.6.1 / Compose 5.3.0. Query limited to 4 CPUs/2 GiB; worker 4 CPUs/3 GiB.
+- Caddy → authenticated/quota-controlled gateway → ingest or query → PostgreSQL
+  and Redis. One query process, two native embedding threads, warm CPU MiniLM
+  model, hybrid retrieval, extractive generation and telemetry enabled.
+- Six generated documents, 29 chunks and 60 entities across two tenants; five
+  documents belong to the queried tenant. This does not establish large-corpus scaling.
+- Open-loop Linux driver on the same server, using Caddy's internal HTTP endpoint.
+  Forty identities stay below the per-user 5 req/s quota. WAN, Tailscale and TLS
+  overhead are excluded.
+- At most 256 concurrent requests, 30-second HTTP timeout, no retries. Latency
+  starts at scheduled dispatch. Dispatch p99 was 1.26–2.92 ms in the confirmation
+  stages. Throughput includes drain time.
+- Initial candidate query image:
+  `sha256:aa4a27a05f8600e07578d57711aedc3f2f4b03c27c2d8508a9c96371e0e25877`.
+  Later confirmation and corrective samples are separate from this baseline.
 
-## Two-minute confirmation
+## Reliability and overload follow-ups
 
-| Endpoint | Offered RPS | HTTP 200 / offered | Client drops | Completed RPS | p50 / p95 / p99 ms |
-| --- | ---: | ---: | ---: | ---: | --- |
-| GET /documents | 25 | 3,000 / 3,000 | 0 | 25.01 | 7.08 / 11.20 / 22.26 |
-| GET /documents | 100 | 12,000 / 12,000 | 0 | 100.00 | 6.51 / 11.32 / 20.18 |
-| POST /query | 25 | 3,000 / 3,000 | 0 | 25.00 | 63.13 / 103.58 / 113.72 |
-| POST /query | 100 | 3,075 / 12,000 | 8,925 | 23.74 | 10,539.11 / 11,858.59 / 12,211.62 |
+| Scenario | Result | Successful p95 | Samples |
+| --- | --- | ---: | --- |
+| Initial 20 req/s, 10 minutes | 11,999 HTTP 200; one 502 | 95.71 ms | [Initial soak](raw/soak.json.gz) |
+| Repeated 20 req/s, 10 minutes | 12,000/12,000 HTTP 200; no drops/errors | 97.72 ms | [Corrected soak](raw/release-soak.json.gz) |
+| 100 offered query req/s, forced JWKS refresh, 60 seconds | 1,465 HTTP 200; 4,535 drops; no HTTP errors | 14,920 ms | [Auth overload](raw/auth-overload.json.gz) |
+| 20 req/s, forced JWKS refresh, 5 minutes | 6,000/6,000 HTTP 200; no drops/errors | 96.20 ms | [Auth soak](raw/auth-soak.json.gz) |
 
-No HTTP 429/5xx occurred in these four stages. The overloaded query stage required
-129.54 seconds including drain. Dispatch p99 stayed between 1.26 and 2.92 ms,
-so the valid Linux driver kept the offered schedule even during saturation.
+The initial 502 matched stale upstream connection reuse; Caddy now retires idle
+connections before Uvicorn closes them. A later overloaded run recorded one 401
+during signing-key refresh; the gateway now uses a separate authentication HTTP
+pool. Forced-refresh checks verified that saturation no longer starved that pool.
+They did not eliminate the query capacity limit. Earlier results remain available.
 
-![Measured throughput and latency](capacity.png)
+## Reproduce
 
-The short ramp independently found the same query boundary: 25 RPS passed; 50 and
-100 offered RPS produced approximately 23 completed RPS with many client drops.
-Query CPU reached approximately 423% (four cores) and memory stayed around 1.05 GiB
-of its 2-GiB cap. CPU inference is the first observed constraint. Increasing replicas
-or CPU, batching embeddings and testing a realistic corpus are future experiments;
-none of those gains is claimed by this report.
+Use generated fixtures in an isolated deployment, with telemetry enabled. Follow
+[private hosting](../docs/private-deployment.md) for configuration and token issuance.
+The existing driver reserves the first two entries in its token JSON for acceptance;
+provide at least 42 entries to exercise 40 load identities. Keep tokens ignored.
 
-## Soak and corrective work
-
-The first ten-minute 20-RPS query soak returned 11,999 HTTP 200 and one HTTP 502:
-99.99% success, p50 60.36 ms, p95 95.71 ms, p99 106.38 ms. No requests were dropped.
-Caddy logged `EOF` for the failed request, about 77 seconds into the run. The proxy
-default kept idle upstream sockets for two minutes while Uvicorn closed them after
-five seconds. The release now retires those sockets after four seconds. This matches
-the failure mode described in [Caddy's transport documentation](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#the-http-transport).
-The initial result remains committed; final-image confirmation is recorded in
-the release verification notes rather than replacing an inconvenient measurement.
-
-An earlier Windows load generator became starved at 50 RPS (dispatch p99 exceeded
-50 seconds). Those results are excluded from server-capacity claims. The replacement
-Linux driver held dispatch p99 below 4 ms. Warm PC-to-server HTTPS health checks
-were approximately 4 ms, which does not establish application latency under load.
-
-## Real-provider and ingestion acceptance
-
-Three bounded server OpenAI checks used `gpt-4.1-mini-2025-04-14`: a supported English
-answer, a supported Croatian answer and an unsupported-question abstention. Observed
-end-to-end times were 2.802 / 1.276 / 2.369 seconds. Usage was 623 input and 62 output
-tokens in total, approximately **$0.0003484** at $0.40/M input and $1.60/M output.
-This is an estimate for these three requests, not the entire session or an invoice.
-Pricing reference: [model documentation](https://developers.openai.com/api/docs/models/gpt-4.1-mini).
-
-First-time server PDF/HR-PDF/scanned-image processing completed within the polling
-observations of 4.05 / 2.05 / 2.03 seconds (two-second polling resolution). These are
-small-fixture observations, not worker throughput measurements. A valid padded PDF
-of at least 10 MiB processed successfully. Repeated acceptance uploads return the
-same IDs; their near-zero processing waits demonstrate idempotence, not OCR speed.
-The browser separately processed a six-page generated PDF and displayed a cited
-OpenAI answer. The legacy evidence score is heuristic and can reject useful answers
-near its threshold; it is not a calibrated probability of correctness.
-
-## Reproduce and inspect
-
-See [private deployment](../docs/private-deployment.md) for credentials, images and
-isolated ports. Use generated fixtures only. Mint at least 40 unique user tokens
-for one provisioned tenant into an ignored JSON array; do not publish tokens.
-Use the same Compose project and a Linux load generator with the locked Python
-environment. Recreate query with the load overlay last:
+Recreate query with the load overlay last and omit the provider secret overlay:
 
 ```sh
 docker compose -f docker-compose.yml -f deploy/compose.private.yml \
@@ -100,61 +78,24 @@ docker compose -f docker-compose.yml -f deploy/compose.private.yml \
 uv run --locked python scripts/load_test.py --base http://127.0.0.1:9080 \
   --tokens .cache/load-tokens.json --seconds 120 --rates 25,100 \
   --modes documents,query --output .cache/confirmation.json
-uv run --locked python scripts/load_test.py --base http://127.0.0.1:9080 \
-  --tokens .cache/load-tokens.json --seconds 600 --rates 20 \
-  --modes query --output .cache/soak.json
+```
+
+The driver refuses load if preflight reports hosted generation. Restore the normal
+query configuration afterwards and verify a real answer:
+
+```sh
 docker compose -f docker-compose.yml -f deploy/compose.secret.yml \
   -f deploy/compose.private.yml --profile '*' up -d --no-deps --wait query
 uv run --locked --with matplotlib==3.10.7 python benchmark/plot_results.py
 ```
 
-[Summaries](results.json), [ramp samples](raw/ramp.json.gz),
-[confirmation samples](raw/confirmation.json.gz), [initial soak samples](raw/soak.json.gz)
-and the [plotting source](plot_results.py) are committed. Raw samples contain status,
-scheduled latency and dispatch lag only; they contain no tokens or document text.
-[Resource samples](resources.json) record CPU/memory observations.
-Screenshots and release validation are in [the evidence index](../docs/evidence/README.md).
+The plot renders the committed historical data. New runs write ignored output;
+review and label a new dataset explicitly before replacing published measurements.
 
-## Transferred-image confirmation
+[Summaries](results.json) · [Confirmation samples](raw/confirmation.json.gz) ·
+[Ramp samples](raw/ramp.json.gz) · [Transferred-image confirmation](raw/release-confirmation.json.gz) ·
+[Resource observations](resources.json) · [Plot source](plot_results.py)
 
-The exported release images were run again for 60 seconds per stage. Metadata
-25/100 RPS returned 1,500/6,000 successful responses (p95 24.13/21.41 ms). Query
-25 RPS returned all 1,500 responses (p95 109.16 ms). At 100 offered query RPS,
-1,605 succeeded, 4,394 were client-dropped, and one received HTTP 401 after 5.017 s.
-This final overloaded stage is retained in [raw samples](raw/release-confirmation.json.gz).
-
-The gateway shared one HTTP connection pool between query traffic and signing-key
-refresh. At saturation, pending query exchanges can starve the five-second JWKS
-fetch, which fails authentication closed. The observed timeout matches that path;
-this is a diagnosis from timing and connection ownership, not a captured exception
-trace. The gateway now gives identity refresh its own reusable HTTP client and closes
-both clients at shutdown. Regression verification records their separate ownership.
-The subsequent verification is recorded below.
-
-## Corrective verification
-
-After the Caddy timeout correction, the full 600-second 20-RPS soak returned
-**12,000 / 12,000 HTTP 200**, zero client drops and zero HTTP errors. p50/p95/p99
-were **61.37 / 97.72 / 107.92 ms**, with dispatch p99 2.07 ms.
-[Raw repeat soak](raw/release-soak.json.gz) preserves every sample.
-
-After separating authentication's connection pool, signing-key cache/refresh were
-forced to 5/1 seconds during a 60-second 100-RPS query overload. It returned 1,465
-HTTP 200 and 4,535 client drops, with **no 401, 429 or 5xx**. Throughput was 21.15 RPS
-including drain and successful p95 was 14.92 seconds. This does not remove CPU
-saturation; it verifies authentication continues independently of that saturation.
-[Raw authentication stress](raw/auth-overload.json.gz) is separate from the baseline.
-To force this condition, set `DI_JWKS_CACHE_SECONDS=5 DI_JWKS_REFRESH_SECONDS=1`
-when recreating the gateway with the load overlay; restore the default 300/5 values
-and the provider secret overlay afterwards.
-
-The final provider-parser correction handles malformed billing metadata with
-conservative reservation charging and extractive fallback. It does not alter the
-embedding/retrieval/extractive path used by these load tests. Valid live OpenAI
-responses are rechecked after promotion.
-
-With that forced-refresh setting retained, the corrected gateway then completed a
-300-second 20-RPS soak: **6,000/6,000 HTTP 200**, zero drops/errors, p50/p95/p99
-**58.85/96.20/107.84 ms**, dispatch p99 2.02 ms. The default signing-key cache and
-OpenAI secret configuration were restored afterwards, and real-provider acceptance
-passed. [Raw five-minute authentication soak](raw/auth-soak.json.gz).
+Raw load samples contain status, latency and dispatch lag, without tokens or
+document contents. Live traces and metrics are documented in
+[observability](../docs/observability.md).

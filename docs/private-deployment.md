@@ -1,7 +1,6 @@
 # Private deployment
 
-Eventual public source, private application. Publication is manual and belongs to
-the owner; keep the repository private until then. Use the base Compose file plus
+Run the application on a private network using the base Compose file plus
 `deploy/compose.private.yml` on Linux. The override removes database, Redis, MinIO,
 collector, Tempo and Prometheus host ports. Caddy and Grafana bind loopback only.
 Query and worker have CPU/memory caps to protect other applications on the host.
@@ -47,6 +46,38 @@ Startup migrates the schema, initializes encrypted object storage and signing ke
 and waits for query model readiness before starting the gateway. Cold startup can
 take minutes on a constrained development machine. `healthz` means process liveness;
 query's container checks `readyz` to protect the first question from cold loading.
+
+## API credentials and token usage
+
+OCR, language detection, named entities and CPU embeddings run locally. Only answer
+generation needs an OpenAI platform API key; a chat subscription is not an API
+credential. Use `DI_OPENAI_API_KEY`, or a mounted key via `deploy/compose.secret.yml`
+and `OPENAI_SECRET_FILE`. The pinned model is `gpt-4.1-mini-2025-04-14`.
+
+```sh
+docker compose -f docker-compose.yml -f deploy/compose.secret.yml \
+  --profile '*' up -d --no-deps --wait query
+```
+
+Add `-f deploy/compose.private.yml` on the private server. Recreate query after
+changing configuration; a restart retains its existing environment. Without a key,
+the app uses extractive answers. `generation.provider` reports the path actually
+used. `generation.usage` includes input, output and cached input tokens;
+`fallback_reason` identifies disabled generation, saturation, circuit, budget,
+upstream and format failures.
+
+`GET /usage` and the browser display the current tenant's UTC-day accounting.
+Default limits are 250,000 daily tokens, 700 output tokens per call and four
+concurrent hosted calls. PostgreSQL reservations protect the allowance across
+concurrency and restarts. Unknown usage is charged conservatively. This is a token
+allowance, not a provider invoice or exact dollar limit. Cached input is already
+included in input tokens. See [query settings](query.md#settings).
+
+Questions and retrieved text are sent to OpenAI with `store: false`. This option
+is not a promise of zero provider retention; consult
+[OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data).
+`HF_HUB_OFFLINE=1` only disables model downloads. Use an empty key/load profile to
+also disable hosted answer calls.
 
 ## Private HTTPS and browser access
 

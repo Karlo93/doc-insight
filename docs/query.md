@@ -7,7 +7,7 @@ Tenant IDs contain 1–64 letters, digits, dots, underscores or hyphens.
 and local embedding inference; unavailable dependencies return 503. The optional
 hosted generator is not required for readiness.
 For Docker credential injection, provider checks and token-usage limitations, see
-[online readiness](online-readiness.md#api-credentials-and-token-usage).
+[private deployment](private-deployment.md#api-credentials-and-token-usage).
 
 ## Request and response
 

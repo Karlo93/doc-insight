@@ -14,6 +14,8 @@ under a version and an ISO date when a release is cut.
 
 ### Added
 
+- License project code under PolyForm Noncommercial 1.0.0.
+
 - Clarify service and adapter contracts with concise function docstrings, inline
   explanations of failure/transaction boundaries, and browser helper documentation.
 - Ship a private browser workspace for uploads, processing status, filtered questions,
@@ -24,8 +26,8 @@ under a version and an ISO date when a release is cut.
   backup/isolated restore scripts, HTTP acceptance and reproducible load-test evidence.
 - Connect gateway, ingest, relay, worker and OpenAI traces; capture real dashboard evidence.
 
-- Add a code walkthrough, assignment deliverable review and online-readiness guide;
-  document service/pipeline boundaries with docstrings and correct stale delivery claims.
+- Add a code walkthrough and deployment guidance; document service and pipeline
+  boundaries with docstrings.
 - Keep provider credentials scoped to query; an empty key selects local extractive answers.
 - Document the current CLI setup, target architecture and planned API contracts.
 - Add locked service images, offline worker models and OCR, migration-first local
@@ -46,6 +48,9 @@ under a version and an ISO date when a release is cut.
 
 
 ### Changed
+
+- Streamline public documentation and contribution workflows; add editor defaults
+  and support guidance while retaining reproducible performance and trace examples.
 
 - Speed up chunking with one page encoding and a Unicode guard that preserves the original
   chunker for unsafe pages; chunk output and pipeline version 6 remain unchanged.

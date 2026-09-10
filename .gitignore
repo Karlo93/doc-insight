@@ -13,3 +13,4 @@ build/
 inputs/
 .cache/
 .dev-keys/
+.local/

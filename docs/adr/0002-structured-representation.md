@@ -58,7 +58,7 @@ offsets. The pinned tokenizer normalizes before splitting and can delete separat
 `"a\x0b. b"` at 2/1, Python treats the vertical tab as a word boundary while the tokenizer
 normalizes it to `"a. b"`. Unguarded counting emits `". b"` with a reported count of two;
 encoding that chunk alone produces three tokens. The 256-page demo book exposed this on
-page 239. See the [journal](../journal.md#guarded-page-token-counting) for the changed offsets.
+page 239. The equivalence suite covers this case in `tests/test_chunker_equivalence.py`.
 
 Choose the path once per page. Any `Cc` code point except tab, LF and CR, or any `Cf`, `Cs`,
 `Co`, `Zl` or `Zp` code point, selects the preserved reference chunker for the entire page.

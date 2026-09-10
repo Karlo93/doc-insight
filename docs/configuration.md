@@ -6,7 +6,7 @@ its settings class does not configure `.env` loading. Compose reads `.env` separ
 Reading `.env` for Compose substitution does not pass every variable to containers:
 only entries mapped in `docker-compose.yml` reach each service. Query's hosted-model
 and retrieval settings are explicitly mapped; other host tuning values may need a
-Compose override. See [online readiness](online-readiness.md).
+Compose override. See [private deployment](private-deployment.md).
 
 | Settings | Defaults and purpose |
 | --- | --- |
