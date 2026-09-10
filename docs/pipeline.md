@@ -83,7 +83,8 @@ Each page first passes a Unicode guard. Pages with `Cc` characters other than ta
 or with `Cf`, `Cs`, `Co`, `Zl` or `Zp` characters, retain the original candidate-retokenizing
 chunker: normalization can otherwise erase raw-text boundaries. Other pages encode once;
 binary searches over token offsets count whole-word windows and overlaps. NBSP (`Zs`) stays
-on this fast path. Equivalence tests compare complete chunks against the preserved reference.
+on this fast path. If token starts or ends are not nondecreasing, the page uses the reference
+instead. Equivalence tests compare complete chunks against the preserved reference.
 `token_count` never exceeds the configured cap.
 Overlap includes as many whole words as fit its budget, so it may be smaller than requested.
 Empty pages produce no chunks. A single word larger than the budget, such as a long URL or an

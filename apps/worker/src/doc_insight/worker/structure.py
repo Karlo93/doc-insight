@@ -2,6 +2,7 @@
 
 import re
 from bisect import bisect_left, bisect_right
+from itertools import pairwise
 from unicodedata import category, normalize
 
 from doc_insight.contracts.extraction import PIPELINE_VERSION, ExtractedDocument, Page
@@ -31,6 +32,9 @@ class _PageTokens:
         offsets = tokenizer.encode(text)
         self.starts = [start for start, _ in offsets]
         self.ends = [end for _, end in offsets]
+        self.ordered = all(a <= b for a, b in pairwise(self.starts)) and all(
+            a <= b for a, b in pairwise(self.ends)
+        )
 
     def count(self, start: int, end: int) -> int:
         # Cuts inside oversized words still need isolated tokenization.
@@ -110,6 +114,8 @@ def chunk_page(
     if _requires_reference(page.text):
         return _reference_chunk_page(page, tokenizer, settings, start_ord)
     tokens = _PageTokens(page.text, tokenizer)
+    if not tokens.ordered:
+        return _reference_chunk_page(page, tokenizer, settings, start_ord)
     units = _units(page, tokens, settings.chunk_tokens)
     chunks: list[Chunk] = []
     first = 0

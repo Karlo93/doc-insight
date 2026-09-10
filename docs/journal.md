@@ -25,11 +25,15 @@ The reference is preserved in both production and the equivalence tests. Pipelin
 stays 6. [ADR-0002](adr/0002-structured-representation.md#token-counting-from-one-page-encoding)
 records the exact guard and its limits.
 
-Three benchmark runs now match all chunks in both books. Median chunking changed from
-17.304 to 16.196 seconds for 256 pages and from 47.785 to 36.028 seconds for 659 pages.
-The guard selects 242/256 and 400/659 pages, so the speedup is limited by fallback work.
-The six-page fixture has no guarded pages and improves from 0.369 to 0.012 seconds.
-The benchmark script reports extraction separately and retains per-run timings.
+Three benchmark runs, including the offset-order check, match all chunks in both books.
+Median chunking changed from 24.615 to 23.039 seconds for 256 pages and from
+65.225 to 49.444 seconds for 659 pages. The guard selects 242/256 and 400/659 pages,
+so the speedup is limited by fallback work. The six-page fixture has no guarded pages
+and improves from 0.374 to 0.014 seconds. The benchmark script reports extraction
+separately and retains per-run timings.
+Review also exposed the offset-ordering assumption: reversed offsets can reject a valid
+window. A once-per-page monotonicity check now selects the reference when starts or ends
+move backwards, with separate regressions for reversed and nested offsets.
 
 ## Contribution standards
 

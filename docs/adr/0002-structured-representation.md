@@ -64,7 +64,9 @@ Choose the path once per page. Any `Cc` code point except tab, LF and CR, or any
 `Co`, `Zl` or `Zp` code point, selects the preserved reference chunker for the entire page.
 This conservative guard avoids reproducing the tokenizer's normalizer. NBSP is `Zs` and
 stays on the fast path. Other pages encode once and count whole-word windows and overlaps
-using binary searches over token starts and ends. Oversized words still split between their
+using binary searches over token starts and ends. Both offset sequences must be nondecreasing;
+a once-per-page check selects the reference if either moves backwards. Equal and overlapping
+spans remain valid when both sequences are ordered. Oversized words still split between their
 tokens, and pieces or candidate windows cut inside those words re-encode in isolation.
 
 Equivalence tests retain the old function, compare every chunk field, and exercise guarded
@@ -72,19 +74,20 @@ characters, NBSP, fixtures, window sizes and oversized words with the pinned tok
 The guard is tied to this tokenizer profile and must be reviewed when the model changes.
 Extraction, stored chunks, the Tokenizer Protocol and pipeline version 6 are unchanged.
 
-Median chunk-stage seconds over three runs at 120/24, with the tokenizer loaded before
-timing (Windows, Python 3.12; extraction and equality assertions excluded from chunk timing):
+Median chunk-stage seconds over three runs at 120/24, including the offset-order check,
+with the tokenizer loaded before timing (Windows, Python 3.12; extraction and equality
+assertions excluded from chunk timing):
 
 | Input | Reference | Guarded chunker | Guarded pages |
 | --- | ---: | ---: | ---: |
-| `text_long.pdf` (6 pages) | 0.369 | 0.012 | 0/6 |
-| 256-page demo book | 17.304 | 16.196 | 242/256 |
-| 659-page demo book | 47.785 | 36.028 | 400/659 |
+| `text_long.pdf` (6 pages) | 0.374 | 0.014 | 0/6 |
+| 256-page demo book | 24.615 | 23.039 | 242/256 |
+| 659-page demo book | 65.225 | 49.444 | 400/659 |
 
 Full chunk equality passed on all three inputs in every run. The guard is common in these
 books, not exceptional: the mathematics text contains control and private-use characters,
-and 400 pages of the other book contain U+0002. Their guarded chunking costs about 43 and
-30 times a single page-encoding pass, so the original within-2-times target is not met on
-the books. The plain fixture is within that target (1.39 times). The conservative page
-fallback trades those remaining costs for unchanged output; narrowing it needs separate
+and 400 pages of the other book contain U+0002. Their guarded chunking costs 52.69 and
+31.98 times a single page-encoding pass, so the original within-2-times target is not met on
+the books. The plain fixture is within that target (2.00 times, rounded). The conservative
+page fallback trades those remaining costs for unchanged output; narrowing it needs separate
 evidence. Reproduce with `scripts/benchmark_chunker.py`; demo inputs are not committed.

@@ -231,3 +231,33 @@ def test_guarded_model_equivalence(
     assert chunks == expected
     for chunk in chunks:
         assert len(tokenizer.encode(chunk.text)) == chunk.token_count <= window
+
+
+@pytest.mark.parametrize("order", ["reversed", "nested"])
+def test_non_monotonic_offsets_use_reference(
+    monkeypatch: pytest.MonkeyPatch, order: str
+) -> None:
+    class UnorderedTokenizer:
+        def encode(self, text: str) -> list[tuple[int, int]]:
+            offsets = FakeTokenizer().encode(text)
+            if order == "reversed":
+                return offsets[::-1]
+            # Starts remain ordered while ends move backwards within each word.
+            return [
+                span
+                for start, end in offsets
+                for span in [(start, end), (start, start + 1)]
+            ]
+
+    tokenizer = UnorderedTokenizer()
+    reference = Mock(wraps=structure._reference_chunk_page)
+    monkeypatch.setattr(structure, "_reference_chunk_page", reference)
+    settings = Settings(chunk_tokens=4, chunk_overlap=1)
+    page = Page(number=2, text="one two three four five", source="text_layer")
+    expected = reference_chunk_page(page, tokenizer, settings, 7)
+    chunks = chunk_page(page, tokenizer, settings, 7)
+    assert chunks == expected
+    reference.assert_called_once_with(page, tokenizer, settings, 7)
+    assert all(
+        len(tokenizer.encode(chunk.text)) == chunk.token_count <= 4 for chunk in chunks
+    )
