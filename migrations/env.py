@@ -12,7 +12,7 @@ def run(connection: Connection) -> None:
 if supplied := context.config.attributes.get("connection"):
     run(supplied)
 else:
-    engine = create_engine(get_settings().database_url, hide_parameters=True)
+    engine = create_engine(get_settings().migration_database_url, hide_parameters=True)
     try:
         with engine.connect() as connection:
             run(connection)

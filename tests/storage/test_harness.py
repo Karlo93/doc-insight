@@ -12,7 +12,7 @@ import pytest
 def test_temporary_databases_refuse_remote_hosts_before_connecting(
     monkeypatch: pytest.MonkeyPatch, temporary_database_factory, url: str, allowed: bool
 ) -> None:
-    monkeypatch.setenv("DI_DATABASE_URL", url)
+    monkeypatch.setenv("DI_MIGRATION_DATABASE_URL", url)
     monkeypatch.delenv("DI_ALLOW_REMOTE_TEST_DB", raising=False)
     # The default suite blocks connections, so a local URL fails only at connect time.
     expected = AssertionError if allowed else RuntimeError
@@ -24,7 +24,7 @@ def test_remote_hosts_need_an_explicit_opt_in(
     monkeypatch: pytest.MonkeyPatch, temporary_database_factory
 ) -> None:
     monkeypatch.setenv(
-        "DI_DATABASE_URL", "postgresql+psycopg://di:di@db.example.internal/di"
+        "DI_MIGRATION_DATABASE_URL", "postgresql+psycopg://di:di@db.example.internal/di"
     )
     monkeypatch.setenv("DI_ALLOW_REMOTE_TEST_DB", "1")
     with (
