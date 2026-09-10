@@ -64,13 +64,16 @@ flowchart TB
 | Worker, no HTTP port | Extract → analyze → embed → store | CLI pipeline exists; stream consumer, status transitions and DLQ land with lane 2 |
 | Object storage, ports 9000/9001 | Original bytes in `documents`, at `{tenant_id}/{sha256}` | Adapter lands with lane 1; MinIO deployment with lane 5 |
 | Redis, port 6379 | Event stream, worker group, DLQ and rate-limit buckets | Consumers/producers land with lanes 1, 2 and 4; deployment with lane 5 |
-| Postgres, port 5432 | Relational metadata and 384-dimensional pgvector HNSW index | Implemented; RLS/outbox/audit tables land with lane 1; full-text retrieval with lane 3 |
+| Postgres, port 5432 | Relational metadata and 384-dimensional pgvector HNSW index | Implemented; RLS/outbox land with lane 1; full-text retrieval with lane 3; `audit_events` delivery unassigned |
 | LLM | Mistral answer generation behind a provider boundary; extractive fallback | Lands with lane 3 |
 | Collector, port 4318; Prometheus; Tempo; Grafana | OTLP/HTTP ingestion, metrics, traces and dashboards | Lands with lane 5 |
 
 Ports above are internal contracts. The current Compose file publishes only Postgres on
 loopback with configurable `POSTGRES_PORT`. A target diagram does not imply public access
 to its internal services or automatic deployment of every component.
+`audit_events` is retained from the reference diagram, but no implementation or migration
+is assigned yet. Full-text retrieval is planned as a `tsvector` expression; a persisted
+search column or GIN index is not part of the initial query-service contract.
 
 ## Upload and processing path — lands with lanes 1, 2, 4 and 5
 
@@ -88,11 +91,13 @@ sequenceDiagram
     G->>I: Validated tenant/user headers + streamed body
     I->>O: Validate magic bytes and stream original with SSE
     I->>D: Commit uploaded document + outbox event atomically
-    I-->>C: 202 document_id, sha256, status
+    I-->>G: 202 document_id, sha256, status
+    G-->>C: Forward upload response
     R->>D: Read unpublished outbox rows
     R->>S: XADD di:documents, document.uploaded
     R->>D: Set published_at after publish
-    S->>W: XREADGROUP, group worker
+    W->>S: XREADGROUP, group worker
+    S-->>W: document.uploaded event
     W->>D: Mark processing
     W->>O: Read tenant-prefixed object
     W->>W: Extract → analyze → embed
@@ -101,7 +106,8 @@ sequenceDiagram
     C->>G: GET /documents/{id}
     G->>I: Tenant-scoped status request
     I->>D: Read tenant-owned document
-    I-->>C: Document status and metadata
+    I-->>G: Document status and metadata
+    G-->>C: Forward status response
 ```
 
 Duplicate `(tenant_id, sha256)` uploads return the existing ID with response status
@@ -138,7 +144,8 @@ sequenceDiagram
     else Evidence insufficient
         Q->>Q: Abstain
     end
-    Q-->>C: answer, confidence, abstained, sources, entities, retrieval, generation, latency_ms
+    Q-->>G: answer, confidence, abstained, sources, entities, retrieval, generation, latency_ms
+    G-->>C: Forward answer response
 ```
 
 Current `di search` only embeds a question and returns tenant-filtered cosine neighbors.
