@@ -34,9 +34,9 @@ route templates keep cardinality bounded and avoid raw question/filename labels.
 
 ## Automated checks and real-stack acceptance
 
-- Linux CI default suite: **464 passed**, 91 deselected, **92.71% coverage**.
+- Linux CI default suite: **473 passed**, 91 deselected, **92.74% coverage**.
   Local run before the three allowlist cases: 461 passed, 92.61%.
-- Real service integration tier: **68 passed**, 487 deselected (final CI).
+- Real service integration tier: **68 passed**, 496 deselected (final CI).
 - Pinned tokenizer/embedding model tier: **23 passed**, 529 deselected.
 - Ruff, formatting, strict mypy, Compose base/private validation and JavaScript
   syntax checks passed. Bandit and pip-audit passed; local workspace and spaCy wheel
@@ -114,3 +114,18 @@ The corrected Caddy deployment passed a repeat ten-minute run: 12,000 queries,
 zero errors/drops, p95 97.72 ms. Authentication-pool isolation was then stressed with
 forced five-second JWKS expiry during 100 offered query RPS; no authentication or
 HTTP errors occurred, while CPU-related client drops remained explicit.
+
+The gateway correction also passed a five-minute 20-RPS soak with deliberately
+frequent signing-key refresh: all 6,000 requests succeeded, p95 96.20 ms. Normal
+cache settings and OpenAI generation were restored and real-provider acceptance
+passed. Final code CI: [run 34472325159](https://github.com/Karlo93/doc-insight/actions/runs/34472325159).
+
+The repository remains private. The owner will perform any visibility change
+manually; no public application ingress or automatic publication was enabled.
+
+Application rollback was exercised locally against preserved storage: switch gateway
+and query to the preceding compatible candidate, pass the full HTTP/OpenAI acceptance,
+then restore the final images and pass acceptance again. The server's consistent
+backup already verified stop/start persistence. The final provider parser image is
+transferred from the local build; all four final runtime configurations and filesystem
+layer digests match the server copies. Existing server services were left in place.

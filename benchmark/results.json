@@ -302,5 +302,22 @@
       "p99_ms": 16391.87,
       "dispatch_p99_ms": 5.83
     }
+  ],
+  "auth_soak": [
+    {
+      "mode": "query",
+      "offered_rps": 20,
+      "duration_seconds": 300,
+      "elapsed_with_drain": 300.01,
+      "completed_rps": 20.0,
+      "statuses": {
+        "200": 6000
+      },
+      "success_percent": 100.0,
+      "p50_ms": 58.85,
+      "p95_ms": 96.2,
+      "p99_ms": 107.84,
+      "dispatch_p99_ms": 2.02
+    }
   ]
 }

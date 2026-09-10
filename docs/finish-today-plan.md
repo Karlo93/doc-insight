@@ -247,16 +247,16 @@ invented throughput guarantee. Set operational limits from the results.
 
 ## Completion checklist
 
-- [ ] OpenAI generation, citations, failure handling and usage/budget controls pass.
-- [ ] Frontend works locally and over the server's intended private access routes.
-- [ ] All provisioned tenants can upload/process/query; isolation tests pass.
-- [ ] Connected HTTP/async traces and useful dashboards are captured.
-- [ ] Unit/integration/model/browser/E2E checks pass with coverage evidence.
-- [ ] Load-test script, raw data, charts and report describe the final release.
-- [ ] Server deployment, encryption, backup/restore and restart/rollback are verified.
-- [ ] Documentation, rendered architecture and assignment evidence are complete.
-- [ ] User can try the final UI; release SHA matches both installations.
-- [ ] Publication is reserved for the owner; no automatic visibility change.
+- [x] OpenAI generation, citations, failure handling and usage/budget controls pass.
+- [x] Frontend works locally and over the server's intended private access routes.
+- [x] All provisioned tenants can upload/process/query; isolation tests pass.
+- [x] Connected HTTP/async traces and useful dashboards are captured.
+- [x] Unit/integration/model/browser/E2E checks pass with coverage evidence.
+- [x] Load-test script, raw data, charts and report describe the final release.
+- [x] Server deployment, encryption, backup/restore and restart verified; compatible application rollback exercised locally.
+- [x] Documentation, rendered architecture and assignment evidence are complete.
+- [x] User can try the private UI; transferred image contents match locally and on the server.
+- [x] Publication is reserved for the owner; no automatic visibility change.
 
 The API credential, server access and publication scope have been resolved. A same-day target does not
 make an unverified deployment, missing permission or failed test a completed deliverable.

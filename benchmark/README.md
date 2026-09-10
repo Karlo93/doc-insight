@@ -152,3 +152,9 @@ The final provider-parser correction handles malformed billing metadata with
 conservative reservation charging and extractive fallback. It does not alter the
 embedding/retrieval/extractive path used by these load tests. Valid live OpenAI
 responses are rechecked after promotion.
+
+With that forced-refresh setting retained, the corrected gateway then completed a
+300-second 20-RPS soak: **6,000/6,000 HTTP 200**, zero drops/errors, p50/p95/p99
+**58.85/96.20/107.84 ms**, dispatch p99 2.02 ms. The default signing-key cache and
+OpenAI secret configuration were restored afterwards, and real-provider acceptance
+passed. [Raw five-minute authentication soak](raw/auth-soak.json.gz).

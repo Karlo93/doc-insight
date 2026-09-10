@@ -56,6 +56,11 @@ Local and server OpenAI EN/HR/abstention acceptance passed. An encrypted snapsho
 restored into isolated containers: six original hashes, 29 chunks, 60 entities,
 usage, stream events and signing keys verified. Final images were exported from the
 local build and loaded on the private host. No internet-facing app was enabled.
+Follow-up review hardened malformed provider usage and preserved conservative
+charging. Signing-key refresh now has its own HTTP pool after overload exposed
+query-pool starvation. Repeat soaks passed 12,000/12,000 and 6,000/6,000 requests;
+compatible image rollback and return to the final version passed locally. The owner
+retains manual control of publication; repository visibility remains private.
 See [release evidence](evidence/README.md), [load report](../benchmark/README.md) and
 [ADR-0012](adr/0012-openai-private-delivery.md) for limitations and reproducibility.
 
