@@ -1,4 +1,4 @@
-# ADR-0008: Compose delivery, service images and Caddy TLS
+# ADR-0011: Compose delivery, service images and Caddy TLS
 
 Status: accepted. Date: 2026-09-10.
 
@@ -18,8 +18,9 @@ first startup would require network access and make startup less reproducible.
 Use Compose profiles for local delivery. Applications wait for healthy storage
 and a successful Alembic job. Run applications as UID/GID 10001 with a read-only
 root and a bounded temporary directory. Keep the existing worker CLI available.
-Unmerged service entrypoints stay in `pending`; a working infrastructure stack
-must not imply that the public application already works.
+A one-shot issuer job generates the development key pair into its own volume and
+publishes only the JWKS to the gateway; `make dev-token` mints tokens through that job,
+so no private key or host Python is needed to exercise the public API.
 
 Caddy terminates TLS with an internal CA for localhost. Persist its CA and
 certificates separately from the read-only configuration. It proxies health

@@ -12,7 +12,9 @@ def check() -> None:
         from redis import Redis
 
         with Redis.from_url(os.environ["DI_REDIS_URL"], socket_timeout=3) as client:
-            if client.ttl(f"di:worker:{socket.gethostname()}") <= 0:
+            # One key per consumer process: di:worker:{hostname}-{pid} (ADR-0009).
+            keys = list(client.scan_iter(f"di:worker:{socket.gethostname()}-*"))
+            if not any(client.ttl(key) > 0 for key in keys):
                 raise RuntimeError("Worker heartbeat expired")
     elif os.environ.get("DI_CONTAINER_ROLE") == "relay":
         # The relay has no HTTP/heartbeat contract; this is liveness only.

@@ -174,10 +174,10 @@ trust it only on the internal network. Tenant IDs are 1–64 characters from `[A
 the local stack already requires SSE-S3 for the `documents` bucket, so originals are encrypted
 at rest there. This does not assert encryption of every database, cache or telemetry volume.
 
-**Configured:** Caddy terminates public HTTPS using a local internal CA, with its
-service pending until gateway merges. Gateway-to-service and local MinIO traffic
-use HTTP inside the Compose network; end-to-end internal TLS is not a guarantee.
-See [deployment](deploy.md) for TLS, development keys and the production boundary.
+**Implemented:** Caddy terminates public HTTPS using a local internal CA in front of
+the gateway. Gateway-to-service and local MinIO traffic use HTTP inside the Compose
+network; end-to-end internal TLS is not a guarantee. See [deployment](deploy.md) for
+TLS, development keys and the production boundary.
 
 Operational logs contain IDs, counts, durations, statuses and error classes. They must not
 contain document text, questions, user filenames, vectors or tokens. Explicit CLI output
@@ -221,7 +221,7 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 | Redis Streams (relay and consumer implemented) | Separate message broker | Shares Redis with rate limiting and supplies consumer groups | Pending-work recovery, retention or throughput exceeds measured limits |
 | Multilingual MiniLM (implemented) | multilingual-e5-large | Existing 384-dimensional profile and 120/24 chunks pass the small regression set | Bilingual holdout recall@5 below 0.8; compare latency/memory before switching (ADR-0003) |
 | ONNX on CPU (implemented) | GPU inference | Current adapter runs without a PyTorch/GPU dependency | Measured inference throughput cannot meet the deployment budget |
-| Compose first (infrastructure, telemetry, application images and migration startup implemented; service runtimes pending) | Kubernetes | One local entry point with locked images and Caddy TLS ([ADR-0008](adr/0008-compose-service-images.md)) | Multi-node availability or orchestration requirements justify manifests |
+| Compose first (implemented: infrastructure, telemetry, service images, migration job and Caddy TLS) | Kubernetes | One local entry point with locked images and Caddy TLS ([ADR-0011](adr/0011-compose-service-images.md)) | Multi-node availability or orchestration requirements justify manifests |
 | Application filters + forced RLS (implemented, [ADR-0005](adr/0005-tenant-row-level-security.md)) | Schema per tenant | Shared schema with database enforcement of the same tenant boundary | Isolation or tenant-specific lifecycle requirements outweigh shared-schema operations |
 
 ## Further reading

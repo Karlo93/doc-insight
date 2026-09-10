@@ -43,9 +43,10 @@ One parameterized multi-stage Dockerfile keeps installation and runtime policy
 consistent across applications. Worker warms the existing pinned model loaders;
 runtime disables Hub access and uses a read-only root with temporary scratch space.
 Compose runs migrations before applications and uses separate database accounts.
-Caddy proxies health through TLS; unmerged runtimes and their proxy stay pending.
+Caddy proxies the gateway through TLS; a one-shot issuer job publishes the development
+JWKS from a private volume and mints demo tokens.
 Main-only publication attaches SBOM and provenance to each application image.
-ADR-0008 records the Compose and TLS choices and the deferred Kubernetes path.
+ADR-0011 records the Compose and TLS choices and the deferred Kubernetes path.
 
 ## Local infrastructure and telemetry
 

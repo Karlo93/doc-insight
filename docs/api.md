@@ -38,10 +38,11 @@ Errors use `{"error":{"code":"...","message":"..."}}`, without tracebacks or doc
 Internal ingest/query requests without `X-Tenant-Id` return 400; these services must not
 be exposed as an alternative public authentication path.
 
-## Planned curl sequence (Bash)
+## Curl sequence (Bash)
 
-Run after the upstream services and deployment are available. Set `BASE_URL` to the deployed public
-HTTPS endpoint and `TOKEN` to a minted development token; neither value is supplied here.
+With `make local-run` finished, set `BASE_URL=https://localhost` (add `-k` for the local
+certificate) and `TOKEN=$(make -s dev-token)`; against a deployment, use its public HTTPS
+endpoint and a token from its issuer.
 
 ```sh
 curl --fail-with-body -H "Authorization: Bearer $TOKEN" \

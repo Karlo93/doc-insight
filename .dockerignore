@@ -12,6 +12,7 @@
 !scripts/warm_models.py
 !scripts/container_health.py
 !scripts/container_entrypoint.sh
+!scripts/dev_issuer.py
 **/__pycache__
 **/*.pyc
 **/*.egg-info

@@ -18,13 +18,23 @@ make local-run
 make local-stop
 ```
 
-Choose free ports in `.env` first if needed. Application servers and the queue
-consumer currently await their service merges and use the `pending` profile.
-Today `local-run` builds all images, starts storage and telemetry, and migrates
-the database. It explicitly reports the public API as pending. After service
-activation it also verifies `curl -fkSs https://localhost/healthz` through Caddy.
-See [deployment](docs/deploy.md) for activation, TLS, image names, environment
-settings and the three authenticated public calls.
+Then, from the same directory:
+
+```sh
+TOKEN=$(make -s dev-token)
+curl -fkSs -H "Authorization: Bearer $TOKEN" -F file=@tests/fixtures/text_hr.pdf https://localhost/ingest
+curl -fkSs -H "Authorization: Bearer $TOKEN" https://localhost/documents/<document_id>
+curl -fkSs -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"question":"Gdje živi Marko Marić?","top_k":3}' https://localhost/query
+```
+
+Choose free ports in `.env` first if needed; `CADDY_HTTPS_PORT` changes the URL (Windows
+reserves some ranges, often port 80; see [deployment](docs/deploy.md#tls-and-public-calls)).
+`local-run` builds the four service images, starts storage, telemetry and the
+applications, migrates the database, publishes a development JWKS from a private
+issuer volume and checks `https://localhost/healthz` through Caddy. `dev-token` mints
+a token for tenant `demo`, the tenant the relay serves (`DI_DEMO_TENANT`). Wait for
+status `processed` before asking. See [deployment](docs/deploy.md) for TLS, image
+names, environment settings and the deferred Kubernetes path.
 
 ## CLI prerequisites
 

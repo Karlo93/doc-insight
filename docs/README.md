@@ -25,7 +25,7 @@
 - [ADR-0008](adr/0008-hybrid-query.md): hybrid retrieval with RRF, extractive fallback and confidence.
 - [ADR-0009](adr/0009-worker-heartbeat-identity.md): one progress heartbeat per consumer process.
 - [ADR-0010](adr/0010-gateway-identity-and-rate-limits.md): RS256/JWKS identity and fail-closed Redis quotas.
-- [ADR-0008](adr/0008-compose-service-images.md): Compose delivery, service images and Caddy TLS.
+- [ADR-0011](adr/0011-compose-service-images.md): Compose delivery, service images and Caddy TLS.
 - [Changelog](../CHANGELOG.md): changes awaiting release.
 - [Contributing](../CONTRIBUTING.md): branch/commit conventions, test tiers, budgets and review checklist.
 - [Security policy](../SECURITY.md): private reporting, supported versions and secrets handling.

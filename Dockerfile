@@ -44,6 +44,9 @@ COPY --from=builder --chown=10001:10001 /home/di/.cache/doc-insight/models /home
 COPY alembic.ini ./
 COPY migrations migrations
 COPY scripts/container_health.py /usr/local/lib/container_health.py
+COPY scripts/dev_issuer.py /usr/local/lib/dev_issuer.py
+# Named volumes inherit this ownership on first use, so the issuer job can write them.
+RUN mkdir -p /issuer /jwks && chown 10001:10001 /issuer /jwks
 COPY scripts/container_entrypoint.sh /usr/local/bin/container-entrypoint
 ENV DI_CONTAINER_APP=${APP} HF_HUB_OFFLINE=1
 USER 10001:10001

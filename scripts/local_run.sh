@@ -3,18 +3,23 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export MSYS_NO_PATHCONV=1
 compose=(docker compose --profile infra --profile telemetry --profile app)
-# Build pending images too: missing service entrypoints must not hide packaging failures.
 docker compose --profile '*' build gateway ingest query worker
 "${compose[@]}" up -d
 bash scripts/wait_local.sh
 "${compose[@]}" ps -a
-if "${compose[@]}" config --services | grep -qx caddy; then
-    binding=$(docker compose port caddy 443)
-    port=${binding##*:}
-    url="https://localhost:${port}"
-    curl -fkSs "$url/healthz"
-    printf '\nPublic URL: %s\ncurl -fkSs %s/healthz\n' "$url" "$url"
-else
-    printf '\nInfrastructure and migrations ready. Public API is pending service merges.\n'
-    printf 'After activation: https://localhost; curl -fkSs https://localhost/healthz\n'
-fi
+binding=$("${compose[@]}" port caddy 443)
+port=${binding##*:}
+url="https://localhost:${port}"
+curl -fkSs "$url/healthz"
+# Readiness needs Redis and both upstream /readyz answers; fresh services take a few seconds.
+for _ in $(seq 1 30); do
+    curl -fkSs -o /dev/null "$url/readyz" && break
+    sleep 2
+done
+curl -fkSs "$url/readyz"
+printf '\nPublic URL: %s\n' "$url"
+printf 'Health:   curl -fkSs %s/healthz\n' "$url"
+printf 'Token:    TOKEN=$(make -s dev-token)   # tenant demo, user alice\n'
+printf 'Upload:   curl -fkSs -H "Authorization: Bearer $TOKEN" -F file=@tests/fixtures/text_hr.pdf %s/ingest\n' "$url"
+printf 'Status:   curl -fkSs -H "Authorization: Bearer $TOKEN" %s/documents/<document_id>\n' "$url"
+printf 'Question: see docs/deploy.md for the query call once the status is processed\n'

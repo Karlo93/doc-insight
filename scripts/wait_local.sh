@@ -10,8 +10,8 @@ for service in "${services[@]}"; do
     while :; do
         state=$(docker inspect --format '{{.State.Status}}/{{.State.ExitCode}}/{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$id")
         case "$service:$state" in
-            migrate:exited/0/|minio-init:exited/0/|telemetry-tools:exited/0/) break ;;
-            migrate:*|minio-init:*|telemetry-tools:*) ;;
+            migrate:exited/0/|minio-init:exited/0/|telemetry-tools:exited/0/|dev-issuer:exited/0/) break ;;
+            migrate:*|minio-init:*|telemetry-tools:*|dev-issuer:*) ;;
             *:running/0/healthy) break ;;
         esac
         if [[ "$state" == exited/* || "$state" == dead/* || "$state" == */unhealthy || $SECONDS -ge $deadline ]]; then
