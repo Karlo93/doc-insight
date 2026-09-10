@@ -65,19 +65,25 @@ def payload(settings: Settings, question: str, passages: list[str]) -> dict[str,
 
 def response_usage(data: dict[str, Any], request_id: str | None) -> TokenUsage | None:
     """Extract billing independently so invalid answer output still gets accounted."""
+    if not isinstance(data, dict):
+        raise ProviderFailure("invalid_output")
     raw_usage = data.get("usage")
-    return (
-        TokenUsage(
+    if raw_usage is None:
+        return None
+    try:
+        details = raw_usage.get("input_tokens_details") or {}
+        usage = TokenUsage(
             input_tokens=raw_usage["input_tokens"],
             output_tokens=raw_usage["output_tokens"],
-            cached_input_tokens=raw_usage.get("input_tokens_details", {}).get(
-                "cached_tokens", 0
-            ),
+            cached_input_tokens=details.get("cached_tokens", 0),
             request_id=request_id,
         )
-        if isinstance(raw_usage, dict)
-        else None
-    )
+        if usage.cached_input_tokens > usage.input_tokens:
+            raise ValueError("Invalid cache usage")
+        return usage
+    except (ValueError, KeyError, TypeError, AttributeError) as exc:
+        # Partial billing is unknown, not zero; the ledger charges the reservation.
+        raise ProviderFailure("invalid_usage") from exc
 
 
 def parse_response(
@@ -110,7 +116,7 @@ def parse_response(
         return result.model_copy(
             update={"cited_passage_indexes": indexes, "usage": usage}
         )
-    except (ValueError, KeyError, TypeError) as exc:
+    except (ValueError, KeyError, TypeError, AttributeError) as exc:
         raise ProviderFailure("invalid_output", usage) from exc
 
 

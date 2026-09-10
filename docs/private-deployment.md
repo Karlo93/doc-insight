@@ -1,6 +1,7 @@
 # Private deployment
 
-Public source, private application. Use the base Compose file plus
+Eventual public source, private application. Publication is manual and belongs to
+the owner; keep the repository private until then. Use the base Compose file plus
 `deploy/compose.private.yml` on Linux. The override removes database, Redis, MinIO,
 collector, Tempo and Prometheus host ports. Caddy and Grafana bind loopback only.
 Query and worker have CPU/memory caps to protect other applications on the host.

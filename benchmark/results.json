@@ -267,5 +267,40 @@
       "p99_ms": 11982.81,
       "dispatch_p99_ms": 3.17
     }
+  ],
+  "release_soak": [
+    {
+      "mode": "query",
+      "offered_rps": 20,
+      "duration_seconds": 600,
+      "elapsed_with_drain": 600.0,
+      "completed_rps": 20.0,
+      "statuses": {
+        "200": 12000
+      },
+      "success_percent": 100.0,
+      "p50_ms": 61.37,
+      "p95_ms": 97.72,
+      "p99_ms": 107.92,
+      "dispatch_p99_ms": 2.07
+    }
+  ],
+  "auth_overload": [
+    {
+      "mode": "query",
+      "offered_rps": 100,
+      "duration_seconds": 60,
+      "elapsed_with_drain": 69.27,
+      "completed_rps": 21.15,
+      "statuses": {
+        "client_dropped": 4535,
+        "200": 1465
+      },
+      "success_percent": 24.42,
+      "p50_ms": 11622.68,
+      "p95_ms": 14919.69,
+      "p99_ms": 16391.87,
+      "dispatch_p99_ms": 5.83
+    }
   ]
 }

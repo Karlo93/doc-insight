@@ -1,8 +1,8 @@
 # Online readiness and API credentials
 
 The application now has a browser frontend and OpenAI generation, with per-tenant
-token accounting and daily budgets. The target is a **public source repository and
-a private application**. Local and private-server HTTP acceptance have passed;
+token accounting and daily budgets. The eventual target is public source and a
+private application. **Both remain private until the owner publishes manually.** Local and private-server HTTP acceptance have passed;
 load and recovery evidence are separate release checks. The original
 [assignment review](assignment-review.md) records the pre-change baseline.
 Use the [private deployment runbook](private-deployment.md) for operation.

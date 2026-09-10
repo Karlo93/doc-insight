@@ -40,6 +40,9 @@ under a version and an ISO date when a release is cut.
 
 - Speed up chunking with one page encoding and a Unicode guard that preserves the original
   chunker for unsafe pages; chunk output and pipeline version 6 remain unchanged.
+- Treat malformed provider billing as unknown usage and preserve conservative budget
+  charging; clear stale browser connection errors after a successful refresh.
+
 - Isolate signing-key HTTP connections from saturated query traffic and retire
   Caddy upstream idle sockets before Uvicorn closes them.
 

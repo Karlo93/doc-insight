@@ -96,7 +96,7 @@ uses private HTTPS, provider traffic uses HTTPS, and disk/backup data is encrypt
 
 ## Image identity
 
-The four locally built images were exported together and loaded on the private
+The initial four locally built images were exported together and loaded on the private
 server; [image evidence](images.json) records both engines' IDs, exact filesystem
 layer digests and a normalized runtime-configuration hash. Docker's save/load path
 normalizes null/absent `Cmd`, `Volumes` and `OnBuild` fields, producing different
@@ -104,6 +104,13 @@ image IDs between these engines. Every filesystem layer and non-null runtime
 configuration value matches; these are transferred builds, not independent rebuilds.
 The 120-second baseline used the earlier candidate query image
 `sha256:aa4a27a05f8600e07578d57711aedc3f2f4b03c27c2d8508a9c96371e0e25877`.
-Final-image confirmation is retained separately in the benchmark data.
+Final-image confirmation is retained separately in the benchmark data. The later
+gateway-only authentication-pool fix was also built locally and transferred;
+unchanged service images retain identical layers.
 
 CI on the initial release commit passed all three jobs: [run 34471097109](https://github.com/Karlo93/doc-insight/actions/runs/34471097109). Subsequent fixes receive their own CI run.
+
+The corrected Caddy deployment passed a repeat ten-minute run: 12,000 queries,
+zero errors/drops, p95 97.72 ms. Authentication-pool isolation was then stressed with
+forced five-second JWKS expiry during 100 offered query RPS; no authentication or
+HTTP errors occurred, while CPU-related client drops remained explicit.

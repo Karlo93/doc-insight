@@ -1,9 +1,9 @@
 [
   {
-    "image": "ghcr.io/karlo93/doc-insight-gateway:release-20260910",
-    "local_image_id": "sha256:0ecd991902ff486b6d8876fb02875c7dd4a77ad52a111e183f06d07af836ad57",
-    "server_image_id": "sha256:a4aa1ae54ecc5fd5ca7628c9fa9bb64b6bd733cda9c7d50a60b57437e3b3f3b9",
-    "normalized_runtime_config_and_rootfs_sha256": "84d38fa29be2eed87d1e19471bb0c4f7c0d418bd6c369538bc08b3bccc3b4d9d",
+    "image": "ghcr.io/karlo93/doc-insight-gateway:release-20260910-auth",
+    "local_image_id": "sha256:36037328867591048c8b05c4736eeb92a169743b5dfddc4c7249c16b88f9b6bd",
+    "server_image_id": "sha256:34d60dbf851fb2d8215a86f48b768e19429d609b8c2d33450586f1025a16241c",
+    "normalized_runtime_config_and_rootfs_sha256": "b33d62bb15a091af8bfddee92833ee01a139e7d9f03c02f44ea2b27e88d60b8e",
     "rootfs_layers": [
       "sha256:66462cc862fe2053b9863fefa3866e07bb5dfb06f6b3ce3177cc096e4021aabe",
       "sha256:bbbb19fa59e928e9d2412742b476b97f157cd95304b1f9fd3a82d221f661acde",
@@ -12,14 +12,14 @@
       "sha256:aef24adf5b956e487954bf18c78dfb13d0706562ffd9d969670a3775d8060b40",
       "sha256:fb9e3fd2b6cce3ad93dde803f640bfa59b463eef0a2f1f644bcd066337cf2366",
       "sha256:000e405cdcb97687a705de911018106789b823cec9363dbd92394c9f57d85666",
-      "sha256:66f44bc21cac5d3902f34ebe9daa387567c133dd1518d19b817b87852b874a3f",
-      "sha256:68a00ab8a0fd2a8f3497517a002d40768b6ba1d40ced148a297836c6a4a47eca",
-      "sha256:bf0a46be5a0d585729a373d06114f1fe099dcf4882fcd9e4ff986aaa70522cd0",
-      "sha256:62e993a740b7feba2d95abd13a4347ff72abc66a8071d38dafc1841000609b81",
-      "sha256:9dec0b8e82d0f8b857a69e91dda55e44a0ececbc03cfd086ab5d904b140e52ef",
-      "sha256:78773b1ceb6fca2d5e6c9d1779fbf11f009cd9ac1b07e51fa9a292c3c2c015ff",
-      "sha256:793b5770cd2d724e8c232c3f853ec748e24b52abbaac9007b0b5310bff360a40",
-      "sha256:864b4006bdcb4640bad6e6c140531e9f3a455b4367d011045a0bdb5887776ca7"
+      "sha256:7737821fe86c8b4acb89740d0c90bc36c8a115c49e6f4746b2405d58188a8764",
+      "sha256:36af25be84a7d3f95a1f9616f27d8f2c40001b9fc5cd0d0c86a4e60b39222827",
+      "sha256:9c902f90bbe3bb159be1b9bd4b704f5d1aa909d741852845376648f67ed266f3",
+      "sha256:0729bfc52ea4caa47a0e17c606d98fbb6f8bfd927b511bc2a6c436cdd199efb1",
+      "sha256:0c0be4f570c370ea9cdc71a2d5faf66ad71fdd9cc842d8b39aa52dada004663c",
+      "sha256:5d796d649d23ccd68b3c0a10564718196305e0b6f06d3cc987c6be0290e989dd",
+      "sha256:ed71b9903612bd39df0505a2d278bdeefa18cb082b863f43c4b83bffde3f21ed",
+      "sha256:7f65c6dccbb9465ae6d17fa6dfa55ec0747e7c573cd2fd23cf31ed2eb1cf4f68"
     ],
     "matching_runtime_config": true,
     "matching_rootfs": true

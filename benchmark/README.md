@@ -129,4 +129,26 @@ fetch, which fails authentication closed. The observed timeout matches that path
 this is a diagnosis from timing and connection ownership, not a captured exception
 trace. The gateway now gives identity refresh its own reusable HTTP client and closes
 both clients at shutdown. Regression verification records their separate ownership.
-The subsequent overload/soak results are recorded below after completion.
+The subsequent verification is recorded below.
+
+## Corrective verification
+
+After the Caddy timeout correction, the full 600-second 20-RPS soak returned
+**12,000 / 12,000 HTTP 200**, zero client drops and zero HTTP errors. p50/p95/p99
+were **61.37 / 97.72 / 107.92 ms**, with dispatch p99 2.07 ms.
+[Raw repeat soak](raw/release-soak.json.gz) preserves every sample.
+
+After separating authentication's connection pool, signing-key cache/refresh were
+forced to 5/1 seconds during a 60-second 100-RPS query overload. It returned 1,465
+HTTP 200 and 4,535 client drops, with **no 401, 429 or 5xx**. Throughput was 21.15 RPS
+including drain and successful p95 was 14.92 seconds. This does not remove CPU
+saturation; it verifies authentication continues independently of that saturation.
+[Raw authentication stress](raw/auth-overload.json.gz) is separate from the baseline.
+To force this condition, set `DI_JWKS_CACHE_SECONDS=5 DI_JWKS_REFRESH_SECONDS=1`
+when recreating the gateway with the load overlay; restore the default 300/5 values
+and the provider secret overlay afterwards.
+
+The final provider-parser correction handles malformed billing metadata with
+conservative reservation charging and extractive fallback. It does not alter the
+embedding/retrieval/extractive path used by these load tests. Valid live OpenAI
+responses are rechecked after promotion.

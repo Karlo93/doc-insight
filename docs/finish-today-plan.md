@@ -10,8 +10,8 @@ A usable browser application works on the developer machine and the private
 deployment server over the intended LAN/Tailscale routes. It uploads documents,
 shows processing progress, and answers questions using OpenAI with inspectable
 sources. Traces connect the services. Tests, load results, deployment instructions
-and assignment evidence are complete. Publication follows successful local and
-server acceptance, as requested.
+and assignment evidence are complete. The repository and app remain private. The owner will perform any publication
+manually after reviewing the result.
 
 Keep the existing Python services, PostgreSQL/pgvector, Redis, object storage and
 CPU embeddings. Replace Mistral generation with OpenAI; there is no need to migrate
@@ -37,7 +37,8 @@ identity-management product are not needed to satisfy this delivery.
 
 1. The supplied private credential authenticated successfully; keep it mounted only
    into query. Never put its value in chat, source or the browser.
-2. Confirmed scope: **public repository, private app**. Private HTTPS over Tailscale;
+2. Updated owner instruction: **keep everything private until manual publication**.
+   The eventual source target is public; the app remains private. Private HTTPS over Tailscale;
    no internet-facing application, router exposure or Funnel.
 3. Use `gpt-4.1-mini-2025-04-14`, verified against English/Croatian fixture answers
    and unsupported-question abstention. Keep CPU embeddings unchanged.
@@ -255,7 +256,7 @@ invented throughput guarantee. Set operational limits from the results.
 - [ ] Server deployment, encryption, backup/restore and restart/rollback are verified.
 - [ ] Documentation, rendered architecture and assignment evidence are complete.
 - [ ] User can try the final UI; release SHA matches both installations.
-- [ ] Publication scope is confirmed and its preconditions pass before publication.
+- [ ] Publication is reserved for the owner; no automatic visibility change.
 
 The API credential, server access and publication scope have been resolved. A same-day target does not
 make an unverified deployment, missing permission or failed test a completed deliverable.

@@ -14,6 +14,7 @@ from doc_insight.query.openai_provider import (
 )
 from doc_insight.query.settings import Settings
 from doc_insight.testing.generation import FakeGenerator
+from doc_insight.testing.usage import InMemoryUsageLedger
 
 
 def response(answer="Vaccines stay in refrigerators.", indexes=None, supported=True):
@@ -191,3 +192,42 @@ def test_no_key_no_http():
             .fallback_reason
             == "disabled"
         )
+
+
+@pytest.mark.parametrize(
+    "usage",
+    [
+        {},
+        {"input_tokens": 10},
+        [],
+        {"input_tokens": -1, "output_tokens": 2},
+        {"input_tokens": 10, "output_tokens": 2, "input_tokens_details": [1]},
+    ],
+)
+def test_malformed_usage_falls_back_and_charges_unknown_reservation(usage):
+    data = response()
+    data["usage"] = usage
+    ledger = InMemoryUsageLedger(20_000)
+    with httpx.Client(
+        transport=httpx.MockTransport(lambda _: httpx.Response(200, json=data))
+    ) as client:
+        primary = OpenAIGenerator(Settings(openai_api_key="test"), client)
+        result, info = FallbackGenerator(primary, "model", ledger).generate(
+            "vaccines", ["Vaccines stay in refrigerators."], tenant="demo"
+        )
+    assert result.supported and info.provider == "extractive"
+    assert info.fallback_reason == "invalid_usage" and info.usage is None
+    summary = ledger.summary("demo")
+    assert summary["charged_tokens"] > 8192 and summary["reserved_tokens"] == 0
+
+
+def test_null_optional_usage_details_preserves_known_totals():
+    data = response()
+    data["usage"]["input_tokens_details"] = None
+    assert parse_response(data, 1, None).usage.total == 150
+
+
+@pytest.mark.parametrize("data", [None, [], {"status": "completed", "output": [None]}])
+def test_invalid_response_shape_is_provider_failure(data):
+    with pytest.raises(ProviderFailure, match="invalid_output"):
+        parse_response(data, 1, None)

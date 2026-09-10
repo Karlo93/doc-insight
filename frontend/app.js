@@ -6,9 +6,15 @@ let token = "",
     offset = 0,
     documents = [],
     poll = null,
+    refreshFailed = false,
     generation = 0;
 const notice = (message = "") => {
+    refreshFailed = false;
     $("notice").textContent = message;
+};
+const showRefreshFailure = (error) => {
+    notice(error.message);
+    refreshFailed = true;
 };
 function disconnect() {
     token = "";
@@ -56,6 +62,7 @@ async function refresh() {
         api("/usage"),
     ]);
     if (current !== generation || !token) return;
+    if (refreshFailed) notice();
     documents = data.items;
     renderDocuments(documents);
     $("document-count").textContent =
@@ -82,7 +89,7 @@ $("auth-form").addEventListener("submit", async (event) => {
         $("token").value = "";
         poll = setInterval(() => {
             if (token && !document.hidden)
-                refresh().catch((e) => notice(e.message));
+                refresh().catch(showRefreshFailure);
         }, 6000);
     } catch (error) {
         token = "";
@@ -95,7 +102,7 @@ $("signout").addEventListener("click", () => {
 });
 $("refresh").addEventListener("click", () => {
     notice();
-    refresh().catch((e) => notice(e.message));
+    refresh().catch(showRefreshFailure);
 });
 for (const [id, delta] of [
     ["prev", -20],
@@ -103,7 +110,7 @@ for (const [id, delta] of [
 ])
     $(id).addEventListener("click", () => {
         offset += delta;
-        refresh().catch((e) => notice(e.message));
+        refresh().catch(showRefreshFailure);
     });
 $("file").addEventListener("change", () => {
     $("upload-button").disabled = !$("file").files.length;
