@@ -17,6 +17,11 @@
 - [ADR-0005](adr/0005-tenant-row-level-security.md): forced row-level security and separate runtime/migration roles.
 - [ADR-0006](adr/0006-local-infrastructure.md): independent infrastructure and telemetry Compose profiles.
 - [Changelog](../CHANGELOG.md): changes awaiting release.
+- [Contributing](../CONTRIBUTING.md): branch/commit conventions, test tiers, budgets and review checklist.
+- [Security policy](../SECURITY.md): private reporting, supported versions and secrets handling.
+- [PR template](../.github/pull_request_template.md): required review sections and eleven checks.
+- [Bug report](../.github/ISSUE_TEMPLATE/bug_report.md): minimal reproduction and sanitized evidence.
+- [Task template](../.github/ISSUE_TEMPLATE/task.md): scope, acceptance criteria and validation.
 - [Fixture font provenance](../scripts/fonts/readme.md): generated fixture font and its license.
 
 Service runbooks and the final demo walkthrough will be linked here when their implementations

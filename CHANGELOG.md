@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+Notable changes are recorded here using Keep a Changelog sections. Unreleased entries move
+under a version and an ISO date when a release is cut.
+
+## [Unreleased]
+
+### Added
 
 - Document the current CLI setup, target architecture and planned API contracts.
 - Add independent infrastructure and telemetry Compose profiles, encrypted local S3,
@@ -10,4 +15,10 @@
 - Add optional OTLP traces, stage/request duration metrics and document outcome counts.
 - Persist processed documents, chunks and entities atomically in tenant-scoped Postgres tables.
 - Add `di index`, `di show`, `di search`, database lifecycle targets and integration CI.
+- Add contribution standards, code ownership, PR/issue templates and a security policy.
+
+### Changed
+
 - Pipeline version 6 carries each page's language on its chunks.
+
+[Unreleased]: https://github.com/Karlo93/doc-insight/commits/main
