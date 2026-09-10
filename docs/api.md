@@ -5,7 +5,7 @@ includes a captured offline response. The internal [ingest service](ingest.md) i
 `POST /ingest`, `GET /documents/{id}` and the outbox relay on port 8001. The public [gateway](gateway.md)
 authenticates, rate-limits and forwards these routes. Examples below describe the public contract; they are not captured responses.
 Run the stack with `make local-run` ([deployment](deploy.md)), or index documents for
-query with the [working CLI](../README.md#local-cli-setup).
+query with the [working CLI](pipeline.md#storage-and-search).
 
 ## Public HTTP contract
 
