@@ -1,7 +1,13 @@
-.PHONY: setup lint typecheck test test-models test-integration db-up db-down infra-up infra-down telemetry-up telemetry-down migrate audit check
+.PHONY: setup lint typecheck test test-models test-integration db-up db-down infra-up infra-down telemetry-up telemetry-down migrate audit check local-run local-stop
 
 setup:
 	uv sync --locked --all-packages
+
+local-run:
+	bash scripts/local_run.sh
+
+local-stop:
+	docker compose --profile infra --profile telemetry --profile app --profile pending down
 
 lint:
 	uv run --locked --all-packages ruff check .

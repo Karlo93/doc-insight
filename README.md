@@ -7,7 +7,26 @@ The internal ingest and query services accept uploads and return cited answers o
 `di worker run` consumes uploaded originals from Redis with crash recovery; see the [worker runbook](docs/worker.md).
 The authenticating gateway is the next service layer; the [architecture](docs/architecture.md) distinguishes implemented behavior from planned contracts.
 
-## Prerequisites
+## Start with Docker
+
+With Docker Compose v2.24+, Buildx, GNU Make, Bash and curl installed:
+
+```sh
+git clone https://github.com/Karlo93/doc-insight.git
+cd doc-insight
+make local-run
+make local-stop
+```
+
+Choose free ports in `.env` first if needed. Application servers and the queue
+consumer currently await their service merges and use the `pending` profile.
+Today `local-run` builds all images, starts storage and telemetry, and migrates
+the database. It explicitly reports the public API as pending. After service
+activation it also verifies `curl -fkSs https://localhost/healthz` through Caddy.
+See [deployment](docs/deploy.md) for activation, TLS, image names, environment
+settings and the three authenticated public calls.
+
+## CLI prerequisites
 
 - Git, uv, Python 3.12 (selected by uv), GNU Make and Go 1.24.11+ for the security gate.
 - Docker with Compose v2 for Postgres/pgvector, Redis, MinIO and the optional telemetry stack; Bash (Git Bash on Windows) for the smoke script.
@@ -16,12 +35,11 @@ The authenticating gateway is the next service layer; the [architecture](docs/ar
 
 See [Windows and WSL/Linux setup](docs/pipeline.md#run-it-wsl2linux) for OCR installation.
 
-## Local setup
+## Local CLI setup
 
-`make local-run` and the application images are not available yet (they land with lane 5's
-final PR). The working entry point is the CLI plus the Compose `infra` profile (Postgres/pgvector,
-Redis, MinIO); the `telemetry` profile is optional. See [local stack](docs/local-stack.md) for
-ports, profiles and encryption. Run from a clone:
+The host CLI can use the Compose `infra` profile (Postgres/pgvector, Redis,
+MinIO) without building images; telemetry is optional. See [local stack](docs/local-stack.md)
+for ports, profiles and encryption. Run from a clone:
 
 ```sh
 git clone https://github.com/Karlo93/doc-insight.git
@@ -78,10 +96,10 @@ Replace `<document-id>` before running. Re-indexing the same bytes for `demo` pr
 the UUID and replaces the stored output atomically; it still runs extraction and inference.
 `make db-down` stops the `infra` profile and keeps its named volumes.
 
-Compose runs infrastructure only, all bound to loopback: Postgres, Redis and MinIO in `infra`,
+Compose publishes infrastructure on loopback: Postgres, Redis and MinIO in `infra`,
 and the OpenTelemetry collector, Prometheus, Tempo and Grafana in `telemetry`
-(`make telemetry-up`). The optional [gateway overlay](docs/gateway.md#try-it-yourself)
-adds a development application image. Caddy and Kubernetes deployment remain pending.
+(`make telemetry-up`). `make local-run` builds the application images and starts the whole
+stack behind Caddy TLS ([deployment](docs/deploy.md)). Kubernetes manifests are wave B.
 
 ## API status and examples
 

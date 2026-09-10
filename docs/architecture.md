@@ -57,7 +57,7 @@ flowchart TB
 | Component | Responsibility | Status on main |
 | --- | --- | --- |
 | Client / SDK | Upload files and ask questions | CLI exists; browser/SDK/Streamlit box is a target interface, no shipped client |
-| Caddy | Public TLS termination | Lands with lane 5 |
+| Caddy | Public TLS termination | Implemented in Compose with an internal CA for localhost, proxying to the gateway ([deployment](deploy.md)) |
 | Gateway, port 8000 | Validate RS256 JWT against JWKS; derive tenant/user; rate-limit and proxy | Implemented; [runbook](gateway.md) |
 | Ingest, port 8001 | Stream validated uploads to objects; create document/outbox transaction; status reads and relay | Implemented; [upload, status and relay](ingest.md) |
 | Query, port 8002 | Retrieve tenant-owned evidence; generate cited answer or abstain | Implemented; [operation and confidence](query.md) |
@@ -174,10 +174,10 @@ trust it only on the internal network. Tenant IDs are 1–64 characters from `[A
 the local stack already requires SSE-S3 for the `documents` bucket, so originals are encrypted
 at rest there. This does not assert encryption of every database, cache or telemetry volume.
 
-**Lands with lane 5:** Caddy terminates public HTTPS. Gateway-to-service traffic is planned
-as HTTP inside the isolated network; end-to-end internal TLS is not an implemented guarantee.
-Object transport uses the configured SSL setting. Deployment documentation must specify
-which links use TLS and how keys for server-side encryption are supplied.
+**Configured:** Caddy terminates public HTTPS using a local internal CA, with its
+service pending until gateway merges. Gateway-to-service and local MinIO traffic
+use HTTP inside the Compose network; end-to-end internal TLS is not a guarantee.
+See [deployment](deploy.md) for TLS, development keys and the production boundary.
 
 Operational logs contain IDs, counts, durations, statuses and error classes. They must not
 contain document text, questions, user filenames, vectors or tokens. Explicit CLI output
@@ -221,7 +221,7 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 | Redis Streams (relay and consumer implemented) | Separate message broker | Shares Redis with rate limiting and supplies consumer groups | Pending-work recovery, retention or throughput exceeds measured limits |
 | Multilingual MiniLM (implemented) | multilingual-e5-large | Existing 384-dimensional profile and 120/24 chunks pass the small regression set | Bilingual holdout recall@5 below 0.8; compare latency/memory before switching (ADR-0003) |
 | ONNX on CPU (implemented) | GPU inference | Current adapter runs without a PyTorch/GPU dependency | Measured inference throughput cannot meet the deployment budget |
-| Compose first (infrastructure and telemetry profiles implemented; application images planned) | Kubernetes | Local infrastructure lifecycle already works ([ADR-0006](adr/0006-local-infrastructure.md)); the full stack keeps one local entry point | Multi-node availability or orchestration requirements justify manifests |
+| Compose first (infrastructure, telemetry, application images and migration startup implemented; service runtimes pending) | Kubernetes | One local entry point with locked images and Caddy TLS ([ADR-0008](adr/0008-compose-service-images.md)) | Multi-node availability or orchestration requirements justify manifests |
 | Application filters + forced RLS (implemented, [ADR-0005](adr/0005-tenant-row-level-security.md)) | Schema per tenant | Shared schema with database enforcement of the same tenant boundary | Isolation or tenant-specific lifecycle requirements outweigh shared-schema operations |
 
 ## Further reading

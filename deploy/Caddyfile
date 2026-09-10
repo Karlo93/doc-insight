@@ -1,0 +1,8 @@
+{
+	skip_install_trust
+}
+
+https://localhost {
+	tls internal
+	reverse_proxy gateway:8000
+}
