@@ -3,6 +3,7 @@
 - [Project README](../README.md): local setup, CLI commands, test tiers and repository layout.
 - [Architecture](architecture.md): system and sequence diagrams, responsibilities, boundaries and trade-offs.
 - [Query service](query.md): implemented retrieval, cited answers, offline operation and settings.
+- [Ingest service](ingest.md): upload validation, object storage, outbox relay and status reads.
 - [API contract](api.md): upload, status, question and stream payloads; delivery status is explicit.
 - [Configuration](configuration.md): current settings tables, defaults and Compose versus Python environment handling.
 - [Pipeline](pipeline.md): implemented extraction, OCR, structure, embeddings, storage and retrieval.
@@ -17,6 +18,8 @@
 - [ADR-0004](adr/0004-opentelemetry.md): OpenTelemetry with OTLP export to a collector.
 - [ADR-0005](adr/0005-tenant-row-level-security.md): forced row-level security and separate runtime/migration roles.
 - [ADR-0006](adr/0006-local-infrastructure.md): independent infrastructure and telemetry Compose profiles.
+- [ADR-0007](adr/0007-transactional-outbox.md): transactional outbox and Redis Streams delivery.
+- [ADR-0008](adr/0008-hybrid-query.md): hybrid retrieval with RRF, extractive fallback and confidence.
 - [Changelog](../CHANGELOG.md): changes awaiting release.
 - [Contributing](../CONTRIBUTING.md): branch/commit conventions, test tiers, budgets and review checklist.
 - [Security policy](../SECURITY.md): private reporting, supported versions and secrets handling.

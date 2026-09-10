@@ -67,7 +67,7 @@ errors. Windows asyncio's loopback socketpair is allowed only inside its own con
 ordinary sockets and libpq remain blocked in unit tests. Cached MiniLM evaluation keeps
 recall@5 1.000 and MRR 0.917. Full-text contributes no hits for these natural-language
 questions; six of eight extractive answers contain the expected substring, one abstains
-and one misses. The confidence heuristic is not calibrated correctness. ADR-0007
+and one misses. The confidence heuristic is not calibrated correctness. ADR-0008
 records the formula, limitations and deferred GIN index. No hosted calls were needed.
 The tokenizer cache-isolation test now seeds its temporary cache from the configured
 model cache, so model tests can run disconnected after their artifacts are provisioned.

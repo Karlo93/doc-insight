@@ -192,16 +192,19 @@ def test_settings_validate(setting, value):
         Settings(**{setting: value})
 
 
-def test_unexpected_errors_keep_error_envelope(service):
+def test_unexpected_errors_keep_error_envelope(service, caplog):
     service.query = Mock(side_effect=TypeError("private document text"))
     client = TestClient(create_app(service), raise_server_exceptions=False)
-    response = client.post(
-        "/query", headers={"X-Tenant-Id": "demo"}, json={"question": "x"}
-    )
+    with caplog.at_level("WARNING", logger="doc_insight.query.main"):
+        response = client.post(
+            "/query", headers={"X-Tenant-Id": "demo"}, json={"question": "x"}
+        )
     assert response.status_code == 500
     assert response.json() == {
         "error": {"code": "internal_error", "message": "Query operation failed"}
     }
+    assert "route=/query" in caplog.text and "error=TypeError" in caplog.text
+    assert "private" not in caplog.text
 
 
 def test_entities_deduplicate_normalized_spelling_per_document(service):

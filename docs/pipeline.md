@@ -355,7 +355,7 @@ See [font provenance](../scripts/fonts/readme.md) and [ADR-0001](adr/0001-text-e
 
 ## Not yet
 
-Queue, ingest HTTP service, gateway/JWT and application containers remain later work.
+Stream consumer, gateway/JWT and application containers remain later work.
 Infrastructure and telemetry have independent Compose profiles.
 M2 performance follow-ups are still pending; the bilingual fixtures and real Croatian smoke
 test do not replace a representative retrieval-quality benchmark.

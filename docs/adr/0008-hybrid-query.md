@@ -1,4 +1,4 @@
-# ADR-0007: Hybrid retrieval with RRF, extractive fallback and confidence
+# ADR-0008: Hybrid retrieval with RRF, extractive fallback and confidence
 
 Status: accepted. Date: 2026-09-10.
 

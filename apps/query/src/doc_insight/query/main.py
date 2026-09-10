@@ -1,5 +1,6 @@
 """Internal HTTP boundary. The gateway alone authenticates tenant headers."""
 
+import logging
 import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -13,6 +14,8 @@ from fastapi import FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
+
+logger = logging.getLogger(__name__)
 
 
 def error(status: int, code: str, message: str) -> JSONResponse:
@@ -50,6 +53,12 @@ async def validation_error(request: Request, exc: Exception) -> JSONResponse:
 
 
 async def unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+    # Class and route template only; the message may carry the question.
+    logger.warning(
+        "request failed route=%s error=%s",
+        getattr(request.scope.get("route"), "path", "unmatched"),
+        type(exc).__name__,
+    )
     return error(500, "internal_error", "Query operation failed")
 
 

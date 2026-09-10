@@ -71,7 +71,7 @@ requires at least 30% of the question's distinct content words in that window.
 Ties choose the earliest window. This lexical rule can miss paraphrases and Croatian
 inflections and can accept a passage sharing words without answering the question.
 The eight-question cached-model run returned six exact answer substrings, abstained
-once and missed once; see [ADR-0007](adr/0007-hybrid-query.md).
+once and missed once; see [ADR-0008](adr/0008-hybrid-query.md).
 
 ## Settings
 
