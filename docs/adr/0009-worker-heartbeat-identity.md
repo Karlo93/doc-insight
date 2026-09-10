@@ -1,4 +1,4 @@
-# ADR-0008: A heartbeat per worker consumer
+# ADR-0009: A heartbeat per worker consumer
 
 Status: accepted.
 

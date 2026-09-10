@@ -21,7 +21,7 @@
 - [ADR-0006](adr/0006-local-infrastructure.md): independent infrastructure and telemetry Compose profiles.
 - [ADR-0007](adr/0007-transactional-outbox.md): transactional outbox and Redis Streams delivery.
 - [ADR-0008](adr/0008-hybrid-query.md): hybrid retrieval with RRF, extractive fallback and confidence.
-- [ADR-0008](adr/0008-worker-heartbeat-identity.md): one progress heartbeat per consumer process.
+- [ADR-0009](adr/0009-worker-heartbeat-identity.md): one progress heartbeat per consumer process.
 - [Changelog](../CHANGELOG.md): changes awaiting release.
 - [Contributing](../CONTRIBUTING.md): branch/commit conventions, test tiers, budgets and review checklist.
 - [Security policy](../SECURITY.md): private reporting, supported versions and secrets handling.

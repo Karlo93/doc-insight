@@ -72,7 +72,7 @@ Remaining entries in a fetched batch stay pending for reclaim. A second signal
 exits immediately. Signal handlers are restored and clients close on normal exit.
 
 Each loop and message boundary refreshes `di:worker:{hostname}-{pid}` with a 30 s
-TTL ([ADR-0008](adr/0008-worker-heartbeat-identity.md)). The key contains `ready`.
+TTL ([ADR-0009](adr/0009-worker-heartbeat-identity.md)). The key contains `ready`.
 Blocking reads are capped at 10 s. This heartbeat
 reports recent progress; a stage taking longer than 30 s can expire it until the
 next boundary. Do not use it alone to kill a process performing a long OCR job.

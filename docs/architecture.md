@@ -76,7 +76,7 @@ services or automatic deployment of every component.
 is assigned yet. Full-text retrieval uses a `tsvector` expression; a persisted
 search column or GIN index is not part of the initial query-service contract.
 
-## Upload and processing path — lands with lanes 1, 2, 4 and 5
+## Upload and processing path — ingest and worker implemented; gateway and TLS land with lanes 4 and 5
 
 ```mermaid
 sequenceDiagram
@@ -190,21 +190,23 @@ chunks and entities in one transaction. Replay preserves the document and child 
 failure rolls back all output. Reads use a consistent snapshot. Expensive extraction and
 inference occur before the transaction, so replay repeats CPU work.
 
-**Lands with lanes 1 and 2:** the outbox commits intent with the document. The relay publishes
-to `di:documents` before marking the row published. A crash between those operations can
-republish, so delivery is at least once. Group `worker` must persist idempotently, acknowledge
-after durable completion, reclaim pending work and send exhausted failures to
-`di:documents:dlq` with original fields plus `error` and `attempts`. Retry/reclaim thresholds
-remain subject to the worker settings; no timing guarantee is asserted here.
+**Implemented:** the outbox commits intent with the document
+([ADR-0007](adr/0007-transactional-outbox.md)). The relay publishes to `di:documents` before
+marking the row published. A crash between those operations can republish, so delivery is
+at least once. Group `worker` persists idempotently, acknowledges after durable completion,
+reclaims pending work and sends exhausted failures to `di:documents:dlq` with original fields
+plus `error` and `attempts` ([worker runbook](worker.md)). Retry/reclaim thresholds are worker
+settings; no timing guarantee is asserted here.
 
-**Lands with lane 3:** timeouts and a circuit breaker bound Mistral failures; extractive
-fallback avoids a provider dependency for every answer. Abstention handles insufficient
-evidence. Breaker thresholds and evidence rules will be documented with the implementation.
+**Implemented:** timeouts and a circuit breaker bound Mistral failures; extractive fallback
+avoids a provider dependency for every answer. Abstention handles insufficient evidence;
+breaker thresholds and evidence rules are in [query.md](query.md) and
+[ADR-0008](adr/0008-hybrid-query.md).
 
-**Lands with lanes 1, 3, 4 and 5:** HTTP services expose dependency-free `GET /healthz` and
-dependency-checking `GET /readyz` (503 when unavailable). **Implemented:** the worker writes
+**Implemented in ingest and query; the gateway lands with lane 4:** HTTP services expose
+dependency-free `GET /healthz` and dependency-checking `GET /readyz` (503 when unavailable). **Implemented:** the worker writes
 `di:worker:{hostname}-{pid}` in Redis with a 30-second TTL at loop/message boundaries
-([ADR-0008](adr/0008-worker-heartbeat-identity.md)); long stages can outlast the TTL. **Implemented:** the
+([ADR-0009](adr/0009-worker-heartbeat-identity.md)); long stages can outlast the TTL. **Implemented:** the
 `doc_insight.observability` helper emits stage durations and request spans and propagates
 `traceparent` through HTTP and stream carriers ([ADR-0004](adr/0004-opentelemetry.md)); the
 local telemetry profile receives them. Services adopt the helper as they land.
