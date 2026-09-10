@@ -1,0 +1,8 @@
+{"question": "Where does the observatory study Saturn through a telescope?", "expected_substring": "quiet mountain"}
+{"question": "What ingredients does the bakery use for sourdough?", "expected_substring": "water and salt"}
+{"question": "What happens when warm water causes coral bleaching?", "expected_substring": "pale patches"}
+{"question": "When do railway maintenance crews inspect the rails?", "expected_substring": "at night"}
+{"question": "Where does the hospital pharmacy store vaccines?", "expected_substring": "monitored refrigerators"}
+{"question": "How does the orchard water roots during dry weeks?", "expected_substring": "drip irrigation"}
+{"question": "What do wind turbines do in a severe storm?", "expected_substring": "machines stop"}
+{"question": "Why do tapestry conservators avoid strong light?", "expected_substring": "dyes may fade"}

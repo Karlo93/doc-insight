@@ -1,13 +1,29 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
+from doc_insight.testing.embedding import FakeEmbedder
 from doc_insight.testing.structure import FakeTokenizer
 from doc_insight.worker import cli
 from doc_insight.worker.cli import main
 
 FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def test_text_cli_does_not_import_the_embedding_runtime() -> None:
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; import doc_insight.worker.cli; assert 'onnxruntime' not in sys.modules",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
 
 
 def test_cli_summary(
@@ -82,3 +98,22 @@ def test_analyze_cli_reports_language_entities_and_chunks(
         assert "Entity | Label | Page | Count" in output
         assert "Marić" in output
         assert "Chunks: 1 | Tokens min/max:" in output
+
+
+@pytest.mark.parametrize("as_json", [False, True])
+def test_analyze_embed_outputs_vectors_or_metadata(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], as_json: bool
+) -> None:
+    monkeypatch.setattr(cli, "HfTokenizer", lambda settings: FakeTokenizer())
+    monkeypatch.setattr(cli, "FastEmbedEmbedder", lambda settings: FakeEmbedder())
+    args = ["di", "analyze", str(FIXTURES / "text_en.pdf"), "--embed"]
+    monkeypatch.setattr("sys.argv", args + (["--json"] if as_json else []))
+    main()
+    output = capsys.readouterr().out
+    if as_json:
+        result = json.loads(output)
+        assert result["embed_model"] == "fake/hash"
+        assert result["embed_dimension"] == 384
+        assert all(len(chunk["embedding"]) == 384 for chunk in result["chunks"])
+    else:
+        assert "Embeddings: 384 dimensions | fake/hash" in output

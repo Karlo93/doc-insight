@@ -2,7 +2,7 @@
 
 from functools import cache
 from pathlib import Path
-from typing import Self
+from typing import Literal, Self
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -23,9 +23,20 @@ class Settings(BaseSettings):
     # MiniLM's 128-token sentence input includes two special tokens.
     chunk_tokens: int = Field(default=120, gt=0, le=126)
     chunk_overlap: int = Field(default=24, ge=0)
-    embed_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    embed_model: Literal[
+        "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    ] = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    embed_batch: int = Field(default=32, gt=0)
+    embed_onnx_repo: Literal["Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q"] = (
+        "Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q"
+    )
+    embed_revision: str = "faf4aa4225822f3bc6376869cb1164e8e3feedd0"
     tokenizer_revision: str = "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
     model_cache: Path = Path.home() / ".cache" / "doc-insight" / "models"
+
+    @property
+    def embed_dim(self) -> int:
+        return 384
 
     @model_validator(mode="after")
     def valid_overlap(self) -> Self:
