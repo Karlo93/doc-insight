@@ -79,11 +79,18 @@ Offsets are zero-based Python character positions, with an exclusive end:
 `page.text[chunk.char_start:chunk.char_end] == chunk.text`. They are not byte offsets.
 Chunks use whole whitespace-delimited words and retain the original whitespace between them. Chunks never cross pages:
 citations stay unambiguous, at the cost of splitting sentences that continue on another page.
-The actual chunk text is tokenized before acceptance: `token_count` never exceeds the configured cap.
+Each page first passes a Unicode guard. Pages with `Cc` characters other than tab, LF and CR,
+or with `Cf`, `Cs`, `Co`, `Zl` or `Zp` characters, retain the original candidate-retokenizing
+chunker: normalization can otherwise erase raw-text boundaries. Other pages encode once;
+binary searches over token offsets count whole-word windows and overlaps. NBSP (`Zs`) stays
+on this fast path. If token starts or ends are not nondecreasing, the page uses the reference
+instead. Equivalence tests compare complete chunks against the preserved reference.
+`token_count` never exceeds the configured cap.
 Overlap includes as many whole words as fit its budget, so it may be smaller than requested.
 Empty pages produce no chunks. A single word larger than the budget, such as a long URL or an
 OCR run, is cut between its own tokens: the only place a boundary can fall inside a word, and
-the model limit is still never exceeded. Tiny final chunks remain separate when merging would
+pieces and windows cut inside that word still re-encode in isolation. The model limit is
+still never exceeded. Tiny final chunks remain separate when merging would
 exceed the cap. See [ADR-0002](adr/0002-structured-representation.md).
 
 Lingua considers only configured languages, using a prefix of each page. Confidence below
@@ -114,7 +121,8 @@ Labels remain model-native (`PERSON` in English, `PER` in Croatian), avoiding a 
 
 `LanguageDetector`, `NerExtractor` and `Tokenizer` are Protocols in contracts, with real
 adapters in worker and fakes in testing. `analyze` composes them without opening files or
-loading models itself. The tokenizer contract returns character spans; the chunker counts them on exact candidate slices.
+loading models itself. The tokenizer contract still returns character spans; the chunker
+uses page offsets only after the guard described in [ADR-0002](adr/0002-structured-representation.md#token-counting-from-one-page-encoding).
 All model loaders are lazy and cached per configuration for the life of the process.
 spaCy's English and Croatian 3.8.0 wheels are exact URLs in the worker's `pyproject.toml`,
 compatible with spaCy 3.8; Lingua's models ship inside its package. `uv.lock` pins dependencies.

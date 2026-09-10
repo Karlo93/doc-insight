@@ -1,7 +1,9 @@
 """Ordered page analysis; adapters are supplied explicitly at the boundary."""
 
 import re
-from unicodedata import normalize
+from bisect import bisect_left, bisect_right
+from itertools import pairwise
+from unicodedata import category, normalize
 
 from doc_insight.contracts.extraction import PIPELINE_VERSION, ExtractedDocument, Page
 from doc_insight.contracts.structure import (
@@ -12,49 +14,114 @@ from doc_insight.contracts.structure import (
     NerExtractor,
     Tokenizer,
 )
+from doc_insight.worker._chunk_reference import _reference_chunk_page
 from doc_insight.worker.settings import Settings
 
 
-def _units(page: Page, tokenizer: Tokenizer, cap: int) -> list[tuple[int, int]]:
+def _requires_reference(text: str) -> bool:
+    # Normalization can erase separators before tokenization; retain raw-text cuts.
+    return any(
+        char not in "\t\n\r" and category(char) in {"Cc", "Cf", "Cs", "Co", "Zl", "Zp"}
+        for char in text
+    )
+
+
+class _PageTokens:
+    def __init__(self, text: str, tokenizer: Tokenizer) -> None:
+        self.text, self.tokenizer = text, tokenizer
+        offsets = tokenizer.encode(text)
+        self.starts = [start for start, _ in offsets]
+        self.ends = [end for _, end in offsets]
+        self.ordered = all(a <= b for a, b in pairwise(self.starts)) and all(
+            a <= b for a, b in pairwise(self.ends)
+        )
+
+    def count(self, start: int, end: int) -> int:
+        # Cuts inside oversized words still need isolated tokenization.
+        if (start > 0 and not self.text[start - 1].isspace()) or (
+            end < len(self.text) and not self.text[end].isspace()
+        ):
+            return len(self.tokenizer.encode(self.text[start:end]))
+        return bisect_right(self.ends, end) - bisect_left(self.starts, start)
+
+
+def _units(page: Page, tokens: _PageTokens, cap: int) -> list[tuple[int, int]]:
     """Whole words, except that a word longer than the cap is cut between its tokens."""
     units: list[tuple[int, int]] = []
     for word in re.finditer(r"\S+", page.text):
         # Every token covers at least one character, so a short word always fits.
-        offsets = tokenizer.encode(word.group()) if len(word.group()) > cap else []
-        if len(offsets) <= cap:
+        if len(word.group()) <= cap or tokens.count(word.start(), word.end()) <= cap:
             units.append((word.start(), word.end()))
             continue
-        # A long URL or OCR run has no whitespace to cut at. This is the only place a
-        # chunk boundary may fall inside a word; failing the whole document was rejected.
-        first = 0
-        while first < len(offsets):
-            last = first + 1
-            while last < len(offsets):
-                piece = word.group()[offsets[first][0] : offsets[last][1]]
-                if len(tokenizer.encode(piece)) > cap:
-                    break
-                last += 1
-            units.append(
-                (word.start() + offsets[first][0], word.start() + offsets[last - 1][1])
-            )
-            first = last
+        units.extend(_split_word(word, tokens.tokenizer, cap))
     return units
+
+
+def _split_word(
+    word: re.Match[str], tokenizer: Tokenizer, cap: int
+) -> list[tuple[int, int]]:
+    offsets = tokenizer.encode(word.group())
+    units: list[tuple[int, int]] = []
+    # A long URL or OCR run has no whitespace to cut at. This is the only place a
+    # chunk boundary may fall inside a word; failing the whole document was rejected.
+    first = 0
+    while first < len(offsets):
+        last = first + 1
+        while last < len(offsets):
+            piece = word.group()[offsets[first][0] : offsets[last][1]]
+            if len(tokenizer.encode(piece)) > cap:
+                break
+            last += 1
+        units.append(
+            (word.start() + offsets[first][0], word.start() + offsets[last - 1][1])
+        )
+        first = last
+    return units
+
+
+def _grow_window(
+    units: list[tuple[int, int]], tokens: _PageTokens, first: int, cap: int
+) -> tuple[int, int]:
+    last, count = first, 0
+    start = units[first][0]
+    while last < len(units):
+        size = tokens.count(start, units[last][1])
+        if size > cap:
+            break
+        last, count = last + 1, size
+    return last, count
+
+
+def _overlap_start(
+    units: list[tuple[int, int]],
+    tokens: _PageTokens,
+    first: int,
+    last: int,
+    budget: int,
+) -> int:
+    next_first = last
+    end = units[last - 1][1]
+    while next_first > first + 1:
+        if tokens.count(units[next_first - 1][0], end) > budget:
+            break
+        next_first -= 1
+    return next_first
 
 
 def chunk_page(
     page: Page, tokenizer: Tokenizer, settings: Settings, start_ord: int
 ) -> list[Chunk]:
-    units = _units(page, tokenizer, settings.chunk_tokens)
+    if _requires_reference(page.text):
+        return _reference_chunk_page(page, tokenizer, settings, start_ord)
+    tokens = _PageTokens(page.text, tokenizer)
+    if not tokens.ordered:
+        return _reference_chunk_page(page, tokenizer, settings, start_ord)
+    units = _units(page, tokens, settings.chunk_tokens)
     chunks: list[Chunk] = []
     first = 0
     while first < len(units):
-        last, count = first, 0
+        last, count = _grow_window(units, tokens, first, settings.chunk_tokens)
         start = units[first][0]
-        while last < len(units):
-            size = len(tokenizer.encode(page.text[start : units[last][1]]))
-            if size > settings.chunk_tokens:
-                break
-            last, count = last + 1, size
         if last == first:
             raise ValueError(f"chunk_tokens too small on page {page.number}")
         end = units[last - 1][1]
@@ -72,13 +139,7 @@ def chunk_page(
             )
         if last == len(units):
             break
-        next_first = last
-        while next_first > first + 1:
-            overlap = page.text[units[next_first - 1][0] : end]
-            if len(tokenizer.encode(overlap)) > settings.chunk_overlap:
-                break
-            next_first -= 1
-        first = next_first
+        first = _overlap_start(units, tokens, first, last, settings.chunk_overlap)
     return chunks
 
 

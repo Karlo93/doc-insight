@@ -27,6 +27,8 @@ under a version and an ISO date when a release is cut.
 
 ### Changed
 
+- Speed up chunking with one page encoding and a Unicode guard that preserves the original
+  chunker for unsafe pages; chunk output and pipeline version 6 remain unchanged.
 - Pipeline version 6 carries each page's language on its chunks.
 
 [Unreleased]: https://github.com/Karlo93/doc-insight/commits/main
