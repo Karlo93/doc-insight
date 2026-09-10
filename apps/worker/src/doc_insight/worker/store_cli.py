@@ -6,6 +6,7 @@ from time import perf_counter
 from uuid import UUID
 
 from doc_insight.contracts.storage import DocumentRepository, StoredDocument
+from doc_insight.observability import configure, stage
 from doc_insight.worker.embedder import FastEmbedEmbedder
 from doc_insight.worker.embedding import embed_document
 from doc_insight.worker.extraction import extract
@@ -41,19 +42,23 @@ def index_file(
 ) -> StoredDocument:
     settings = get_settings()
     started = perf_counter()
-    extracted = extract(path)
+    with stage("extract"):
+        extracted = extract(path)
     extracted_at = perf_counter()
-    document = analyze(
-        extracted,
-        LinguaLanguageDetector(settings),
-        SpacyNerExtractor(settings),
-        HfTokenizer(settings),
-        settings,
-    )
+    with stage("analyze"):
+        document = analyze(
+            extracted,
+            LinguaLanguageDetector(settings),
+            SpacyNerExtractor(settings),
+            HfTokenizer(settings),
+            settings,
+        )
     analyzed_at = perf_counter()
-    embedded = embed_document(document, FastEmbedEmbedder(settings))
+    with stage("embed"):
+        embedded = embed_document(document, FastEmbedEmbedder(settings))
     embedded_at = perf_counter()
-    stored = repository.upsert_document(tenant, path.name, embedded)
+    with stage("store"):
+        stored = repository.upsert_document(tenant, path.name, embedded)
     stored_at = perf_counter()
     print(
         f"extract={extracted_at - started:.3f}s analyze={analyzed_at - extracted_at:.3f}s embed={embedded_at - analyzed_at:.3f}s store={stored_at - embedded_at:.3f}s"
@@ -70,6 +75,7 @@ def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
         parser.error("search text must be nonblank")
     engine: Engine | None = None
     try:
+        configure("worker")
         # A malformed URL fails here and must get the same sanitized message.
         engine = create_engine(get_settings().database_url, hide_parameters=True)
         repository = PostgresRepository(engine)
@@ -80,7 +86,8 @@ def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
                     f"{hit.document_id} | Page {hit.chunk.page} | cosine={hit.score:.3f}\n{hit.chunk.text}"
                 )
         elif args.command == "index":
-            stored = index_file(args.value, args.tenant, repository)
+            with stage("process"):
+                stored = index_file(args.value, args.tenant, repository)
             print(
                 f"Document: {stored.id} | Chunks: {len(stored.chunks)} | Tenant: {stored.tenant_id}"
             )

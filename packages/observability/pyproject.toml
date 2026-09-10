@@ -2,6 +2,14 @@
 name = "doc-insight-observability"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
+dependencies = [
+    "doc-insight-contracts",
+    "fastapi>=0.115,<1",
+    "opentelemetry-exporter-otlp-proto-http>=1.40,<2",
+    "opentelemetry-instrumentation-fastapi>=0.61b0,<1",
+    "opentelemetry-sdk>=1.40,<2",
+    "pydantic-settings>=2.15,<3",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -9,3 +17,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/doc_insight"]
+
+[tool.uv.sources]
+doc-insight-contracts = { workspace = true }

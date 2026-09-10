@@ -237,6 +237,8 @@ make db-down
 
 Index output includes four stage durations, a document UUID and chunk count; search includes
 the document UUID, page, cosine score and passage. Repeat indexing: the UUID stays unchanged.
+Optional [observability](observability.md) adds stage spans, duration metrics and a document
+attempt counter. Leave `DI_OTEL_ENDPOINT` unset to run without exporters.
 Search with another tenant returns no passages; showing another tenant's ID exits with an error.
 `db-down` keeps the named volume. The Compose service publishes only to the local machine.
 Copy `.env.example` to `.env` to change Compose credentials/port; export `DI_DATABASE_URL`
@@ -298,7 +300,7 @@ See [font provenance](../scripts/fonts/readme.md) and [ADR-0001](adr/0001-text-e
 
 ## Not yet
 
-Queue, HTTP services, gateway/JWT, LLM answers, RLS, hybrid retrieval, telemetry and application
+Queue, HTTP services, gateway/JWT, LLM answers, RLS, hybrid retrieval and application
 containers remain later work. `DOCKER_DEV=no`: only Postgres runs in Docker here.
 The bilingual retrieval evaluation and M2 performance follow-ups are still pending;
 the real Croatian smoke test is not a retrieval-quality benchmark.
