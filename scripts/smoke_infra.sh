@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# Git Bash on Windows rewrites arguments that look like absolute paths; these are container paths.
+export MSYS_NO_PATHCONV=1
 
 profile=${1:-infra}
 case "$profile" in
