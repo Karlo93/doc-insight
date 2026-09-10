@@ -2,7 +2,8 @@
 
 - [Project README](../README.md): local setup, CLI commands, test tiers and repository layout.
 - [Architecture](architecture.md): system and sequence diagrams, responsibilities, boundaries and trade-offs.
-- [API contract](api.md): planned upload, status, question and stream payloads; delivery status is explicit.
+- [Query service](query.md): implemented retrieval, cited answers, offline operation and settings.
+- [API contract](api.md): upload, status, question and stream payloads; delivery status is explicit.
 - [Configuration](configuration.md): current settings tables, defaults and Compose versus Python environment handling.
 - [Pipeline](pipeline.md): implemented extraction, OCR, structure, embeddings, storage and retrieval.
 - [Local stack](local-stack.md): Compose `infra` and `telemetry` profiles, ports, encryption and Grafana.

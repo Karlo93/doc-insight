@@ -60,12 +60,12 @@ flowchart TB
 | Caddy | Public TLS termination | Lands with lane 5 |
 | Gateway, port 8000 | Validate RS256 JWT against JWKS; derive tenant/user; rate-limit and proxy | Lands with lane 4 |
 | Ingest, port 8001 | Stream validated uploads to objects; create document/outbox transaction; status reads and relay | Lands with lane 1 |
-| Query, port 8002 | Retrieve tenant-owned evidence; generate cited answer or abstain | Lands with lane 3 |
+| Query, port 8002 | Retrieve tenant-owned evidence; generate cited answer or abstain | Implemented; [operation and confidence](query.md) |
 | Worker, no HTTP port | Extract → analyze → embed → store | CLI pipeline exists; stream consumer, status transitions and DLQ land with lane 2 |
 | Object storage, ports 9000/9001 | Original bytes in `documents`, at `{tenant_id}/{sha256}` | MinIO with mandatory SSE-S3 runs in the Compose `infra` profile; the adapter lands with lane 1 |
 | Redis, port 6379 | Event stream, worker group, DLQ and rate-limit buckets | Redis runs in the Compose `infra` profile; consumers/producers land with lanes 1, 2 and 4 |
-| Postgres, port 5432 | Relational metadata and 384-dimensional pgvector HNSW index | Implemented, including forced row-level security ([ADR-0005](adr/0005-tenant-row-level-security.md)); outbox lands with lane 1; full-text retrieval with lane 3; `audit_events` delivery unassigned |
-| LLM | Mistral answer generation behind a provider boundary; extractive fallback | Lands with lane 3 |
+| Postgres, port 5432 | Relational metadata and 384-dimensional pgvector HNSW index | Implemented, including forced row-level security ([ADR-0005](adr/0005-tenant-row-level-security.md)); outbox lands with lane 1; full-text expression retrieval implemented; `audit_events` delivery unassigned |
+| LLM | Mistral answer generation behind a provider boundary; extractive fallback | Implemented; hosted calls are opt-in, offline fallback validated |
 | Collector, port 4318; Prometheus; Tempo; Grafana | OTLP/HTTP ingestion, metrics, traces and dashboards | Runs in the Compose `telemetry` profile with a provisioned dashboard; the `doc_insight.observability` helper is implemented ([ADR-0004](adr/0004-opentelemetry.md)) and the CLI emits stage spans; services adopt it as they land |
 
 Ports above are internal contracts. The Compose `infra` and `telemetry` profiles publish every
@@ -73,7 +73,7 @@ service on loopback with configurable host ports (see [local stack](local-stack.
 application image is built yet. A target diagram does not imply public access to its internal
 services or automatic deployment of every component.
 `audit_events` is retained from the reference diagram, but no implementation or migration
-is assigned yet. Full-text retrieval is planned as a `tsvector` expression; a persisted
+is assigned yet. Full-text retrieval uses a `tsvector` expression; a persisted
 search column or GIN index is not part of the initial query-service contract.
 
 ## Upload and processing path — lands with lanes 1, 2, 4 and 5
@@ -167,7 +167,7 @@ credentials.
 
 **Lands with lane 4:** the gateway alone derives identity from RS256 JWT claims verified
 against JWKS. It strips client-supplied `X-Tenant-Id` and `X-User-Id`, then injects its own.
-**Lands with lanes 1 and 3:** ingest and query require `X-Tenant-Id` (400 if absent) and
+**Implemented in query; pending in ingest:** both require `X-Tenant-Id` (400 if absent) and
 trust it only on the internal network. Tenant IDs are 1–64 characters from `[A-Za-z0-9._-]`.
 **Lands with lane 1:** per-tenant object prefixes through the object-storage adapter. MinIO in
 the local stack already requires SSE-S3 for the `documents` bucket, so originals are encrypted
@@ -235,6 +235,6 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 - [Observability](observability.md): the shared helper API and attribute policy.
 - [Local stack](local-stack.md): Compose profiles, ports, encryption and Grafana.
 
-Per-service `ingest.md`, `query.md`, `gateway.md` and `deploy.md` are not present yet; they
+The [query guide](query.md) is implemented. `ingest.md`, `gateway.md` and `deploy.md` are not present yet; they
 land with their owning services. Add their links to the [index](README.md) when merged. The
 current worker service documentation is `pipeline.md`.

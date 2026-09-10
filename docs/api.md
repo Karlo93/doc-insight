@@ -1,9 +1,9 @@
-# Planned API and event contract
+# API and event contract
 
-These contracts land with ingest (lane 1), worker (lane 2), query (lane 3), gateway
-(lane 4) and deployment (lane 5). None of these HTTP routes is implemented on main yet.
-Examples describe expected shapes; they are not captured responses. Use the
-[working CLI](../README.md#local-setup) until the service stack lands.
+The internal [query service](query.md) implements `POST /query` on port 8002. Its guide
+includes a captured offline response. Public gateway, ingest and event delivery remain
+planned. Examples below describe the public contract; they are not captured responses.
+Use the [working CLI](../README.md#local-setup) to index documents for query.
 
 ## Public HTTP contract
 
