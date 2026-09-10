@@ -19,8 +19,10 @@ disclosure with the maintainer; no response-time guarantee is currently defined.
 | Earlier commits and unreleased snapshots | No separate backports; update to current `main` |
 
 There is no stable-release support schedule yet. The current runnable slice is a local CLI
-and loopback Postgres. Authentication, RLS and the service deployment must be checked against
-their implementation before using the system for sensitive documents.
+with loopback Postgres, Redis and MinIO. The database enforces row-level security for the
+restricted runtime login. Authentication and the service deployment land with the service
+lanes and must be checked against their implementation before using the system for
+sensitive documents.
 
 ## Secrets and document data
 

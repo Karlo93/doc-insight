@@ -62,19 +62,22 @@ Install uv, Python 3.12, GNU Make, Go 1.24.11+, Docker/Compose and Tesseract wit
 | `make typecheck` | mypy strict on `apps` and `packages` |
 | `make test` | Default tests, offline socket/psycopg guard; installed OCR and language packages; coverage ≥70% |
 | `make test-models` | Real tokenizer/embedding tests; may download pinned snapshots; no coverage report |
-| `make db-up` | Start and wait for local Postgres/pgvector |
-| `make migrate` | Apply schema to the development database |
+| `make db-up` | Alias of `make infra-up`: start the Compose `infra` profile (Postgres/pgvector, Redis, MinIO) and run the smoke script |
+| `make migrate` | Apply schema to the development database through `DI_MIGRATION_DATABASE_URL` |
 | `make test-integration` | Service-backed tests; temporary databases; no coverage report |
 | `make audit` | Bandit, pip-audit and pinned gitleaks via Go |
 | `make check` | Lint, types, default tests/coverage and audit |
-| `make db-down` | Stop Compose; preserve the named volume |
+| `make db-down` | Alias of `make infra-down`: stop the `infra` profile; preserve named volumes |
+| `make telemetry-up` / `make telemetry-down` | Start or stop the collector, Prometheus, Tempo and Grafana profile |
 
-When changing the host port, export both `POSTGRES_PORT` and the matching `DI_DATABASE_URL`.
+When changing the host port, export `POSTGRES_PORT` and the matching `DI_DATABASE_URL`
+(restricted `di_app` login) and `DI_MIGRATION_DATABASE_URL` (privileged login).
 Integration tests need database-creation permission; the harness migrates its own disposable
 databases and refuses nonlocal hosts unless explicitly enabled. Never target a shared database
 casually. Default tests must not reach services or use sleeps for synchronization.
 
-CI has `quality`, `test` and `security` jobs. The test job includes Postgres integration tests;
+CI has `quality`, `test` and `security` jobs. The quality job validates the Compose configuration;
+the test job runs Postgres, Redis and MinIO services and the integration tests;
 runtime model downloads are a separate local tier. Run relevant tiers and record exact results.
 Passing a subset does not mean `make check` passed. See [CI](docs/ci.md) for coverage artifacts,
 audit limitations and branch-protection setup. Install hooks with
