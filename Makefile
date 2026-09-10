@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test test-models test-integration db-up db-down migrate audit check
+.PHONY: setup lint typecheck test test-models test-integration db-up db-down infra-up infra-down telemetry-up telemetry-down migrate audit check
 
 setup:
 	uv sync --locked --all-packages
@@ -19,11 +19,22 @@ test-models:
 test-integration:
 	uv run --locked --all-packages pytest -m integration --no-cov
 
-db-up:
-	uv run --locked docker compose up -d --wait db
+infra-up:
+	docker compose --profile infra up -d
+	bash scripts/smoke_infra.sh
 
-db-down:
-	uv run --locked docker compose down
+infra-down:
+	docker compose --profile infra down
+
+telemetry-up:
+	docker compose --profile telemetry up -d --wait --wait-timeout 120
+
+telemetry-down:
+	docker compose --profile telemetry down
+
+db-up: infra-up
+
+db-down: infra-down
 
 migrate:
 	uv run --locked --all-packages alembic upgrade head

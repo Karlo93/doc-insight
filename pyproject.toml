@@ -22,7 +22,7 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests", "apps", "packages"]
 addopts = '--cov --cov-report=term-missing --cov-report=xml --cov-fail-under=70 -m "not models and not integration"'
-markers = ["models: requires runtime model downloads", "integration: requires Postgres"]
+markers = ["models: requires runtime model downloads", "integration: requires local infrastructure services"]
 
 [tool.coverage.run]
 source = ["apps", "packages"]

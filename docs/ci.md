@@ -16,9 +16,11 @@ flowchart LR
 | Step | What | Why it exists | What a failure means |
 | --- | --- | --- | --- |
 | Setup | Sync every workspace member from uv.lock | Reproduce the same environment | Lockfile, download or installation failed |
-| quality | `make lint` + `make typecheck` | Catch style defects and type errors | Fix the reported code or formatting |
+| quality | `make lint` + `make typecheck` + `docker compose --profile infra --profile telemetry config --quiet` | Catch style, type and Compose configuration errors | Fix the reported code, formatting or configuration |
 | test | `make test`, then `make test-integration`; upload coverage.xml for 7 days | Enforce 70% unit coverage and prove the real storage contract | Behavior, migration, isolation or coverage failed |
 | Postgres | Healthy pgvector/Postgres 16 service | Exercise transactions, tenant constraints and vector retrieval | Service startup or database assertions failed |
+| Redis | Pinned Redis 7 service, checked with `redis-cli ping` | Provide the queue backend for integration tests | Service startup failed |
+| MinIO | Pinned official image started through Compose; ready probe, bucket creation and SSE-S3 check | Provide initialized S3 storage with the same settings as local development | Startup or encryption initialization failed |
 | OCR binary | Install Tesseract and Croatian data in the test job | Exercise actual scan extraction on Ubuntu without model downloads | Installation failed or required language data is unavailable |
 | security | `make audit`: bandit, pip-audit, gitleaks | Catch unsafe Python, vulnerable dependencies and exposed secrets | Review and fix the reported finding or tool failure |
 
@@ -35,6 +37,17 @@ pip-audit skips editable workspace stubs; their installed third-party dependenci
 Tests cover extraction/OCR, structure, provider contracts and CLI output; Python socket access is blocked.
 `make db-up`, then `make test-integration` exercises temporary databases; it never downloads models.
 The integration target leaves unit coverage.xml intact; it runs alongside unit tests in the `test` job.
+The job exports `DI_MIGRATION_DATABASE_URL`, `DI_REDIS_URL` and all six `DI_S3_` connection
+settings shown in [local stack](local-stack.md). Integration fixtures preserve
+these connection settings; default tests still clear them and forbid sockets.
+GitHub Actions cannot pass a command to a declarative service, so the MinIO step
+runs `docker compose up -d --wait --wait-timeout 60 minio`, then
+`docker compose run --rm minio-init`. Its cleanup runs even after test failure.
+Postgres and Redis remain GitHub-managed service containers. Telemetry is not
+started in this job; the target remains roughly three minutes with dependency
+caches, while first-time downloads and runner/OCR installation can exceed it.
+The existing integration suite exercises Postgres; Redis/S3 adapter contracts
+join this job as their service implementations arrive.
 Lingua/spaCy models install with dependencies; runtime downloads run separately with `make test-models`, outside CI.
 Local `make test` needs Tesseract with `eng` and `hrv`, as described in [pipeline setup](pipeline.md).
 
