@@ -8,6 +8,9 @@ under a version and an ISO date when a release is cut.
 ### Added
 
 - Document the current CLI setup, target architecture and planned API contracts.
+- Add locked service images, offline worker models and OCR, migration-first local
+  startup behind Caddy TLS (`make local-run`, `make dev-token`) and main-only GHCR
+  publication with SBOMs.
 - Add the gateway with RS256/JWKS authentication, atomic Redis quotas, streaming uploads and verified identity headers.
 - Add `di worker run`: sequential Redis consumption, tenant/object validation, version-aware replay, pending recovery, sanitized dead letters and graceful shutdown.
 - Add tenant-scoped uploads, encrypted object storage, document status and an atomic outbox with a Redis Streams relay.

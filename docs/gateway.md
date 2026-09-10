@@ -173,16 +173,9 @@ done
 The first two attempts consume capacity even if query is unavailable; subsequent ones
 return 429 with `Retry-After`. PowerShell can use `1..5 | ForEach-Object { curl.exe ... }`.
 
-The optional development Compose overlay builds just the gateway's locked dependencies:
-
-```sh
-docker compose -f docker-compose.yml -f docker-compose.gateway.yml up -d --build --wait gateway
-```
-
-It points JWKS at the gateway itself and mounts only the public JSON. Generate keys
-first. Ingest and query must be supplied on the same Compose network under those service
-names, or override their URLs; without them liveness is 200 and readiness is 503.
-This overlay is development-only and provides plain HTTP on loopback, not TLS.
+The full Compose stack (`make local-run`) runs the gateway image behind Caddy TLS; a
+one-shot issuer job publishes the development JWKS from a private volume and
+`make dev-token` mints tokens through it. See [deployment](deploy.md).
 
 ```sh
 uv run --locked --all-packages pytest tests/gateway --no-cov

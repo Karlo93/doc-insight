@@ -1,6 +1,7 @@
 # CI gates
 
-Every PR and push to `main` runs three independent jobs; superseded runs are cancelled.
+Every PR and push to `main` runs three independent verification jobs; superseded
+runs are cancelled. Successful main pushes also run the image publication job.
 
 ```mermaid
 flowchart LR
@@ -63,14 +64,37 @@ Until this rule is active, failed checks do not prevent a merge.
 GitHub offers branch protection on public repositories or paid plans;
 while this repository is private on the free plan, defer it until publication.
 
-## Not in phase 0 on purpose
+## Deferred work
 
 | Work | Milestone |
 | --- | --- |
-| Image build/publish; SBOM and provenance; HTTP service integration tests | Chunk 6 — Tests and CI hardening |
+| HTTP service integration tests | Service delivery |
 | Kubernetes deployment and autoscaling | Chunk 8 — Kubernetes, autoscaling, benchmark |
 
-Only checkout, setup-uv and upload-artifact actions are allowed, with read-only contents permission.
+Verification uses checkout, setup-uv and upload-artifact, with read-only contents permission.
 setup-uv uses `v7`, its last published major tag; v8+ only publish full version tags.
 Dependabot checks actions and Python dependencies weekly, grouping minor/patch changes.
 The `uv` ecosystem updates `uv.lock`, the file `make setup` installs from.
+
+## Image publication
+
+`images` waits for quality, test and security and runs only on pushes to `main`
+in the upstream repository. Forks and all pull requests skip the job. Only this
+job has `packages: write`; the workflow's default remains `contents: read`.
+The repository action allowlist must also allow `docker/setup-buildx-action`,
+`docker/login-action` and `docker/build-push-action` for publication.
+
+The matrix builds gateway, ingest, query and worker for Linux amd64 from the
+parameterized Dockerfile. Each installs its locked production workspace package,
+uses a cache scoped by application, and publishes both the full commit SHA and
+`main` to `ghcr.io/karlo93/doc-insight-<app>`. Relay reuses ingest and migration
+reuses worker. Buildx attaches an SBOM and maximum provenance to the registry
+image manifest; no secrets are supplied through build arguments. See Docker's
+[attestation documentation](https://docs.docker.com/build/ci/github-actions/attestations/).
+
+The quality job validates all Compose profiles, including pending service
+definitions. Validate images locally with `bash scripts/smoke_images.sh` after
+building. `bash scripts/smoke_tls.sh` verifies HTTPS forwarding against an isolated
+test upstream and cleans up its containers/network; it does not test the gateway.
+`make local-run` additionally verifies health and migration completion.
+Container builds have their own job and do not extend the test job's time budget.

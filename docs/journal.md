@@ -37,6 +37,17 @@ size checks. Fake/real provider contracts cover authentication and forwarding; r
 Redis tests prove exactly seven of fifty concurrent requests pass a burst of seven.
 Adopted shared request instrumentation and attached only verified identity ids.
 
+## Service images and local delivery
+
+One parameterized multi-stage Dockerfile keeps installation and runtime policy
+consistent across applications. Worker warms the existing pinned model loaders;
+runtime disables Hub access and uses a read-only root with temporary scratch space.
+Compose runs migrations before applications and uses separate database accounts.
+Caddy proxies the gateway through TLS; a one-shot issuer job publishes the development
+JWKS from a private volume and mints demo tokens.
+Main-only publication attaches SBOM and provenance to each application image.
+ADR-0011 records the Compose and TLS choices and the deferred Kubernetes path.
+
 ## Local infrastructure and telemetry
 
 Separated storage and telemetry profiles so neither requires application images.

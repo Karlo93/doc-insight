@@ -1,7 +1,20 @@
-.PHONY: setup lint typecheck test test-models test-integration db-up db-down infra-up infra-down telemetry-up telemetry-down migrate audit check
+.PHONY: setup lint typecheck test test-models test-integration db-up db-down infra-up infra-down telemetry-up telemetry-down migrate audit check local-run local-stop dev-token
+
+TENANT ?= demo
+SUBJECT ?= alice
+TTL ?= 3600
 
 setup:
 	uv sync --locked --all-packages
+
+local-run:
+	bash scripts/local_run.sh
+
+local-stop:
+	docker compose --profile infra --profile telemetry --profile app down
+
+dev-token:
+	@docker compose --profile infra --profile telemetry --profile app run --rm --no-deps -T dev-issuer python /usr/local/lib/dev_issuer.py mint --tenant $(TENANT) --user $(SUBJECT) --ttl $(TTL)
 
 lint:
 	uv run --locked --all-packages ruff check .
