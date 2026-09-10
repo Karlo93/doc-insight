@@ -61,7 +61,9 @@ def test_database_failure_rolls_back_metadata_chunks_and_entities(database, docu
 
 
 @pytest.mark.integration
-def test_concurrent_replays_and_database_tenant_constraint(database, document):
+def test_concurrent_replays_and_database_tenant_constraint(
+    database, migration_database, document
+):
     repository = PostgresRepository(database)
     tenant = uuid4().hex
     with ThreadPoolExecutor(max_workers=2) as pool:
@@ -73,12 +75,12 @@ def test_concurrent_replays_and_database_tenant_constraint(database, document):
         )
     assert results[0].id == results[1].id
     assert len(repository.get_document(tenant, results[0].id).chunks) == 1
-    with pytest.raises(IntegrityError), database.begin() as connection:
+    with pytest.raises(IntegrityError), migration_database.begin() as connection:
         connection.execute(
             text("UPDATE chunks SET tenant_id = 'wrong' WHERE document_id = :id"),
             {"id": results[0].id},
         )
-    with database.begin() as connection:
+    with migration_database.begin() as connection:
         connection.execute(
             text("DELETE FROM documents WHERE tenant_id = :tenant"), {"tenant": tenant}
         )

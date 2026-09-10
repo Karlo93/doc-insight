@@ -205,8 +205,15 @@ erDiagram
 
 The [migration](../migrations/versions/0001_core_tables.py) lists every column.
 Composite foreign keys include `tenant_id`: the database rejects children owned by another tenant.
-Every repository read/write also filters by tenant. This is application isolation, not RLS;
-the CLI's caller supplies a trusted tenant until authenticated services arrive.
+Every repository read/write still filters by tenant. Migration 0002 also enables and forces
+row-level security on all three tables. One policy per table checks `tenant_id` against
+`current_setting('app.tenant_id', true)` for reads and writes, normalizing an empty
+setting to NULL so pool resets cannot authorize empty tenant rows. The repository binds this
+setting with `set_config(..., true)` at the start of every transaction, including its
+REPEATABLE READ snapshot. Commit, rollback and pool return clear the tenant context.
+Without a tenant, row reads/updates/deletes return nothing and inserts are rejected.
+The CLI's caller supplies a trusted tenant until authenticated services arrive.
+See [ADR-0005](adr/0005-tenant-row-level-security.md) for the role and trust boundaries.
 
 `upsert_document` writes metadata and replaces all chunks/entities in one transaction.
 The unique `(tenant_id, sha256)` conflict locks the row, serializing concurrent replays.
@@ -228,6 +235,12 @@ From the repository root, with Docker running:
 ```text
 make db-up
 make migrate
+# A fresh Compose volume creates the restricted di_app login automatically
+# (deploy/postgres/init-runtime-role.sql). For a volume created before that script
+# existed, run the same two statements once, or recreate the volume with `make db-down`
+# followed by `docker compose down -v`:
+docker compose exec db psql -U di -d di -c "CREATE ROLE di_app LOGIN NOSUPERUSER NOBYPASSRLS NOINHERIT PASSWORD 'di_app'"
+docker compose exec db psql -U di -d di -c "GRANT USAGE ON SCHEMA public TO di_app; GRANT SELECT, INSERT, UPDATE, DELETE ON documents, chunks, entities TO di_app"
 uv run --locked --all-packages di index tests/fixtures/text_hr.pdf --tenant demo
 uv run --locked --all-packages di show <document-id> --tenant demo
 uv run --locked --all-packages di search "Gdje se nalazi Zagreb?" --tenant demo -k 5
@@ -241,15 +254,36 @@ Optional [observability](observability.md) adds stage spans, duration metrics an
 attempt counter. Leave `DI_OTEL_ENDPOINT` unset to run without exporters.
 Search with another tenant returns no passages; showing another tenant's ID exits with an error.
 `db-down` keeps the named volume. The Compose service publishes only to the local machine.
-Copy `.env.example` to `.env` to change Compose credentials/port; export `DI_DATABASE_URL`
-separately for Python. Its default is `postgresql+psycopg://di:di@localhost:5432/di`.
-If 5432 is occupied, set `POSTGRES_PORT=55432` for Compose and the matching URL for Python:
-PowerShell: `$env:DI_DATABASE_URL = 'postgresql+psycopg://di:di@127.0.0.1:55432/di'`;
-WSL/Linux: `export DI_DATABASE_URL='postgresql+psycopg://di:di@localhost:55432/di'`.
-`make test-integration` needs database-creation permission: tests create and drop only their
-randomly named databases, never the configured development database's tables. The harness
+Copy `.env.example` to `.env` to change Compose credentials/port; export the Python URLs
+separately. These passwords are for local development only. Runtime `DI_DATABASE_URL`
+defaults to `postgresql+psycopg://di_app:di_app@localhost:5432/di`.
+`DI_MIGRATION_DATABASE_URL` defaults to `postgresql+psycopg://di:di@localhost:5432/di`;
+`make migrate` uses only this URL. Compose's `di` is the development migration superuser.
+Never give its credentials to a runtime service: superusers and BYPASSRLS roles ignore FORCE.
+
+For deployment, an administrator provisions `di_migrate LOGIN NOSUPERUSER BYPASSRLS`
+and `di_app LOGIN NOSUPERUSER NOBYPASSRLS NOINHERIT`, with separate managed credentials.
+The administrator installs the vector extension and grants `di_migrate` CREATE/USAGE on
+`public`. Run migrations as `di_migrate`, which owns the tables; grant `di_app` schema USAGE
+and only SELECT/INSERT/UPDATE/DELETE on documents, chunks and entities. Set default table
+privileges as `di_migrate` for future migrations. Do not grant `di_app` membership in the
+owner role, schema CREATE, TRUNCATE or table ownership. FORCE also protects an owner
+without BYPASSRLS, but an owner can alter policies; runtime therefore does not own tables.
+
+If 5432 is occupied, set `POSTGRES_PORT=55432` and match both Python URLs:
+
+```powershell
+$env:DI_DATABASE_URL = 'postgresql+psycopg://di_app:di_app@127.0.0.1:55432/di'
+$env:DI_MIGRATION_DATABASE_URL = 'postgresql+psycopg://di:di@127.0.0.1:55432/di'
+```
+
+On Linux, use `export NAME='value'` for each setting.
+`make test-integration` uses `DI_MIGRATION_DATABASE_URL` and needs database/role-creation
+permission. Tests create and drop only randomly named databases and restricted runtime
+logins, never the configured development database's tables. Repository contracts and
+concurrent writers connect as restricted logins; migration checks use the owner. The harness
 refuses hosts other than localhost unless `DI_ALLOW_REMOTE_TEST_DB=1` is set, so a shared
-server named in `DI_DATABASE_URL` cannot be touched by accident. Compose and CI pin the
+server named in `DI_MIGRATION_DATABASE_URL` cannot be touched by accident. Compose and CI pin the
 same `pgvector/pgvector` image tag; move both together.
 
 ## Run it: WSL2/Linux
@@ -300,7 +334,7 @@ See [font provenance](../scripts/fonts/readme.md) and [ADR-0001](adr/0001-text-e
 
 ## Not yet
 
-Queue, HTTP services, gateway/JWT, LLM answers, RLS, hybrid retrieval and application
+Queue, HTTP services, gateway/JWT, LLM answers, hybrid retrieval and application
 containers remain later work. `DOCKER_DEV=no`: only Postgres runs in Docker here.
 The bilingual retrieval evaluation and M2 performance follow-ups are still pending;
 the real Croatian smoke test is not a retrieval-quality benchmark.

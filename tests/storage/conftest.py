@@ -30,7 +30,7 @@ LOCAL_HOSTS = {None, "localhost", "127.0.0.1", "::1"}
 
 @contextmanager
 def temporary_database():
-    url = make_url(Settings().database_url)
+    url = make_url(Settings().migration_database_url)
     # Creating and dropping databases on a shared server is destructive; opt in explicitly.
     if url.host not in LOCAL_HOSTS and not os.environ.get("DI_ALLOW_REMOTE_TEST_DB"):
         raise RuntimeError(
@@ -57,10 +57,43 @@ def temporary_database_factory():
 
 
 @pytest.fixture(scope="module")
-def database():
+def migration_database():
     with temporary_database() as engine:
         migrate(engine, "head")
         yield engine
+
+
+@pytest.fixture(scope="module")
+def database(migration_database):
+    # A separate login proves policies without inheriting the migration role's bypass.
+    role, password = f"di_app_{uuid4().hex}", uuid4().hex
+    with migration_database.begin() as connection:
+        connection.execute(
+            text(
+                f"CREATE ROLE {role} LOGIN PASSWORD '{password}'"
+                " NOSUPERUSER NOBYPASSRLS NOINHERIT"
+            )
+        )
+        connection.execute(text(f"GRANT USAGE ON SCHEMA public TO {role}"))
+        connection.execute(
+            text(
+                f"GRANT SELECT, INSERT, UPDATE, DELETE ON"
+                f" documents, chunks, entities TO {role}"
+            )
+        )
+    engine = create_engine(
+        migration_database.url.set(username=role, password=password),
+        hide_parameters=True,
+        pool_size=1,
+        max_overflow=1,
+    )
+    try:
+        yield engine
+    finally:
+        engine.dispose()
+        with migration_database.begin() as connection:
+            connection.execute(text(f"DROP OWNED BY {role}"))
+            connection.execute(text(f"DROP ROLE {role}"))
 
 
 @pytest.fixture(

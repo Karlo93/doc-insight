@@ -11,8 +11,15 @@ from doc_insight.contracts.storage import (
 )
 from doc_insight.contracts.structure import Chunk, Document, Entity
 from pgvector.sqlalchemy import VECTOR
-from sqlalchemy import Connection, Engine, MetaData, Table, func, select
+from sqlalchemy import Connection, Engine, MetaData, Table, func, select, text
 from sqlalchemy.dialects.postgresql import insert
+
+
+def _set_tenant(connection: Connection, tenant_id: str) -> None:
+    # Transaction-local state is cleared on commit/rollback before pool reuse.
+    connection.execute(
+        text("SELECT set_config('app.tenant_id', :tenant, true)"), {"tenant": tenant_id}
+    )
 
 
 class PostgresRepository:
@@ -70,6 +77,7 @@ class PostgresRepository:
             index_elements=["tenant_id", "sha256"], set_=updates
         ).returning(self.docs)
         with self.engine.begin() as connection:
+            _set_tenant(connection, tenant_id)
             row = connection.execute(upsert).mappings().one()
             self._replace(
                 connection, tenant_id, row["id"], record.chunks, record.entities
@@ -84,6 +92,7 @@ class PostgresRepository:
         entities: list[Entity],
     ) -> None:
         with self.engine.begin() as connection:
+            _set_tenant(connection, tenant_id)
             owner = connection.execute(
                 select(self.docs.c.id)
                 .filter_by(tenant_id=tenant_id, id=document_id)
@@ -98,6 +107,7 @@ class PostgresRepository:
         with self.engine.connect().execution_options(
             isolation_level="REPEATABLE READ"
         ) as connection:
+            _set_tenant(connection, tenant_id)
             query = select(self.docs).filter_by(tenant_id=tenant_id, id=document_id)
             row = connection.execute(query).mappings().one_or_none()
             if row is None:
@@ -126,6 +136,7 @@ class PostgresRepository:
             .limit(k)
         )
         with self.engine.connect() as connection:
+            _set_tenant(connection, tenant_id)
             return [
                 SearchHit(
                     document_id=row["document_id"],
