@@ -488,7 +488,7 @@ dev = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "bandit", extras = ["toml"], specifier = ">=1.8" },
+    { name = "bandit", extras = ["toml"], specifier = ">=1.9.4" },
     { name = "fonttools", specifier = ">=4.64.0" },
     { name = "fpdf2", specifier = ">=2.8.8" },
     { name = "mypy", specifier = ">=1.14" },
