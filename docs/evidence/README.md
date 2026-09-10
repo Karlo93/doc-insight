@@ -34,8 +34,9 @@ route templates keep cardinality bounded and avoid raw question/filename labels.
 
 ## Automated checks and real-stack acceptance
 
-- Offline default suite: **461 passed**, 91 deselected, **92.61% coverage**.
-- Real service integration tier: **68 passed**, 484 deselected.
+- Linux CI default suite: **464 passed**, 91 deselected, **92.71% coverage**.
+  Local run before the three allowlist cases: 461 passed, 92.61%.
+- Real service integration tier: **68 passed**, 487 deselected (final CI).
 - Pinned tokenizer/embedding model tier: **23 passed**, 529 deselected.
 - Ruff, formatting, strict mypy, Compose base/private validation and JavaScript
   syntax checks passed. Bandit and pip-audit passed; local workspace and spaCy wheel
@@ -104,3 +105,5 @@ configuration value matches; these are transferred builds, not independent rebui
 The 120-second baseline used the earlier candidate query image
 `sha256:aa4a27a05f8600e07578d57711aedc3f2f4b03c27c2d8508a9c96371e0e25877`.
 Final-image confirmation is retained separately in the benchmark data.
+
+CI on the initial release commit passed all three jobs: [run 34471097109](https://github.com/Karlo93/doc-insight/actions/runs/34471097109). Subsequent fixes receive their own CI run.

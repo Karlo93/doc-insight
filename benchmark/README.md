@@ -47,7 +47,7 @@ so the valid Linux driver kept the offered schedule even during saturation.
 
 The short ramp independently found the same query boundary: 25 RPS passed; 50 and
 100 offered RPS produced approximately 23 completed RPS with many client drops.
-Query CPU reached approximately 406% (four cores) and memory stayed around 1.05 GiB
+Query CPU reached approximately 423% (four cores) and memory stayed around 1.05 GiB
 of its 2-GiB cap. CPU inference is the first observed constraint. Increasing replicas
 or CPU, batching embeddings and testing a realistic corpus are future experiments;
 none of those gains is claimed by this report.
@@ -112,4 +112,21 @@ uv run --locked --with matplotlib==3.10.7 python benchmark/plot_results.py
 [confirmation samples](raw/confirmation.json.gz), [initial soak samples](raw/soak.json.gz)
 and the [plotting source](plot_results.py) are committed. Raw samples contain status,
 scheduled latency and dispatch lag only; they contain no tokens or document text.
+[Resource samples](resources.json) record CPU/memory observations.
 Screenshots and release validation are in [the evidence index](../docs/evidence/README.md).
+
+## Transferred-image confirmation
+
+The exported release images were run again for 60 seconds per stage. Metadata
+25/100 RPS returned 1,500/6,000 successful responses (p95 24.13/21.41 ms). Query
+25 RPS returned all 1,500 responses (p95 109.16 ms). At 100 offered query RPS,
+1,605 succeeded, 4,394 were client-dropped, and one received HTTP 401 after 5.017 s.
+This final overloaded stage is retained in [raw samples](raw/release-confirmation.json.gz).
+
+The gateway shared one HTTP connection pool between query traffic and signing-key
+refresh. At saturation, pending query exchanges can starve the five-second JWKS
+fetch, which fails authentication closed. The observed timeout matches that path;
+this is a diagnosis from timing and connection ownership, not a captured exception
+trace. The gateway now gives identity refresh its own reusable HTTP client and closes
+both clients at shutdown. Regression verification records their separate ownership.
+The subsequent overload/soak results are recorded below after completion.

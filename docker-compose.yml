@@ -45,6 +45,8 @@ services:
       DI_DEV_JWKS_PATH: /run/dev/jwks.json
       DI_JWT_ISSUER: ${DI_JWT_ISSUER:-doc-insight-dev}
       DI_JWT_AUDIENCE: ${DI_JWT_AUDIENCE:-doc-insight}
+      DI_JWKS_CACHE_SECONDS: ${DI_JWKS_CACHE_SECONDS:-300}
+      DI_JWKS_REFRESH_SECONDS: ${DI_JWKS_REFRESH_SECONDS:-5}
       DI_TENANTS: ${DI_TENANTS:-demo,other}
       DI_RATE_LIMIT_RPS: ${DI_RATE_LIMIT_RPS:-5}
       DI_RATE_LIMIT_BURST: ${DI_RATE_LIMIT_BURST:-10}

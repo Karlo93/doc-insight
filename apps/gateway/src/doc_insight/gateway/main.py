@@ -27,6 +27,8 @@ async def production_gateway() -> AsyncIterator[Gateway]:
     settings = get_settings()
     async with (
         httpx.AsyncClient(follow_redirects=False, trust_env=False) as client,
+        # Query saturation must not starve signing-key refresh of a connection.
+        httpx.AsyncClient(follow_redirects=False, trust_env=False) as identity_client,
         Redis.from_url(
             str(settings.redis_url),
             socket_timeout=settings.redis_timeout_seconds,
@@ -35,7 +37,9 @@ async def production_gateway() -> AsyncIterator[Gateway]:
     ):
         yield Gateway(
             settings,
-            Authenticator(HttpJwksSource(client, str(settings.jwks_url)), settings),
+            Authenticator(
+                HttpJwksSource(identity_client, str(settings.jwks_url)), settings
+            ),
             RedisRateLimiter(redis, settings.rate_limit_rps, settings.rate_limit_burst),
             HttpUpstream(
                 client, str(settings.ingest_url), settings.max_upstream_response_bytes

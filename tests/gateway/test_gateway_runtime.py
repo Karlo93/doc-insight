@@ -46,9 +46,12 @@ async def test_production_clients_created_once_and_closed(settings):
             gateway.query.max_response_bytes
             == gateway.settings.max_upstream_response_bytes
         )
-        assert gateway.auth.source.client is client
+        identity_client = gateway.auth.source.client
+        assert identity_client is not client
+        assert not identity_client.is_closed
         assert not client.is_closed
     assert client.is_closed
+    assert identity_client.is_closed
 
 
 @pytest.mark.parametrize(

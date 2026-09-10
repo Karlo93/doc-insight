@@ -40,6 +40,9 @@ under a version and an ISO date when a release is cut.
 
 - Speed up chunking with one page encoding and a Unicode guard that preserves the original
   chunker for unsafe pages; chunk output and pipeline version 6 remain unchanged.
+- Isolate signing-key HTTP connections from saturated query traffic and retire
+  Caddy upstream idle sockets before Uvicorn closes them.
+
 - Run validation on every push; wait for model readiness before admitting queries.
 - Provision all configured tenants in the outbox relay and reject unprovisioned identities.
 - Add a GIN full-text index and cap native embedding threads; document measured capacity.
