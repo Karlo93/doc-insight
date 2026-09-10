@@ -5,6 +5,10 @@ under a version and an ISO date when a release is cut.
 
 ## [Unreleased]
 
+No changes yet.
+
+## [0.1.0] - 2026-09-10
+
 ### Fixed
 
 - Generate independent local credentials, preserve existing configuration, scope
@@ -72,4 +76,5 @@ under a version and an ISO date when a release is cut.
 
 - Pipeline version 6 carries each page's language on its chunks.
 
-[Unreleased]: https://github.com/Karlo93/doc-insight/commits/main
+[Unreleased]: https://github.com/Karlo93/doc-insight/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Karlo93/doc-insight/releases/tag/v0.1.0
