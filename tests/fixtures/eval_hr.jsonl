@@ -1,0 +1,8 @@
+{"question": "Čime radnici skupljaju kristale u paškim bazenima?", "question_en": "What tool do workers use to collect crystals in the Pag salt pans?", "expected_substring": "drvene grablje"}
+{"question": "Zašto se voda nakon pljuska ne zadržava iza suhozida?", "question_en": "Why does water not collect behind a dry stone wall after a downpour?", "expected_substring": "kišnica prolazi"}
+{"question": "Po kakvom svjetlosnom signalu pomorac prepoznaje opisani svjetionik?", "question_en": "What light signal lets a sailor recognize the lighthouse described?", "expected_substring": "tri kratka bljeska"}
+{"question": "Kakvu poslasticu dobije pas kad nanjuši tartuf?", "question_en": "What treat does the dog receive when it sniffs out a truffle?", "expected_substring": "komadićem sira"}
+{"question": "Pomoću kojeg uređaja tamburaši prije sviranja namještaju visinu tona?", "question_en": "Which device do tambura players use to adjust their pitch before playing?", "expected_substring": "elektronički ugađač"}
+{"question": "Kako se pokreti glumčevih ruku prenose na marionetu?", "question_en": "How are the movements of an actor's hands transmitted to a marionette?", "expected_substring": "tanke niti"}
+{"question": "Kakve trajne oznake pokazuju gdje završavaju izmjerene parcele?", "question_en": "What permanent markers show where the surveyed plots end?", "expected_substring": "betonski međaši"}
+{"question": "Zašto košarač prije rada potapa osušene šibe?", "question_en": "Why does the basket maker soak dried willow rods before working?", "expected_substring": "ne bi pucale"}
