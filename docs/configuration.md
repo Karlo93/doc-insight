@@ -10,6 +10,7 @@ its settings class does not configure `.env` loading. Compose reads `.env` separ
 | Language, NER, chunking, tokenizer and cache | [Structure table](pipeline.md#structure-m2) |
 | Query: `DI_LLM_*`, `DI_ABSTAIN_THRESHOLD`, `DI_RRF_K`, `DI_QUERY_TOP_K_MAX` | [Query settings](query.md#settings); shares the embedding profile with worker |
 | Embedding batch and pinned ONNX snapshot | [Embedding table](pipeline.md#embeddings-m3) |
+| Redis, S3 and `DI_WORKER_*` | [Worker settings](worker.md#settings): stream reads, reclaim, attempts and original object storage |
 | `DI_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@localhost:5432/di`; restricted runtime login for the CLI and storage code; cannot bypass row-level security |
 | `DI_MIGRATION_DATABASE_URL` | `postgresql+psycopg://di:di@localhost:5432/di`; privileged login for `make migrate` and the disposable integration databases |
 | `DI_ALLOW_REMOTE_TEST_DB` | Unset; the integration harness refuses nonlocal database hosts unless explicitly enabled |
@@ -23,11 +24,9 @@ worker settings are documented in the linked pipeline tables and
 [settings class](../apps/worker/src/doc_insight/worker/settings.py).
 `DI_ALLOW_REMOTE_TEST_DB` belongs to the test harness, not the worker settings object.
 
-`DI_REDIS_URL` and the six `DI_S3_*` variables appear in `.env.example` and CI as connection
-conventions for the [local stack](local-stack.md); the adapters that read them, and
-`DI_MAX_UPLOAD_BYTES`, land with lane 1. Until then no worker option consumes them. The
-observability package validates its own `DI_OTEL_*` settings once at `configure()`. Add
-default/purpose tables with each service implementation; do not infer unset defaults.
+The worker consumes `DI_REDIS_URL`, all six `DI_S3_*` variables and its `DI_WORKER_*`
+settings. The [worker runbook](worker.md) records defaults and local examples.
+The observability package validates its own `DI_OTEL_*` settings once at `configure()`.
 
 Keep credentials out of tracked files. The checked-in database values are for local
 development. Model-cache paths must be absolute in containers. Warm the pinned snapshots

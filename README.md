@@ -3,7 +3,9 @@
 
 doc-insight extracts text from PDFs and images, detects language and entities, and builds searchable passages.
 The worker CLI stores documents and 384-dimensional embeddings in tenant-scoped Postgres tables.
-The internal ingest and query services accept uploads and return cited answers or abstain. The authenticating gateway is the next service layer; the [architecture](docs/architecture.md) distinguishes implemented behavior from planned contracts.
+The internal ingest and query services accept uploads and return cited answers or abstain.
+`di worker run` consumes uploaded originals from Redis with crash recovery; see the [worker runbook](docs/worker.md).
+The authenticating gateway is the next service layer; the [architecture](docs/architecture.md) distinguishes implemented behavior from planned contracts.
 
 ## Prerequisites
 
