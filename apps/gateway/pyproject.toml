@@ -10,7 +10,7 @@ dependencies = [
     "httpx>=0.28.1,<1",
     "pydantic-settings>=2.15,<3",
     "pyjwt[crypto]>=2.13,<3",
-    "redis>=6.4,<7",
+    "redis>=7.2,<8",
     "uvicorn>=0.35,<1",
 ]
 

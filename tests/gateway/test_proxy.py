@@ -138,6 +138,12 @@ async def test_upload_streams_before_client_finishes(gateway, token):
     "status,body,expected",
     [
         (404, b'{"error":{"code":"not_found","message":"not found"}}', 404),
+        (404, b'{"error":{"code":"404","message":"Document not found"}}', 404),
+        (
+            415,
+            b'{"error":{"code":"415","message":"Expected PDF, PNG, JPEG or TIFF bytes"}}',
+            415,
+        ),
         (422, b'{"detail":[{"input":"private"}]}', 502),
         (500, b"traceback private", 502),
         (504, b"traceback private", 504),

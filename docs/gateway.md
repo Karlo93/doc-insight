@@ -120,7 +120,7 @@ All gateway errors have `{"error":{"code":"...","message":"..."}}`.
 | Other routing status | `http_error` | Unmatched route or unsupported method |
 
 Upstream 4xx responses pass through only if JSON contains exactly `error.code` and
-`error.message`: a lowercase identifier code (at most 64 characters) and a message
+`error.message`: a lowercase identifier or status code (at most 64 characters) and a message
 of at most 1024 characters. Other bodies are discarded. Services must keep documented
 error messages free of document text. Upstream 5xx messages never pass through.
 
@@ -193,4 +193,4 @@ make check
 Offline tests generate session keys, use an in-process ASGI upstream, and share provider
 contracts between fakes and real adapters. Redis tests use unique tenant keys and remove
 only those keys. Fifty concurrent requests must admit exactly the configured burst.
-See [ADR-0007](adr/0007-gateway-identity-and-rate-limits.md) for the trade-offs.
+See [ADR-0010](adr/0010-gateway-identity-and-rate-limits.md) for the trade-offs.

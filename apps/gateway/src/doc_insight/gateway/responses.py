@@ -29,7 +29,7 @@ def upstream_response(reply: UpstreamReply) -> Response:
                 set(payload) == {"error"}
                 and set(detail) == {"code", "message"}
                 and isinstance(detail["code"], str)
-                and re.fullmatch(r"[a-z][a-z0-9_]{0,63}", detail["code"])
+                and re.fullmatch(r"[a-z0-9][a-z0-9_]{0,63}", detail["code"])
                 and isinstance(detail["message"], str)
                 and len(detail["message"]) <= 1024
             ):

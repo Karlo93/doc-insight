@@ -1,4 +1,4 @@
-# ADR-0007: RS256/JWKS identity and a Redis token bucket
+# ADR-0010: RS256/JWKS identity and a Redis token bucket
 
 Status: accepted. Date: 2026-09-10.
 

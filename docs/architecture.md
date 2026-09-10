@@ -203,7 +203,7 @@ avoids a provider dependency for every answer. Abstention handles insufficient e
 breaker thresholds and evidence rules are in [query.md](query.md) and
 [ADR-0008](adr/0008-hybrid-query.md).
 
-**Implemented in ingest and query; the gateway lands with lane 4:** HTTP services expose
+**Implemented in ingest, query and the gateway:** HTTP services expose
 dependency-free `GET /healthz` and dependency-checking `GET /readyz` (503 when unavailable). **Implemented:** the worker writes
 `di:worker:{hostname}-{pid}` in Redis with a 30-second TTL at loop/message boundaries
 ([ADR-0009](adr/0009-worker-heartbeat-identity.md)); long stages can outlast the TTL. **Implemented:** the

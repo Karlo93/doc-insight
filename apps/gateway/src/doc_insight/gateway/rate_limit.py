@@ -52,6 +52,6 @@ class RedisRateLimiter:
 
     async def ready(self) -> bool:
         try:
-            return bool(await self.redis.ping())
+            return bool(await cast(Awaitable[bool], self.redis.ping()))
         except RedisError:
             return False
