@@ -58,12 +58,12 @@ flowchart TB
 | --- | --- | --- |
 | Client / SDK | Upload files and ask questions | CLI exists; browser/SDK/Streamlit box is a target interface, no shipped client |
 | Caddy | Public TLS termination | Lands with lane 5 |
-| Gateway, port 8000 | Validate RS256 JWT against JWKS; derive tenant/user; rate-limit and proxy | Lands with lane 4 |
+| Gateway, port 8000 | Validate RS256 JWT against JWKS; derive tenant/user; rate-limit and proxy | Implemented; [runbook](gateway.md) |
 | Ingest, port 8001 | Stream validated uploads to objects; create document/outbox transaction; status reads and relay | Implemented; [upload, status and relay](ingest.md) |
 | Query, port 8002 | Retrieve tenant-owned evidence; generate cited answer or abstain | Implemented; [operation and confidence](query.md) |
 | Worker, no HTTP port | Extract → analyze → embed → store | CLI and `di worker run` share the pipeline; status transitions, replay, reclaim and DLQ are implemented |
 | Object storage, ports 9000/9001 | Original bytes in `documents`, at `{tenant_id}/{sha256}` | MinIO with mandatory SSE-S3 runs in the Compose `infra` profile; the ingest adapter streams originals into it |
-| Redis, port 6379 | Event stream, worker group, DLQ and rate-limit buckets | Redis runs in the Compose `infra` profile; the ingest relay publishes `di:documents` and `di worker run` consumes it; rate limiting lands with lane 4 |
+| Redis, port 6379 | Event stream, worker group, DLQ and rate-limit buckets | Redis runs in the Compose `infra` profile; the ingest relay publishes `di:documents` and `di worker run` consumes it; the gateway keeps its token buckets there |
 | Postgres, port 5432 | Relational metadata and 384-dimensional pgvector HNSW index | Implemented, including forced row-level security ([ADR-0005](adr/0005-tenant-row-level-security.md)); outbox implemented ([ADR-0007](adr/0007-transactional-outbox.md)); full-text expression retrieval implemented; `audit_events` delivery unassigned |
 | LLM | Mistral answer generation behind a provider boundary; extractive fallback | Implemented; hosted calls are opt-in, offline fallback validated |
 | Collector, port 4318; Prometheus; Tempo; Grafana | OTLP/HTTP ingestion, metrics, traces and dashboards | Runs in the Compose `telemetry` profile with a provisioned dashboard; the `doc_insight.observability` helper is implemented ([ADR-0004](adr/0004-opentelemetry.md)) and the CLI emits stage spans; services adopt it as they land |
@@ -166,7 +166,7 @@ transaction-local setting, and the restricted runtime login has neither superuse
 validation, object-storage adapter or TLS. Local Postgres is loopback-only with development
 credentials.
 
-**Lands with lane 4:** the gateway alone derives identity from RS256 JWT claims verified
+**Implemented:** the gateway alone derives identity from RS256 JWT claims verified
 against JWKS. It strips client-supplied `X-Tenant-Id` and `X-User-Id`, then injects its own.
 **Implemented in ingest and query:** both require `X-Tenant-Id` (400 if absent) and
 trust it only on the internal network. Tenant IDs are 1–64 characters from `[A-Za-z0-9._-]`.
@@ -203,7 +203,7 @@ avoids a provider dependency for every answer. Abstention handles insufficient e
 breaker thresholds and evidence rules are in [query.md](query.md) and
 [ADR-0008](adr/0008-hybrid-query.md).
 
-**Implemented in ingest and query; the gateway lands with lane 4:** HTTP services expose
+**Implemented in ingest, query and the gateway:** HTTP services expose
 dependency-free `GET /healthz` and dependency-checking `GET /readyz` (503 when unavailable). **Implemented:** the worker writes
 `di:worker:{hostname}-{pid}` in Redis with a 30-second TTL at loop/message boundaries
 ([ADR-0009](adr/0009-worker-heartbeat-identity.md)); long stages can outlast the TTL. **Implemented:** the
@@ -239,6 +239,6 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 - [Observability](observability.md): the shared helper API and attribute policy.
 - [Local stack](local-stack.md): Compose profiles, ports, encryption and Grafana.
 
-The [query guide](query.md) is implemented. `ingest.md`, `gateway.md` and `deploy.md` are not present yet; they
-land with their owning services. Add their links to the [index](README.md) when merged. The
-worker service documentation is [worker.md](worker.md), with pipeline details in `pipeline.md`.
+The [query guide](query.md), [ingest guide](ingest.md), [worker runbook](worker.md) and
+[gateway runbook](gateway.md) are implemented; `deploy.md` lands with the deployment lane. Add
+its link to the [index](README.md) when merged; pipeline details stay in `pipeline.md`.

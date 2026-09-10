@@ -27,6 +27,16 @@ after analysis and restarted against durable Redis/Postgres state. The shared S3
 adapter serves both ingestion and processing. No schema or pipeline-version change.
 ADR-0009 records per-consumer heartbeat identity and its progress-reporting limits.
 
+## Gateway — public identity boundary
+
+Added RS256 verification against cached JWKS and a generated development issuer.
+One Redis Lua script owns refill and consumption for each tenant/user bucket. Chose
+fail closed by default; fail open is explicit and leaves readiness unhealthy during
+an outage. Request bodies stream to reused HTTP clients with declared and observed
+size checks. Fake/real provider contracts cover authentication and forwarding; real
+Redis tests prove exactly seven of fifty concurrent requests pass a burst of seven.
+Adopted shared request instrumentation and attached only verified identity ids.
+
 ## Local infrastructure and telemetry
 
 Separated storage and telemetry profiles so neither requires application images.

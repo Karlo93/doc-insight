@@ -12,3 +12,4 @@ build/
 *.key
 inputs/
 .cache/
+.dev-keys/

@@ -2,15 +2,14 @@
 
 The internal [query service](query.md) implements `POST /query` on port 8002. Its guide
 includes a captured offline response. The internal [ingest service](ingest.md) implements
-`POST /ingest`, `GET /documents/{id}` and the outbox relay on port 8001. The public gateway
-remains planned. Examples below describe the public contract; they are not captured responses.
+`POST /ingest`, `GET /documents/{id}` and the outbox relay on port 8001. The public [gateway](gateway.md)
+authenticates, rate-limits and forwards these routes. Examples below describe the public contract; they are not captured responses.
 Use the [working CLI](../README.md#local-setup) to index documents for query.
 
 ## Public HTTP contract
 
 Authenticate with `Authorization: Bearer <JWT>` at the gateway. The development issuer,
-key-generation and token-minting scripts land with lane 4. Their invocation and actual
-responses will be verified after merge; no token command is available in this revision.
+key-generation and token-minting commands are in the [gateway runbook](gateway.md).
 The gateway derives internal tenant/user headers from verified credentials.
 
 | Request | Success | Other outcomes |
@@ -40,7 +39,7 @@ be exposed as an alternative public authentication path.
 
 ## Planned curl sequence (Bash)
 
-Run only after deployment and token tooling land. Set `BASE_URL` to the deployed public
+Run after the upstream services and deployment are available. Set `BASE_URL` to the deployed public
 HTTPS endpoint and `TOKEN` to a minted development token; neither value is supplied here.
 
 ```sh

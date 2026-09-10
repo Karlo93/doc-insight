@@ -10,6 +10,7 @@
 - [Worker](worker.md): sequential consumption, recovery, dead letters and manual object/event examples.
 - [Local stack](local-stack.md): Compose `infra` and `telemetry` profiles, ports, encryption and Grafana.
 - [Observability](observability.md): the shared OpenTelemetry helper, emitted signals and attribute policy.
+- [Gateway](gateway.md): JWT/JWKS authentication, rate limits, proxy behavior and development token setup.
 - [CI](ci.md): lint, types, tests, security checks and repository protection setup.
 - [Engineering journal](journal.md): implementation notes by milestone.
 - [Lessons](lessons.md): concise observations from implementation and failure cases.
@@ -22,6 +23,7 @@
 - [ADR-0007](adr/0007-transactional-outbox.md): transactional outbox and Redis Streams delivery.
 - [ADR-0008](adr/0008-hybrid-query.md): hybrid retrieval with RRF, extractive fallback and confidence.
 - [ADR-0009](adr/0009-worker-heartbeat-identity.md): one progress heartbeat per consumer process.
+- [ADR-0010](adr/0010-gateway-identity-and-rate-limits.md): RS256/JWKS identity and fail-closed Redis quotas.
 - [Changelog](../CHANGELOG.md): changes awaiting release.
 - [Contributing](../CONTRIBUTING.md): branch/commit conventions, test tiers, budgets and review checklist.
 - [Security policy](../SECURITY.md): private reporting, supported versions and secrets handling.
