@@ -19,8 +19,20 @@ jobs:
       - run: make setup
       - run: make lint
       - run: make typecheck
+      - name: compose
+        run: docker compose --profile infra --profile telemetry config --quiet
   test:
     runs-on: ubuntu-latest
+    env:
+      COMPOSE_PROJECT_NAME: di-ci
+      DI_MIGRATION_DATABASE_URL: postgresql+psycopg://di:di@127.0.0.1:5432/di
+      DI_REDIS_URL: redis://127.0.0.1:6379/0
+      DI_S3_ENDPOINT: http://127.0.0.1:9000
+      DI_S3_REGION: us-east-1
+      DI_S3_BUCKET: documents
+      DI_S3_ACCESS_KEY: minioadmin
+      DI_S3_SECRET_KEY: minioadmin
+      DI_S3_USE_SSL: "false"
     services:
       postgres:
         image: pgvector/pgvector:0.8.6-pg16
@@ -32,15 +44,29 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U di -d di"
           --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.9-alpine
+        ports: [6379:6379]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 12
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
+      # Actions services cannot supply MinIO's required server command.
+      - name: MinIO service
+        run: |
+          docker compose up -d --wait --wait-timeout 60 minio
+          docker compose run --rm minio-init
       - run: make setup
       - run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-hrv
       - run: make test
       - run: make test-integration
+      - name: MinIO cleanup
+        if: always()
+        run: docker compose down minio-init minio
       - uses: actions/upload-artifact@v7
         with:
           name: coverage

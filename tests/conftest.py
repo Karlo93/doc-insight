@@ -7,9 +7,13 @@ from doc_insight.worker.settings import get_settings
 
 
 @pytest.fixture(autouse=True)
-def isolated_settings(monkeypatch: pytest.MonkeyPatch):
+def isolated_settings(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch):
     # Local tuning must not change assertions; keep machine-specific binary/cache paths.
     for key in list(os.environ):
+        if request.node.get_closest_marker("integration") and (
+            key == "DI_REDIS_URL" or key.startswith("DI_S3_")
+        ):
+            continue
         if key.startswith("DI_") and key not in {
             "DI_TESSERACT_CMD",
             "DI_MODEL_CACHE",

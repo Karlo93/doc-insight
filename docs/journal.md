@@ -1,5 +1,14 @@
 # Engineering journal
 
+## Local infrastructure and telemetry
+
+Separated storage and telemetry profiles so neither requires application images.
+MinIO generates a persistent development key and the bucket job requires SSE-S3.
+Collector and Tempo probes use a static binary from a pinned one-shot image.
+CI reuses the MinIO Compose definition because Actions services cannot pass its
+server command. Postgres and Redis use declarative services. ADR-0006 records
+the alternatives; application code and pipeline output are unchanged.
+
 ## Shared observability
 
 Added process-owned OpenTelemetry providers behind the stage observer contract.
