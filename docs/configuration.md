@@ -8,6 +8,7 @@ its settings class does not configure `.env` loading. Compose reads `.env` separ
 | --- | --- |
 | OCR: `DI_OCR_MIN_CHARS`, `DI_OCR_DPI`, `DI_OCR_LANGS`, `DI_TESSERACT_CMD` | [Extraction table](pipeline.md#pipeline-files-to-searchable-documents) |
 | Language, NER, chunking, tokenizer and cache | [Structure table](pipeline.md#structure-m2) |
+| Query: `DI_LLM_*`, `DI_ABSTAIN_THRESHOLD`, `DI_RRF_K`, `DI_QUERY_TOP_K_MAX` | [Query settings](query.md#settings); shares the embedding profile with worker |
 | Embedding batch and pinned ONNX snapshot | [Embedding table](pipeline.md#embeddings-m3) |
 | `DI_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@localhost:5432/di`; restricted runtime login for the CLI and storage code; cannot bypass row-level security |
 | `DI_MIGRATION_DATABASE_URL` | `postgresql+psycopg://di:di@localhost:5432/di`; privileged login for `make migrate` and the disposable integration databases |

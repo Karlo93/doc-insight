@@ -6,8 +6,8 @@ from math import sqrt
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from doc_insight.contracts.settings import EmbeddingSettings
 from doc_insight.worker.providers import HfTokenizer
-from doc_insight.worker.settings import Settings
 from huggingface_hub import snapshot_download
 
 if TYPE_CHECKING:
@@ -35,7 +35,7 @@ def _model(model: str, repo: str, revision: str, cache_dir: Path) -> "TextEmbedd
 
 @dataclass
 class FastEmbedEmbedder:
-    settings: Settings
+    settings: EmbeddingSettings
 
     @property
     def dimension(self) -> int:

@@ -56,6 +56,26 @@ explicitly 0.5 because whitespace hashing misses inflected forms. English-to-Cro
 retrieval measured 1.000 recall and 0.875 MRR at both sizes, reported without a gate.
 ADR-0003 records the complete results and limits. The committed font covers every Croatian
 diacritic; existing fixtures regenerate byte-identically. No stored output or pipeline version changes.
+
+
+## Query — retrieval and grounded answers
+
+Added an internal query service and shared embedding settings. Both retrieval paths
+read one PostgreSQL snapshot, including citation metadata; generation runs afterward.
+Offline tests cover filters, isolation, exact page slices, breaker recovery and HTTP
+errors. Windows asyncio's loopback socketpair is allowed only inside its own constructor;
+ordinary sockets and libpq remain blocked in unit tests. Cached MiniLM evaluation keeps
+recall@5 1.000 and MRR 0.917. Full-text contributes no hits for these natural-language
+questions; six of eight extractive answers contain the expected substring, one abstains
+and one misses. The confidence heuristic is not calibrated correctness. ADR-0008
+records the formula, limitations and deferred GIN index. No hosted calls were needed.
+The tokenizer cache-isolation test now seeds its temporary cache from the configured
+model cache, so model tests can run disconnected after their artifacts are provisioned.
+Rebased on the shared RLS and observability changes. Snapshots bind one tenant and
+use restricted runtime credentials; a shared fake/Postgres regression proves that
+a reader cannot switch to another populated tenant. Query stages adopt the shared
+telemetry API. The ADR moves to 0007 to preserve the published numbering.
+
 ## M4 — persistent core
 
 Kept extraction and inference outside the write transaction; the unique tenant/hash upsert

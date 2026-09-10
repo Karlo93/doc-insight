@@ -59,13 +59,13 @@ flowchart TB
 | Client / SDK | Upload files and ask questions | CLI exists; browser/SDK/Streamlit box is a target interface, no shipped client |
 | Caddy | Public TLS termination | Lands with lane 5 |
 | Gateway, port 8000 | Validate RS256 JWT against JWKS; derive tenant/user; rate-limit and proxy | Lands with lane 4 |
-| Ingest, port 8001 | Stream validated uploads to objects; create document/outbox transaction; status reads and relay | Lands with lane 1 |
-| Query, port 8002 | Retrieve tenant-owned evidence; generate cited answer or abstain | Lands with lane 3 |
+| Ingest, port 8001 | Stream validated uploads to objects; create document/outbox transaction; status reads and relay | Implemented; [upload, status and relay](ingest.md) |
+| Query, port 8002 | Retrieve tenant-owned evidence; generate cited answer or abstain | Implemented; [operation and confidence](query.md) |
 | Worker, no HTTP port | Extract → analyze → embed → store | CLI pipeline exists; stream consumer, status transitions and DLQ land with lane 2 |
-| Object storage, ports 9000/9001 | Original bytes in `documents`, at `{tenant_id}/{sha256}` | MinIO with mandatory SSE-S3 runs in the Compose `infra` profile; the adapter lands with lane 1 |
-| Redis, port 6379 | Event stream, worker group, DLQ and rate-limit buckets | Redis runs in the Compose `infra` profile; consumers/producers land with lanes 1, 2 and 4 |
-| Postgres, port 5432 | Relational metadata and 384-dimensional pgvector HNSW index | Implemented, including forced row-level security ([ADR-0005](adr/0005-tenant-row-level-security.md)); outbox lands with lane 1; full-text retrieval with lane 3; `audit_events` delivery unassigned |
-| LLM | Mistral answer generation behind a provider boundary; extractive fallback | Lands with lane 3 |
+| Object storage, ports 9000/9001 | Original bytes in `documents`, at `{tenant_id}/{sha256}` | MinIO with mandatory SSE-S3 runs in the Compose `infra` profile; the ingest adapter streams originals into it |
+| Redis, port 6379 | Event stream, worker group, DLQ and rate-limit buckets | Redis runs in the Compose `infra` profile; the ingest relay publishes `di:documents`; the worker consumer and rate limiting land with lanes 2 and 4 |
+| Postgres, port 5432 | Relational metadata and 384-dimensional pgvector HNSW index | Implemented, including forced row-level security ([ADR-0005](adr/0005-tenant-row-level-security.md)); outbox implemented ([ADR-0007](adr/0007-transactional-outbox.md)); full-text expression retrieval implemented; `audit_events` delivery unassigned |
+| LLM | Mistral answer generation behind a provider boundary; extractive fallback | Implemented; hosted calls are opt-in, offline fallback validated |
 | Collector, port 4318; Prometheus; Tempo; Grafana | OTLP/HTTP ingestion, metrics, traces and dashboards | Runs in the Compose `telemetry` profile with a provisioned dashboard; the `doc_insight.observability` helper is implemented ([ADR-0004](adr/0004-opentelemetry.md)) and the CLI emits stage spans; services adopt it as they land |
 
 Ports above are internal contracts. The Compose `infra` and `telemetry` profiles publish every
@@ -73,7 +73,7 @@ service on loopback with configurable host ports (see [local stack](local-stack.
 application image is built yet. A target diagram does not imply public access to its internal
 services or automatic deployment of every component.
 `audit_events` is retained from the reference diagram, but no implementation or migration
-is assigned yet. Full-text retrieval is planned as a `tsvector` expression; a persisted
+is assigned yet. Full-text retrieval uses a `tsvector` expression; a persisted
 search column or GIN index is not part of the initial query-service contract.
 
 ## Upload and processing path — lands with lanes 1, 2, 4 and 5
@@ -115,8 +115,9 @@ Duplicate `(tenant_id, sha256)` uploads return the existing ID with response sta
 `duplicate`, without reprocessing. `duplicate` is not a database lifecycle state.
 The lifecycle is `uploaded → processing → processed | failed`; failures record a sanitized
 error class and short message. The object write is outside the SQL transaction: the outbox
-does not make object storage and Postgres one atomic resource. Failed-upload cleanup must
-be verified against the ingest implementation when it lands.
+does not make object storage and Postgres one atomic resource. A failed insert after the
+object write leaves an orphan that a later identical upload overwrites
+([ADR-0007](adr/0007-transactional-outbox.md)).
 
 ## Question and answer path — lands with lanes 3, 4 and 5
 
@@ -167,9 +168,9 @@ credentials.
 
 **Lands with lane 4:** the gateway alone derives identity from RS256 JWT claims verified
 against JWKS. It strips client-supplied `X-Tenant-Id` and `X-User-Id`, then injects its own.
-**Lands with lanes 1 and 3:** ingest and query require `X-Tenant-Id` (400 if absent) and
+**Implemented in ingest and query:** both require `X-Tenant-Id` (400 if absent) and
 trust it only on the internal network. Tenant IDs are 1–64 characters from `[A-Za-z0-9._-]`.
-**Lands with lane 1:** per-tenant object prefixes through the object-storage adapter. MinIO in
+**Implemented in ingest:** per-tenant object prefixes through the object-storage adapter. MinIO in
 the local stack already requires SSE-S3 for the `documents` bucket, so originals are encrypted
 at rest there. This does not assert encryption of every database, cache or telemetry volume.
 
@@ -214,7 +215,7 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 | Decision | Alternative | Why | When to revisit |
 | --- | --- | --- | --- |
 | pgvector in Postgres (implemented) | Dedicated vector database | One transaction/backup boundary for metadata and vectors | Representative tenant-filtered recall or latency misses the agreed budget |
-| Redis Streams (planned) | Separate message broker | Shares Redis with rate limiting and supplies consumer groups | Pending-work recovery, retention or throughput exceeds measured limits |
+| Redis Streams (relay implemented; consumer planned) | Separate message broker | Shares Redis with rate limiting and supplies consumer groups | Pending-work recovery, retention or throughput exceeds measured limits |
 | Multilingual MiniLM (implemented) | multilingual-e5-large | Existing 384-dimensional profile and 120/24 chunks pass the small regression set | Bilingual holdout recall@5 below 0.8; compare latency/memory before switching (ADR-0003) |
 | ONNX on CPU (implemented) | GPU inference | Current adapter runs without a PyTorch/GPU dependency | Measured inference throughput cannot meet the deployment budget |
 | Compose first (infrastructure and telemetry profiles implemented; application images planned) | Kubernetes | Local infrastructure lifecycle already works ([ADR-0006](adr/0006-local-infrastructure.md)); the full stack keeps one local entry point | Multi-node availability or orchestration requirements justify manifests |
@@ -235,6 +236,6 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 - [Observability](observability.md): the shared helper API and attribute policy.
 - [Local stack](local-stack.md): Compose profiles, ports, encryption and Grafana.
 
-Per-service `ingest.md`, `query.md`, `gateway.md` and `deploy.md` are not present yet; they
+The [query guide](query.md) is implemented. `ingest.md`, `gateway.md` and `deploy.md` are not present yet; they
 land with their owning services. Add their links to the [index](README.md) when merged. The
 current worker service documentation is `pipeline.md`.

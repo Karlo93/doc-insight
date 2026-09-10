@@ -445,10 +445,14 @@ version = "0.1.0"
 source = { editable = "packages/contracts" }
 dependencies = [
     { name = "pydantic" },
+    { name = "pydantic-settings" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.13.5" }]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.13.5" },
+    { name = "pydantic-settings", specifier = ">=2.15,<3" },
+]
 
 [[package]]
 name = "doc-insight-domain"
@@ -520,6 +524,28 @@ requires-dist = [
 name = "doc-insight-query"
 version = "0.1.0"
 source = { editable = "apps/query" }
+dependencies = [
+    { name = "doc-insight-contracts" },
+    { name = "doc-insight-observability" },
+    { name = "doc-insight-worker" },
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "pydantic-settings" },
+    { name = "sqlalchemy" },
+    { name = "uvicorn" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "doc-insight-contracts", editable = "packages/contracts" },
+    { name = "doc-insight-observability", editable = "packages/observability" },
+    { name = "doc-insight-worker", editable = "apps/worker" },
+    { name = "fastapi", specifier = ">=0.115,<1" },
+    { name = "httpx", specifier = ">=0.28,<1" },
+    { name = "pydantic-settings", specifier = ">=2.15,<3" },
+    { name = "sqlalchemy", specifier = ">=2,<3" },
+    { name = "uvicorn", specifier = ">=0.34,<1" },
+]
 
 [[package]]
 name = "doc-insight-testing"

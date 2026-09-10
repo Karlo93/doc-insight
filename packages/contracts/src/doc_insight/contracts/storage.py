@@ -2,12 +2,18 @@
 
 from datetime import UTC, datetime
 from math import isfinite
-from typing import Protocol
+from typing import Literal, Protocol
 from uuid import UUID, uuid4
 
 from doc_insight.contracts.ingest import DocumentStatus
 from doc_insight.contracts.structure import Chunk, Document, Entity
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+
+
+class QueryFilter(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    document_ids: list[UUID] | None = None
+    language: Literal["en", "hr"] | None = None
 
 
 class StoredDocument(BaseModel):
@@ -92,5 +98,12 @@ class DocumentRepository(Protocol):
         self, tenant_id: str, document_id: UUID
     ) -> StoredDocument | None: ...
     def nearest_chunks(
-        self, tenant_id: str, vector: list[float], k: int
+        self,
+        tenant_id: str,
+        vector: list[float],
+        k: int,
+        filter: QueryFilter | None = None,
+    ) -> list[SearchHit]: ...
+    def search_text(
+        self, tenant_id: str, query: str, k: int, filter: QueryFilter | None = None
     ) -> list[SearchHit]: ...

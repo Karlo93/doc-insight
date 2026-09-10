@@ -20,9 +20,10 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
+pythonpath = ["."]
 testpaths = ["tests", "apps", "packages"]
-addopts = '--cov --cov-report=term-missing --cov-report=xml --cov-fail-under=70 -m "not models and not integration"'
-markers = ["models: requires runtime model downloads", "integration: requires local infrastructure services"]
+addopts = '--cov --cov-report=term-missing --cov-report=xml --cov-fail-under=70 -m "not models and not integration and not external"'
+markers = ["models: requires runtime model downloads", "integration: requires local infrastructure services", "external: opt-in hosted model contract; never in CI"]
 
 [tool.coverage.run]
 source = ["apps", "packages"]
@@ -38,7 +39,7 @@ target-version = "py312"
 python_version = "3.12"
 strict = true
 explicit_package_bases = true
-mypy_path = ["apps/ingest/src", "apps/worker/src", "packages/contracts/src", "packages/testing/src", "packages/observability/src"]
+mypy_path = ["apps/ingest/src", "apps/query/src", "apps/worker/src", "packages/contracts/src", "packages/testing/src", "packages/observability/src"]
 
 [[tool.mypy.overrides]]
 module = ["pypdfium2.*", "pytesseract.*"]

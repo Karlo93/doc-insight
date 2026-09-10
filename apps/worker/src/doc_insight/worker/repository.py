@@ -1,8 +1,11 @@
 """SQLAlchemy Core adapter; the migration owns the schema, reflected once per instance."""
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import cast
 from uuid import UUID, uuid5
 
+from doc_insight.contracts.query import QueryFilter, QueryReader
 from doc_insight.contracts.storage import (
     SearchHit,
     StoredDocument,
@@ -10,6 +13,7 @@ from doc_insight.contracts.storage import (
     validate_vector,
 )
 from doc_insight.contracts.structure import Chunk, Document, Entity
+from doc_insight.worker.query_repository import PostgresQueryReader
 from doc_insight.worker.uploads import UploadRepository
 from pgvector.sqlalchemy import VECTOR
 from sqlalchemy import Connection, Engine, MetaData, Table, func, select, text
@@ -105,46 +109,36 @@ class PostgresRepository(UploadRepository):
                 raise LookupError("Document not found for tenant")
             self._replace(connection, tenant_id, document_id, chunks, entities)
 
-    def get_document(self, tenant_id: str, document_id: UUID) -> StoredDocument | None:
-        # One snapshot prevents a concurrent replacement mixing metadata and children.
+    @contextmanager
+    def snapshot(self, tenant_id: str) -> Iterator[QueryReader]:
         with self.engine.connect().execution_options(
             isolation_level="REPEATABLE READ"
         ) as connection:
             _set_tenant(connection, tenant_id)
-            query = select(self.docs).filter_by(tenant_id=tenant_id, id=document_id)
-            row = connection.execute(query).mappings().one_or_none()
-            if row is None:
-                return None
-            children = {}
-            for table, order in ((self.chunks, "ord"), (self.entities, "char_start")):
-                rows = connection.execute(
-                    select(table)
-                    .filter_by(tenant_id=tenant_id, document_id=document_id)
-                    .order_by(table.c.page, table.c[order])
-                ).mappings()
-                children[table.name] = list(rows)
-            return StoredDocument.model_validate(dict(row, **children))
+            yield PostgresQueryReader(
+                connection, self.docs, self.chunks, self.entities, self.dimension
+            )
+
+    def get_document(self, tenant_id: str, document_id: UUID) -> StoredDocument | None:
+        with self.snapshot(tenant_id) as reader:
+            return reader.get_document(tenant_id, document_id)
 
     def nearest_chunks(
-        self, tenant_id: str, vector: list[float], k: int
+        self,
+        tenant_id: str,
+        vector: list[float],
+        k: int,
+        filter: QueryFilter | None = None,
     ) -> list[SearchHit]:
-        validate_vector(vector, self.dimension)
-        if k < 1:
-            raise ValueError("k must be positive")
-        distance = self.chunks.c.embedding.cosine_distance(vector)
-        statement = (
-            select(self.chunks, (1 - distance).label("score"))
-            .where(self.chunks.c.tenant_id == tenant_id)
-            .order_by(distance, self.chunks.c.document_id, self.chunks.c.ord)
-            .limit(k)
-        )
-        with self.engine.connect() as connection:
-            _set_tenant(connection, tenant_id)
-            return [
-                SearchHit(
-                    document_id=row["document_id"],
-                    chunk=Chunk.model_validate(row),
-                    score=row["score"],
-                )
-                for row in connection.execute(statement).mappings()
-            ]
+        with self.snapshot(tenant_id) as reader:
+            return reader.nearest_chunks(tenant_id, vector, k, filter)
+
+    def search_text(
+        self,
+        tenant_id: str,
+        query: str,
+        k: int,
+        filter: QueryFilter | None = None,
+    ) -> list[SearchHit]:
+        with self.snapshot(tenant_id) as reader:
+            return reader.search_text(tenant_id, query, k, filter)

@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from shutil import copyfile
 from unittest.mock import patch
 
 import pytest
@@ -104,6 +105,19 @@ def test_installed_models_load_once() -> None:
 
 @pytest.mark.models
 def test_hf_tokenizer_covers_a_long_page_and_caches_the_model(tmp_path: Path) -> None:
+    shared = Settings()
+    cached = Path(
+        hf_hub_download(
+            shared.embed_model,
+            "tokenizer.json",
+            revision=shared.tokenizer_revision,
+            cache_dir=shared.model_cache,
+        )
+    )
+    # Seed the isolated cache so a warmed model suite also runs fully offline.
+    destination = tmp_path / cached.relative_to(shared.model_cache)
+    destination.parent.mkdir(parents=True)
+    copyfile(cached, destination)
     settings = Settings(model_cache=tmp_path)
     tokenizer = HfTokenizer(settings)
     text = "Hello world. " * 1000

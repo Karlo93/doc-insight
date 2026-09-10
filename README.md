@@ -3,7 +3,7 @@
 
 doc-insight extracts text from PDFs and images, detects language and entities, and builds searchable passages.
 The worker CLI stores documents and 384-dimensional embeddings in tenant-scoped Postgres tables.
-Authenticated uploads and cited answers are the next service layer; the [architecture](docs/architecture.md) distinguishes implemented behavior from planned contracts.
+The internal ingest and query services accept uploads and return cited answers or abstain. The authenticating gateway is the next service layer; the [architecture](docs/architecture.md) distinguishes implemented behavior from planned contracts.
 
 ## Prerequisites
 
@@ -83,7 +83,10 @@ manifests yet (they land with lane 5).
 
 ## API status and examples
 
-The gateway, ingest and query packages are currently workspace shells (land with lanes 4, 1 and 3).
+The [query service](docs/query.md) implements `POST /query` on port 8002, with offline
+extractive answers, citations and abstention. Start it with `di-query serve` after indexing
+a fixture. The [ingest service](docs/ingest.md) accepts uploads and serves status on port 8001;
+the gateway package remains a workspace shell.
 The planned sequence is mint a development token → `POST /ingest` →
 `GET /documents/{id}` until processed → `POST /query`.
 See the [API contract](docs/api.md) for payloads, status codes and planned curl calls.
@@ -150,7 +153,9 @@ See [architecture and trade-offs](docs/architecture.md) for the planned service 
 | Path | Purpose |
 | --- | --- |
 | `apps/worker` | Extraction, analysis, embedding, storage and CLI |
-| `apps/{gateway,ingest,query}` | Reserved service packages |
+| `apps/query` | Internal hybrid retrieval and grounded answers |
+| `apps/ingest` | Upload validation, object storage, outbox relay and status reads |
+| `apps/gateway` | Reserved service package |
 | `packages/{contracts,testing}` | Shared types, Protocols and fakes |
 | `packages/observability` | OpenTelemetry setup, stage spans, request metrics and trace propagation |
 | `packages/domain` | Reserved shared package |

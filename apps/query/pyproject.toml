@@ -2,6 +2,19 @@
 name = "doc-insight-query"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
+dependencies = [
+    "doc-insight-contracts", "doc-insight-worker", "doc-insight-observability",
+    "fastapi>=0.115,<1", "httpx>=0.28,<1", "uvicorn>=0.34,<1",
+    "pydantic-settings>=2.15,<3", "sqlalchemy>=2,<3",
+]
+
+[project.scripts]
+di-query = "doc_insight.query.cli:main"
+
+[tool.uv.sources]
+doc-insight-contracts = { workspace = true }
+doc-insight-worker = { workspace = true }
+doc-insight-observability = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
