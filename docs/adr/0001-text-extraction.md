@@ -1,6 +1,6 @@
 # ADR-0001: Text extraction with pypdfium2 and Tesseract
 
-Status: accepted for M1. Date: 2026-09-09.
+Status: accepted. Date: 2026-09-09.
 
 ## Context
 
@@ -28,7 +28,7 @@ Text PDFs avoid unnecessary OCR. Scans require a separately installed binary;
 CI installs it and exercises the committed image and mixed PDF fixtures.
 OCR is approximate, so tests check names/places rather than exact transcripts.
 The threshold cannot detect a large image beside an otherwise sufficient text
-layer; region-level OCR remains outside M1. Images yield their first frame only.
+layer; region-level OCR is not implemented. Images yield their first frame only.
 PDFium is not thread-safe, so this CLI processes pages sequentially.
 
 ## Alternatives

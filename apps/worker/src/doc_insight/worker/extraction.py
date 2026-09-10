@@ -59,7 +59,7 @@ def extract(path: Path) -> ExtractedDocument:
     """Extract ordered pages from one byte snapshot, also used for its digest.
 
     PDFium and pytesseract configuration are used sequentially in this CLI process.
-    Images, including TIFF, intentionally yield only their first frame in M1.
+    Images, including TIFF, intentionally yield only their first frame.
     """
     data = path.read_bytes()
     kind = media_type(data)

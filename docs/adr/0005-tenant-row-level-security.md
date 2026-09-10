@@ -22,7 +22,7 @@ Use two credentials. `di_migrate` owns tables and has BYPASSRLS for migrations;
 superuser, BYPASSRLS, owner-role membership or ownership privileges. Development
 Compose's existing `di` superuser fills the migration role only. Alembic reads
 `DI_MIGRATION_DATABASE_URL`; runtime reads `DI_DATABASE_URL`. See the
-[setup commands](../pipeline.md#storage-and-search-m4).
+[setup commands](../pipeline.md#storage-and-search).
 
 ## Consequences and alternatives
 

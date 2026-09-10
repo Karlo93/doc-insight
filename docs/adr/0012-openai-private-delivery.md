@@ -4,7 +4,7 @@ Status: accepted. Date: 2026-09-10. Supersedes the provider portion of ADR-0008.
 
 ## Context and decision
 
-The owner has OpenAI API access and needs a usable private application on a shared
+The application needs hosted answers while keeping document processing on a shared
 CPU server. Public source must not expose the app, its documents or credentials.
 
 Use Responses with pinned `gpt-4.1-mini-2025-04-14`, strict structured output,
@@ -25,8 +25,8 @@ stays within the Compose network. The provider key is mounted only into query.
 
 ## Alternatives and consequences
 
-Chat Completions could work but preserves the older parsing contract. Mistral would
-require another funded provider. React was considered; the single-screen workflow
+Chat Completions could work but preserves the older parsing contract. An alternative hosted provider would
+require a separate adapter and quality evaluation. React was considered; the single-screen workflow
 does not justify its build/runtime dependencies. No embedding re-index is needed.
 
 Unknown usage can conservatively consume a full reservation; a reconciliation worker

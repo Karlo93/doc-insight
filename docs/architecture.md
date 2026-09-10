@@ -4,7 +4,7 @@ doc-insight turns PDF and image bytes into tenant-scoped, searchable passages wi
 citations and extracted entities. The implemented processing slice is the worker CLI, Redis
 consumer and transactional Postgres/pgvector storage, pipeline version 6. The service layer accepts authenticated
 uploads, processes them asynchronously, and answers questions using retrieved passages.
-Docker Compose runs the services locally; [online readiness](online-readiness.md) records the private release configuration.
+Docker Compose runs the services locally; [private deployment](private-deployment.md) records the private release configuration.
 
 ## System diagram
 
@@ -245,4 +245,4 @@ These decisions describe the implemented design; [the load report](../benchmark/
 
 The [query guide](query.md), [ingest guide](ingest.md), [worker runbook](worker.md) and
 [gateway runbook](gateway.md) describe implemented services. [Deployment](deploy.md) covers
-local startup; [online readiness](online-readiness.md) covers private operation and remaining scale/identity limitations.
+local startup; [private deployment](private-deployment.md) covers private operation and remaining scale/identity limitations.

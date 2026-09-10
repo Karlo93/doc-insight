@@ -1,6 +1,8 @@
 # ADR-0008: Hybrid retrieval with RRF, extractive fallback and confidence
 
-Status: accepted. Date: 2026-09-10.
+Status: accepted for retrieval. Date: 2026-09-10.
+Hosted generation is superseded by [ADR-0012](0012-openai-private-delivery.md);
+answer support and document context are updated by [ADR-0013](0013-query-grounding-and-document-context.md).
 
 ## Decision
 
@@ -11,8 +13,7 @@ and page-language filters. Each ranking retrieves up to the service cap (20).
 Bind the tenant once per snapshot with transaction-local `app.tenant_id`; runtime
 connections use the restricted role introduced by migration 0002. Pool reuse clears
 the context. A reader cannot switch to another tenant within the snapshot.
-Close the snapshot before generation. No migration here; after the pending storage
-migrations, add `CREATE INDEX chunks_text_gin ON chunks USING gin (to_tsvector('simple', text));`.
+Close the snapshot before generation. Migration 0004 adds the GIN full-text index.
 
 Fuse by chunk identity using `sum(1 / (K + rank))`, rank starting at 1, `K=60`.
 Missing results contribute zero; UUID/ordinal break ties. Keep the default fixed,

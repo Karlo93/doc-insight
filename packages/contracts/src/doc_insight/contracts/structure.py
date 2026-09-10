@@ -1,4 +1,4 @@
-"""Structured output and the three replaceable providers used in M2."""
+"""Structured output and replaceable language, entity and tokenizer providers."""
 
 from collections import Counter
 from typing import Protocol

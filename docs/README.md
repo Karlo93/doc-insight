@@ -1,47 +1,35 @@
-# Documentation index
+# Documentation
 
-- [Code walkthrough](code-guide.md): reading order, module responsibilities and extension points.
-- [Assignment review](assignment-review.md): requirement-by-requirement status and remaining evidence.
-- [Online readiness](online-readiness.md): local versus public deployment, credentials and token accounting.
-- [Project README](../README.md): local setup, CLI commands, test tiers and repository layout.
-- [Architecture](architecture.md): system and sequence diagrams, responsibilities, boundaries and trade-offs.
-- [Query service](query.md): implemented retrieval, cited answers, offline operation and settings.
-- [Ingest service](ingest.md): upload validation, object storage, outbox relay and status reads.
-- [API contract](api.md): upload, status, question and stream payloads; delivery status is explicit.
-- [Configuration](configuration.md): current settings tables, defaults and Compose versus Python environment handling.
-- [Pipeline](pipeline.md): implemented extraction, OCR, structure, embeddings, storage and retrieval.
-- [Worker](worker.md): sequential consumption, recovery, dead letters and manual object/event examples.
-- [Local stack](local-stack.md): Compose `infra` and `telemetry` profiles, ports, encryption and Grafana.
-- [Deployment](deploy.md): service images, local startup, environment and Caddy TLS.
-- [Observability](observability.md): the shared OpenTelemetry helper, emitted signals and attribute policy.
-- [Gateway](gateway.md): JWT/JWKS authentication, rate limits, proxy behavior and development token setup.
-- [CI](ci.md): lint, types, tests, security checks and repository protection setup.
-- [Engineering journal](journal.md): implementation notes by milestone.
-- [Lessons](lessons.md): concise observations from implementation and failure cases.
-- [ADR-0001](adr/0001-text-extraction.md): PDFium/Tesseract extraction and alternatives.
-- [ADR-0002](adr/0002-structured-representation.md): language, entities, chunk budgets and exact offsets.
-- [ADR-0003](adr/0003-embeddings-and-vector-storage.md): MiniLM, ONNX, pgvector and upgrade criteria.
-- [ADR-0004](adr/0004-opentelemetry.md): OpenTelemetry with OTLP export to a collector.
-- [ADR-0005](adr/0005-tenant-row-level-security.md): forced row-level security and separate runtime/migration roles.
-- [ADR-0006](adr/0006-local-infrastructure.md): independent infrastructure and telemetry Compose profiles.
-- [ADR-0007](adr/0007-transactional-outbox.md): transactional outbox and Redis Streams delivery.
-- [ADR-0008](adr/0008-hybrid-query.md): hybrid retrieval with RRF, extractive fallback and confidence.
-- [ADR-0009](adr/0009-worker-heartbeat-identity.md): one progress heartbeat per consumer process.
-- [ADR-0010](adr/0010-gateway-identity-and-rate-limits.md): RS256/JWKS identity and fail-closed Redis quotas.
-- [ADR-0011](adr/0011-compose-service-images.md): Compose delivery, service images and Caddy TLS.
-- [Changelog](../CHANGELOG.md): changes awaiting release.
-- [Contributing](../CONTRIBUTING.md): branch/commit conventions, test tiers, budgets and review checklist.
-- [Security policy](../SECURITY.md): private reporting, supported versions and secrets handling.
-- [PR template](../.github/pull_request_template.md): required review sections and eleven checks.
-- [Bug report](../.github/ISSUE_TEMPLATE/bug_report.md): minimal reproduction and sanitized evidence.
-- [Task template](../.github/ISSUE_TEMPLATE/task.md): scope, acceptance criteria and validation.
-- [Fixture font provenance](../scripts/fonts/readme.md): generated fixture font and its license.
+## Use and operate
 
-The service runbooks above describe the implemented stack. The assignment review records the historical gaps; the release evidence tracks their closure.
+- [Quick start](../README.md)
+- [API reference](api.md) and [configuration](configuration.md)
+- [Docker deployment](deploy.md), [private hosting and credentials](private-deployment.md)
+- [Metrics and tracing](observability.md), [captured examples](evidence/README.md)
+- [Performance report](../benchmark/README.md) and reproducible measurements
 
-- [Private deployment](private-deployment.md)
-- [OpenAI/private delivery decision](adr/0012-openai-private-delivery.md)
-- [Hosted support and document context](adr/0013-query-grounding-and-document-context.md)
+## Develop
 
-- [Release evidence and assignment closure](evidence/README.md)
-- [Measured load-test report](../benchmark/README.md)
+- [Architecture](architecture.md) and [code guide](code-guide.md)
+- [Gateway](gateway.md), [ingest](ingest.md), [worker](worker.md), [query](query.md)
+- [Processing pipeline](pipeline.md) and [local infrastructure](local-stack.md)
+- [Contributing](../CONTRIBUTING.md), [CI](ci.md), [security](../SECURITY.md)
+- [Changelog](../CHANGELOG.md)
+
+## Design decisions
+
+| ADR | Decision |
+| --- | --- |
+| [0001](adr/0001-text-extraction.md) | PDF text extraction and OCR fallback |
+| [0002](adr/0002-structured-representation.md) | Language, entities, chunking and page offsets |
+| [0003](adr/0003-embeddings-and-vector-storage.md) | CPU embeddings and vector storage |
+| [0004](adr/0004-opentelemetry.md) | OpenTelemetry export |
+| [0005](adr/0005-tenant-row-level-security.md) | Tenant row-level security |
+| [0006](adr/0006-local-infrastructure.md) | Compose infrastructure profiles |
+| [0007](adr/0007-transactional-outbox.md) | Transactional outbox and Redis delivery |
+| [0008](adr/0008-hybrid-query.md) | Hybrid retrieval and extractive fallback |
+| [0009](adr/0009-worker-heartbeat-identity.md) | Worker heartbeat identity |
+| [0010](adr/0010-gateway-identity-and-rate-limits.md) | Authentication and quotas |
+| [0011](adr/0011-compose-service-images.md) | Service images and TLS |
+| [0012](adr/0012-openai-private-delivery.md) | Hosted generation and private browser access |
+| [0013](adr/0013-query-grounding-and-document-context.md) | Hosted answer support and document context |

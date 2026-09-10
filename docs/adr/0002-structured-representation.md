@@ -1,6 +1,6 @@
 # ADR-0002: Structured text and model-sized chunks
 
-Status: accepted in M2, pipeline version 4.
+Status: accepted for structured processing, initially pipeline version 4.
 
 ## Context
 
@@ -14,8 +14,8 @@ The original 400-token default was inconsistent with that published sentence con
 
 - Keep multilingual MiniLM and its pinned tokenizer: 120 content tokens, up to 24 overlap.
   Settings reject more than 126 content tokens, reserving two special tokens within 128.
-  M3 must enforce the same input limit without silent truncation; model selection is already
-  coupled to tokenization in M2, not a decision that can be postponed until database design.
+  Embedding adapters enforce the same input limit without silent truncation; model selection is already
+  coupled to chunk tokenization, not a decision that can be postponed until database design.
 - Accumulate whole whitespace-delimited words while the actual candidate token count fits.
   Count tokens from page offsets only after the Unicode guard below; guarded pages retain
   candidate retokenization.
@@ -32,7 +32,7 @@ The original 400-token default was inconsistent with that published sentence con
 
 ## Consequences and alternatives
 
-- Smaller chunks may lose some local context; overlap and M3 retrieval evaluation measure this trade-off.
+- Smaller chunks may lose some local context; overlap and retrieval evaluation measure this trade-off.
 - Snapping outward can exceed the input cap; snapping whole words inside it preserves both guarantees.
 - Tiny tails remain when folding them would exceed the cap; redistribution adds complexity without
   fixing a correctness problem. A long URL or OCR run is cut between its tokens, so a boundary can
@@ -45,11 +45,11 @@ The original 400-token default was inconsistent with that published sentence con
 - Newline filtering can discard a real wrapped name. Small spaCy models still misread table headings,
   page codes and salary figures; this heuristic is not an accuracy guarantee or a layout parser.
 - E5-large needs its own pinned tokenizer, input/prefix budget, evaluation and version bump.
-  Changing models later also requires regenerating chunks and, after M4, re-indexing stored vectors.
-- A generative model belongs in the later answer-generation milestone; it does not replace
-  a retrieval embedder merely because both expose tokens or hidden states. M2 has no server dependency.
+  Changing models later also requires regenerating chunks and re-indexing stored vectors.
+- A generative model belongs in the answer-generation stage; it does not replace
+  a retrieval embedder merely because both expose tokens or hidden states. Standalone text analysis has no server dependency.
 
-The embedding/storage ADR planned for M3 will be ADR-0003, following creation order.
+See [ADR-0003](0003-embeddings-and-vector-storage.md) for embedding and storage decisions.
 
 ## Token counting from one page encoding
 
@@ -58,7 +58,7 @@ offsets. The pinned tokenizer normalizes before splitting and can delete separat
 `"a\x0b. b"` at 2/1, Python treats the vertical tab as a word boundary while the tokenizer
 normalizes it to `"a. b"`. Unguarded counting emits `". b"` with a reported count of two;
 encoding that chunk alone produces three tokens. The 256-page demo book exposed this on
-page 239. See the [journal](../journal.md#guarded-page-token-counting) for the changed offsets.
+page 239. The equivalence suite covers this case in `tests/test_chunker_equivalence.py`.
 
 Choose the path once per page. Any `Cc` code point except tab, LF and CR, or any `Cf`, `Cs`,
 `Co`, `Zl` or `Zp` code point, selects the preserved reference chunker for the entire page.

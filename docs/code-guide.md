@@ -3,8 +3,8 @@
 The application is a Python 3.12 uv workspace. Four service packages share typed
 contracts, a processing pipeline and PostgreSQL adapters. A static browser frontend
 is served by Caddy and calls the authenticated API.
-Read [architecture](architecture.md) for the data flow and [assignment review](assignment-review.md)
-for the historical gap analysis. This guide describes the private release.
+Read [architecture](architecture.md) for the data flow and
+[deployment](private-deployment.md) for server operation.
 
 ## Read the code in this order
 

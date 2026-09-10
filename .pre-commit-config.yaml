@@ -1,15 +1,30 @@
+default_install_hook_types: [pre-commit, pre-push]
 repos:
   - repo: local
     hooks:
       - id: ruff
-        name: ruff check and format
-        entry: make lint
+        name: ruff check
+        entry: uv run --locked --all-packages ruff check
+        language: system
+        types: [python]
+        stages: [pre-commit]
+      - id: ruff-format
+        name: ruff format check
+        entry: uv run --locked --all-packages ruff format --check
+        language: system
+        types: [python]
+        stages: [pre-commit]
+      - id: bandit
+        name: bandit
+        entry: uv run --locked --all-packages bandit -c pyproject.toml -r apps packages
         language: system
         pass_filenames: false
         always_run: true
+        stages: [pre-commit]
       - id: gitleaks
         name: gitleaks, bandit and pip-audit
         entry: make audit
         language: system
         pass_filenames: false
         always_run: true
+        stages: [pre-push]
