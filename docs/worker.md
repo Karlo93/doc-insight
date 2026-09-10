@@ -97,8 +97,8 @@ variables before launching; `.env` is used by Compose and is not loaded by the C
 | `DI_WORKER_RECLAIM_SECONDS` | `30` | Positive interval between full pending scans |
 | `DI_WORKER_CLAIM_MIN_IDLE_MS` | `300000` (Compose: `900000`) | Positive idle lease before reclaim |
 | `DI_WORKER_MAX_ATTEMPTS` | `5` | Positive number of permitted processing deliveries |
-| `DI_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@localhost:5432/di` | Restricted runtime DB login |
-| `DI_MIGRATION_DATABASE_URL` | `postgresql+psycopg://di:di@localhost:5432/di` | Migration/test administrator login |
+| `DI_DATABASE_URL` | `DI_DATABASE_URL` from generated `.env` | Restricted runtime DB login |
+| `DI_MIGRATION_DATABASE_URL` | `DI_MIGRATION_DATABASE_URL` from generated `.env` | Migration/test administrator login |
 | `DI_S3_ENDPOINT` | `http://127.0.0.1:9000` | Object store endpoint |
 | `DI_S3_REGION` | `us-east-1` | S3 signing region |
 | `DI_S3_BUCKET` | `documents` | Original document bucket |
@@ -120,20 +120,18 @@ worker may download its pinned tokenizer and embedding snapshot on first use.
 ```bash
 uv sync --locked --all-packages
 export COMPOSE_PROJECT_NAME=di-lane2
-export POSTGRES_PORT=55433 REDIS_PORT=56380 MINIO_PORT=59002 MINIO_CONSOLE_PORT=59003
-export DI_DATABASE_URL=postgresql+psycopg://di_app:di_app@127.0.0.1:55433/di
-export DI_MIGRATION_DATABASE_URL=postgresql+psycopg://di:di@127.0.0.1:55433/di
-export DI_REDIS_URL=redis://127.0.0.1:56380/0
-export DI_S3_ENDPOINT=http://127.0.0.1:59002 DI_S3_REGION=us-east-1 DI_S3_BUCKET=documents
-export DI_S3_ACCESS_KEY=minioadmin DI_S3_SECRET_KEY=minioadmin DI_S3_USE_SSL=false
 docker compose up -d --wait db redis minio
 docker compose run --rm minio-init
-uv run --locked --all-packages alembic upgrade head
+uv run --env-file .env --locked --all-packages alembic upgrade head
+# In Bash, export this trusted, generated file for the mc and Python commands.
+set -a
+source .env
+set +a
 mc alias set worker-local "$DI_S3_ENDPOINT" "$DI_S3_ACCESS_KEY" "$DI_S3_SECRET_KEY"
 export SHA=$(sha256sum tests/fixtures/text_hr.pdf | cut -d ' ' -f 1)
 export SIZE=$(wc -c < tests/fixtures/text_hr.pdf | tr -d ' ')
 mc cp --enc-s3 worker-local/documents tests/fixtures/text_hr.pdf "worker-local/documents/demo/$SHA"
-export DOCUMENT_ID=$(uv run --locked --all-packages python - <<'PY'
+export DOCUMENT_ID=$(uv run --env-file .env --locked --all-packages python - <<'PY'
 import os
 from sqlalchemy import create_engine
 from doc_insight.worker.repository import PostgresRepository
@@ -147,11 +145,11 @@ finally:
     engine.dispose()
 PY
 )
-export EVENT_ID=$(uv run --locked python -c 'from uuid import uuid4; print(uuid4())')
-redis-cli -p 56380 XADD di:documents '*' event_id "$EVENT_ID" type document.uploaded \
+export EVENT_ID=$(uv run --env-file .env --locked python -c 'from uuid import uuid4; print(uuid4())')
+redis-cli -p 6379 XADD di:documents '*' event_id "$EVENT_ID" type document.uploaded \
   tenant_id demo document_id "$DOCUMENT_ID" sha256 "$SHA" object_key "demo/$SHA" \
   media_type application/pdf size_bytes "$SIZE" occurred_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-uv run --locked --all-packages di worker run
+uv run --env-file .env --locked --all-packages di worker run
 ```
 
 The registration creates an outbox entry as well; this example publishes by hand
@@ -159,19 +157,22 @@ and does not run the relay. Later relaying that entry is a harmless duplicate.
 In another terminal, with the same environment, inspect the result:
 
 ```bash
-uv run --locked --all-packages di show "$DOCUMENT_ID" --tenant demo
-redis-cli -p 56380 XPENDING di:documents worker
-redis-cli -p 56380 XPENDING di:documents worker - + 20
-redis-cli -p 56380 XRANGE di:documents:dlq - + COUNT 20
-redis-cli -p 56380 --scan --pattern 'di:worker:*'
+uv run --env-file .env --locked --all-packages di show "$DOCUMENT_ID" --tenant demo
+redis-cli -p 6379 XPENDING di:documents worker
+redis-cli -p 6379 XPENDING di:documents worker - + 20
+redis-cli -p 6379 XRANGE di:documents:dlq - + COUNT 20
+redis-cli -p 6379 --scan --pattern 'di:worker:*'
 ```
 
 Replay the XADD command to exercise the completed-result shortcut. A deliberately
-malformed event exercises the DLQ: `redis-cli -p 56380 XADD di:documents '*' type invalid`.
+malformed event exercises the DLQ: `redis-cli -p 6379 XADD di:documents '*' type invalid`.
 For deterministic recovery, the integration test kills a child process at the
 analyze/embed boundary and starts a new consumer against the same durable state:
 
 ```bash
-uv run --locked --all-packages pytest tests/storage/test_worker_integration.py -m integration --no-cov
-uv run --locked --all-packages pytest tests/storage/test_worker_streams.py -m integration --no-cov
+uv run --env-file .env --locked --all-packages pytest tests/storage/test_worker_integration.py -m integration --no-cov
+uv run --env-file .env --locked --all-packages pytest tests/storage/test_worker_streams.py -m integration --no-cov
 ```
+
+Generate `.env` with `python scripts/configure_local.py` before running host commands.
+Match host database URL ports to the Compose port and preserve generated passwords.

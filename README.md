@@ -12,7 +12,7 @@ OpenTelemetry connects HTTP requests, background processing and model calls.
 
 ## Quick start
 
-Install Docker Compose v2.24.4+, Buildx, GNU Make, Bash and curl, then:
+Install Docker Compose v2.24.4+, Buildx, GNU Make, Bash, Python 3 and curl, then:
 
 ```sh
 git clone https://github.com/Karlo93/doc-insight.git
@@ -26,7 +26,10 @@ Upload a PDF, PNG or JPEG, wait for **processed**, then ask a question. Tokens s
 in browser memory; refresh or expiry requires reconnecting. Cold startup downloads
 and warms the local models and can take several minutes.
 
-Configure free ports in an untracked `.env` if needed. The browser uses
+`make local-run` generates private credentials in `.env` on first use. To choose
+ports before startup, run `python scripts/configure_local.py` and edit `.env`.
+Existing credentials are never overwritten. Keep host database URLs consistent
+with `POSTGRES_PORT`. The browser uses
 `CADDY_HTTP_PORT`; HTTPS uses `CADDY_HTTPS_PORT`.
 See [deployment](docs/deploy.md) for startup details and
 [private hosting](docs/private-deployment.md) for protected server access.
@@ -77,6 +80,7 @@ Browser → Caddy → Gateway → Ingest → Object storage + PostgreSQL outbox
 - [API](docs/api.md), [configuration](docs/configuration.md) and [runbooks](docs/README.md)
 - [Metrics and distributed tracing](docs/observability.md), with [captured examples](docs/evidence/README.md)
 - [100 req/s benchmark report and graph](benchmark/README.md)
+- [Security boundaries](docs/security-boundaries.md), [scaling strategy](docs/scaling.md) and [cost estimate](docs/costs.md)
 
 The recorded single-server benchmark sustained 100 document-list requests/s and
 25 extractive queries/s on a small generated corpus. At 100 offered queries/s the

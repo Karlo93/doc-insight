@@ -83,7 +83,7 @@ explicitly archive those rows and drain the outbox before downgrading.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `DI_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@localhost:5432/di` | Restricted runtime connection |
+| `DI_DATABASE_URL` | `DI_DATABASE_URL` from generated `.env` | Restricted runtime connection |
 | `DI_S3_ENDPOINT` | `http://localhost:9000` | S3-compatible API endpoint |
 | `DI_S3_REGION` | `us-east-1` | Signing region |
 | `DI_S3_BUCKET` | `documents` | Existing bucket; provision with SSE-S3 support |
@@ -102,45 +102,35 @@ timeouts and retries; Redis uses five-second connection and operation timeouts.
 
 ## Run locally
 
-Start Postgres, Redis and MinIO using the infrastructure setup. For non-default host
-ports, set `POSTGRES_PORT=55432`, `REDIS_PORT=56379`, `MINIO_PORT=59000`, and
-`MINIO_CONSOLE_PORT=59001` before starting those services. Provision the `documents`
-bucket with SSE-S3 enabled and a MinIO KMS key before uploading. The shared infrastructure
-configuration also supplies CI startup.
+First run `python scripts/configure_local.py`. The examples use default host ports.
+For alternate ports, update the host URLs and CLI arguments to match; preserve passwords.
+Commands load `.env` explicitly.
 
-Export these variables in each shell (PowerShell uses `$env:NAME='value'`):
+Start Postgres, Redis and MinIO using the generated `.env`. The initializer
+requires SSE-S3 bucket encryption before uploads. These examples use default
+host ports; see [configuration](configuration.md) for alternate ports.
 
 ```sh
-export POSTGRES_PORT=55432
-export REDIS_PORT=56379
-export MINIO_PORT=59000
-export MINIO_CONSOLE_PORT=59001
-export DI_DATABASE_URL=postgresql+psycopg://di_app:di_app@127.0.0.1:55432/di
-export DI_MIGRATION_DATABASE_URL=postgresql+psycopg://di:di@127.0.0.1:55432/di
-export DI_REDIS_URL=redis://127.0.0.1:56379/0
-export DI_S3_ENDPOINT=http://127.0.0.1:59000
-export DI_S3_ACCESS_KEY=minioadmin
-export DI_S3_SECRET_KEY=minioadmin
 docker compose --profile infra up -d --wait db redis minio
 docker compose --profile infra run --rm minio-init
 uv sync --locked --all-packages
-uv run --locked --all-packages alembic upgrade head
-uv run --locked --all-packages di-ingest serve
+uv run --env-file .env --locked --all-packages alembic upgrade head
+uv run --env-file .env --locked --all-packages di-ingest serve
 ```
 
 From another shell with the same environment:
 
 ```sh
 curl -F file=@tests/fixtures/text_hr.pdf -H 'X-Tenant-Id: demo' http://127.0.0.1:8001/ingest
-uv run --locked --all-packages di-ingest relay --tenant demo
+uv run --env-file .env --locked --all-packages di-ingest relay --tenant demo
 ```
 
 Inspect from a third shell; repeat the upload to see `duplicate`:
 
 ```sh
-redis-cli -p 56379 XRANGE di:documents - +
+redis-cli -p 6379 XRANGE di:documents - +
 curl -H 'X-Tenant-Id: demo' http://127.0.0.1:8001/documents/DOCUMENT_ID
-uv run --locked --all-packages pytest -m integration --no-cov
+uv run --env-file .env --locked --all-packages pytest -m integration --no-cov
 ```
 
 On Windows use `curl.exe` to avoid a shell alias. The integration suite creates its

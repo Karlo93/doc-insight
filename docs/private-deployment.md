@@ -11,7 +11,7 @@ Requirements: Docker Compose 2.24.4+, an encrypted host volume, a Docker-capable
 account, and Tailscale Serve permission. Use a unique, stable Compose project name.
 Keep the deployment directory, `.env`, signing keys and provider key private.
 
-Copy `.env.example` to `.env` and configure before creating volumes:
+Run `python scripts/configure_local.py`, then configure `.env` before creating volumes:
 
 | Variable | Deployment setting |
 | --- | --- |
@@ -28,7 +28,8 @@ Copy `.env.example` to `.env` and configure before creating volumes:
 | `DI_TENANTS` | Comma-separated provisioned tenants, matching issued tokens |
 | `OPENAI_SECRET_FILE` | Absolute path to a private UTF-8 file containing only the API key |
 
-Generate independent passwords using `python -c 'import secrets; print(secrets.token_hex(24))'`.
+The bootstrap generates independent passwords and matching database URLs without
+printing secrets or overwriting existing configuration.
 The runtime-role initialization script runs only on a **new database volume**;
 changing `.env` does not rotate an existing database password.
 On Linux, the mounted provider file must be readable by container UID 10001.

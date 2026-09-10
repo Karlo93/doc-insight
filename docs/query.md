@@ -103,8 +103,8 @@ adapters are reused from the worker package. Pipeline version remains 6.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `DI_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@localhost:5432/di` | PostgreSQL connection |
-| `DI_MIGRATION_DATABASE_URL` | `postgresql+psycopg://di:di@localhost:5432/di` | Migration/test harness only; not read by query |
+| `DI_DATABASE_URL` | `DI_DATABASE_URL` from generated `.env` | PostgreSQL connection |
+| `DI_MIGRATION_DATABASE_URL` | `DI_MIGRATION_DATABASE_URL` from generated `.env` | Migration/test harness only; not read by query |
 | `DI_OPENAI_MODEL` | `gpt-4.1-mini-2025-04-14` | Hosted generation model |
 | `DI_OPENAI_API_KEY` | empty | Enables hosted generation; empty selects extractive |
 | `DI_OPENAI_API_KEY_FILE` | unset | Optional mounted UTF-8 secret; nonempty file takes precedence |
@@ -132,6 +132,10 @@ durations without question or passage text. Unset `DI_OTEL_ENDPOINT` keeps it lo
 
 ## Run locally, fully offline
 
+First run `python scripts/configure_local.py`. The examples use default host ports.
+For alternate ports, update the host URLs and CLI arguments to match; preserve passwords.
+Commands load `.env` explicitly.
+
 Use an already populated uv/model cache and the local image
 `pgvector/pgvector:0.8.6-pg16`. No Redis or other service is needed. For a clean
 clone on a disconnected machine, provision those caches and the image beforehand.
@@ -142,16 +146,13 @@ From the repository root in PowerShell:
 $env:UV_OFFLINE='1'
 $env:HF_HUB_OFFLINE='1'
 $env:DI_OPENAI_API_KEY=''
-$env:POSTGRES_PORT='55434'
 $env:COMPOSE_PROJECT_NAME='doc-insight-query'
-$env:DI_DATABASE_URL='postgresql+psycopg://di_app:di_app@127.0.0.1:55434/di'
-$env:DI_MIGRATION_DATABASE_URL='postgresql+psycopg://di:di@127.0.0.1:55434/di'
 uv sync --locked --all-packages
 docker compose --profile infra up -d --wait --pull never db
-uv run --locked --all-packages alembic upgrade head
+uv run --env-file .env --locked --all-packages alembic upgrade head
 docker compose exec db psql -U di -d di -c 'GRANT USAGE ON SCHEMA public TO di_app; GRANT SELECT, INSERT, UPDATE, DELETE ON documents, chunks, entities TO di_app;'
-uv run --locked --all-packages di index tests/fixtures/text_hr.pdf --tenant demo
-uv run --locked --all-packages di-query serve
+uv run --env-file .env --locked --all-packages di index tests/fixtures/text_hr.pdf --tenant demo
+uv run --env-file .env --locked --all-packages di-query serve
 ```
 
 Fresh volumes create `di_app` through the committed init script. For an older
@@ -174,10 +175,10 @@ Ask `Gdje živi Marko Marić?` for a supported extractive example. Validate and 
 in the same offline environment:
 
 ```sh
-uv run --locked --all-packages pytest
-uv run --locked --all-packages pytest -m integration --no-cov
-uv run --locked --all-packages python scripts/eval_query.py
-uv run --locked --all-packages python scripts/eval_query.py --provider fastembed
+uv run --env-file .env --locked --all-packages pytest
+uv run --env-file .env --locked --all-packages pytest -m integration --no-cov
+uv run --env-file .env --locked --all-packages python scripts/eval_query.py
+uv run --env-file .env --locked --all-packages python scripts/eval_query.py --provider fastembed
 ```
 
 Evaluation creates a unique tenant and deletes only that tenant's fixture rows afterward.

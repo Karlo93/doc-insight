@@ -169,13 +169,13 @@ vector. It tests retrieval without a model but cannot recognize paraphrases with
 Both accept another dimension for contract tests; the production profile is deliberately MiniLM-only.
 
 ```text
-uv run --locked --all-packages di analyze tests/fixtures/text_hr.pdf --embed
-uv run --locked --all-packages python scripts/eval_retrieval.py
-uv run --locked --all-packages python scripts/eval_retrieval.py --provider fastembed
-uv run --locked --all-packages python scripts/eval_retrieval.py --provider fastembed --production
-uv run --locked --all-packages python scripts/eval_retrieval.py --language hr --provider all
-uv run --locked --all-packages python scripts/eval_retrieval.py --language hr --provider all --production
-uv run --locked --all-packages python scripts/make_eval_fixture.py
+uv run --env-file .env --locked --all-packages di analyze tests/fixtures/text_hr.pdf --embed
+uv run --env-file .env --locked --all-packages python scripts/eval_retrieval.py
+uv run --env-file .env --locked --all-packages python scripts/eval_retrieval.py --provider fastembed
+uv run --env-file .env --locked --all-packages python scripts/eval_retrieval.py --provider fastembed --production
+uv run --env-file .env --locked --all-packages python scripts/eval_retrieval.py --language hr --provider all
+uv run --env-file .env --locked --all-packages python scripts/eval_retrieval.py --language hr --provider all --production
+uv run --env-file .env --locked --all-packages python scripts/make_eval_fixture.py
 ```
 
 The generated `eval.jsonl` and `eval_hr.jsonl` each contain eight fixed questions over
@@ -237,7 +237,8 @@ setting to NULL so pool resets cannot authorize empty tenant rows. The repositor
 setting with `set_config(..., true)` at the start of every transaction, including its
 REPEATABLE READ snapshot. Commit, rollback and pool return clear the tenant context.
 Without a tenant, row reads/updates/deletes return nothing and inserts are rejected.
-The CLI's caller supplies a trusted tenant until authenticated services arrive.
+The CLI's trusted operator supplies the tenant. HTTP requests obtain their tenant
+from a verified JWT at the gateway; internal services trust that gateway boundary.
 See [ADR-0005](adr/0005-tenant-row-level-security.md) for the role and trust boundaries.
 
 `upsert_document` writes metadata and replaces all chunks/entities in one transaction.
@@ -267,9 +268,9 @@ make migrate
 # followed by `docker compose down -v`:
 docker compose exec db psql -U di -d di -c "CREATE ROLE di_app LOGIN NOSUPERUSER NOBYPASSRLS NOINHERIT PASSWORD 'di_app'"
 docker compose exec db psql -U di -d di -c "GRANT USAGE ON SCHEMA public TO di_app; GRANT SELECT, INSERT, UPDATE, DELETE ON documents, chunks, entities TO di_app"
-uv run --locked --all-packages di index tests/fixtures/text_hr.pdf --tenant demo
-uv run --locked --all-packages di show <document-id> --tenant demo
-uv run --locked --all-packages di search "Gdje se nalazi Zagreb?" --tenant demo -k 5
+uv run --env-file .env --locked --all-packages di index tests/fixtures/text_hr.pdf --tenant demo
+uv run --env-file .env --locked --all-packages di show <document-id> --tenant demo
+uv run --env-file .env --locked --all-packages di search "Gdje se nalazi Zagreb?" --tenant demo -k 5
 make test-integration
 make db-down
 ```
@@ -280,10 +281,9 @@ Optional [observability](observability.md) adds stage spans, duration metrics an
 attempt counter. Leave `DI_OTEL_ENDPOINT` unset to run without exporters.
 Search with another tenant returns no passages; showing another tenant's ID exits with an error.
 `db-down` keeps the named volume. The Compose service publishes only to the local machine.
-Copy `.env.example` to `.env` to change Compose credentials/port; export the Python URLs
-separately. These passwords are for local development only. Runtime `DI_DATABASE_URL`
-defaults to `postgresql+psycopg://di_app:di_app@localhost:5432/di`.
-`DI_MIGRATION_DATABASE_URL` defaults to `postgresql+psycopg://di:di@localhost:5432/di`;
+Run `python scripts/configure_local.py` once to create private credentials in `.env`.
+Host commands below load that file explicitly; runtime and migration URLs have
+separate passwords. The generated configuration supplies `DI_MIGRATION_DATABASE_URL`;
 `make migrate` uses only this URL. Compose's `di` is the development migration superuser.
 Never give its credentials to a runtime service: superusers and BYPASSRLS roles ignore FORCE.
 
@@ -296,14 +296,8 @@ privileges as `di_migrate` for future migrations. Do not grant `di_app` membersh
 owner role, schema CREATE, TRUNCATE or table ownership. FORCE also protects an owner
 without BYPASSRLS, but an owner can alter policies; runtime therefore does not own tables.
 
-If 5432 is occupied, set `POSTGRES_PORT=55432` and match both Python URLs:
-
-```powershell
-$env:DI_DATABASE_URL = 'postgresql+psycopg://di_app:di_app@127.0.0.1:55432/di'
-$env:DI_MIGRATION_DATABASE_URL = 'postgresql+psycopg://di:di@127.0.0.1:55432/di'
-```
-
-On Linux, use `export NAME='value'` for each setting.
+If 5432 is occupied, edit `POSTGRES_PORT` and the port in both host Python URLs
+in `.env`, preserving their generated passwords. Container URLs retain port 5432.
 `make test-integration` uses `DI_MIGRATION_DATABASE_URL` and needs database/role-creation
 permission. Tests create and drop only randomly named databases and restricted runtime
 logins, never the configured development database's tables. Repository contracts and
@@ -327,15 +321,16 @@ same `pgvector/pgvector` image tag; move both together.
 - If it is absent from PATH, set `$env:DI_TESSERACT_CMD = 'C:\Program Files\Tesseract-OCR\tesseract.exe'` in PowerShell.
 - Verify `& $env:DI_TESSERACT_CMD --list-langs` (or `tesseract --list-langs` on PATH), then run `make setup`.
 
-Commands work from the repository root in either shell:
+Run `python scripts/configure_local.py` once. Commands work from the repository
+root in either shell and load the generated configuration explicitly:
 
 ```text
-uv run --locked --all-packages di extract tests/fixtures/mixed.pdf
-uv run --locked --all-packages di extract tests/fixtures/text_hr.pdf --json
-uv run --locked --all-packages di extract "inputs/example.pdf"
-uv run --locked --all-packages di analyze tests/fixtures/text_hr.pdf --json
-uv run --locked --all-packages di analyze "inputs/example.pdf"
-uv run --locked --all-packages python scripts/make_fixtures.py
+uv run --env-file .env --locked --all-packages di extract tests/fixtures/mixed.pdf
+uv run --env-file .env --locked --all-packages di extract tests/fixtures/text_hr.pdf --json
+uv run --env-file .env --locked --all-packages di extract "inputs/example.pdf"
+uv run --env-file .env --locked --all-packages di analyze tests/fixtures/text_hr.pdf --json
+uv run --env-file .env --locked --all-packages di analyze "inputs/example.pdf"
+uv run --env-file .env --locked --all-packages python scripts/make_fixtures.py
 make check
 make test-models
 ```

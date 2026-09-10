@@ -2,14 +2,14 @@
 
 ## Local Compose
 
-Install Docker with Compose v2.24+ and Buildx, GNU Make, Bash and curl. Docker
-Desktop must use Linux containers. Python, uv and Tesseract on the host are not
-required for `local-run`; Docker installs the locked runtime and OCR tools.
+Install Docker with Compose v2.24.4+ and Buildx, GNU Make, Bash, Python 3 and curl.
+Docker Desktop must use Linux containers. Python generates local credentials;
+Docker installs the locked application runtime and OCR tools.
 
 ```sh
 git clone https://github.com/Karlo93/doc-insight.git
 cd doc-insight
-# Optional: copy .env.example to .env and choose free host ports.
+# Optional: run python scripts/configure_local.py, then choose ports in .env.
 make local-run
 make local-stop
 ```
@@ -76,13 +76,13 @@ in [local stack](local-stack.md). Internal application ports are not published.
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `IMAGE_TAG` | `local` | Compose image tag; `local-run` builds this tag |
-| `DI_CONTAINER_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@db:5432/di` | Mapped to application `DI_DATABASE_URL`; restricted runtime role |
-| `DI_CONTAINER_MIGRATION_DATABASE_URL` | `postgresql+psycopg://di:di@db:5432/di` | Mapped to migration `DI_MIGRATION_DATABASE_URL` only |
+| `DI_CONTAINER_DATABASE_URL` | `DI_DATABASE_URL` from generated `.env` | Mapped to application `DI_DATABASE_URL`; restricted runtime role |
+| `DI_CONTAINER_MIGRATION_DATABASE_URL` | `DI_MIGRATION_DATABASE_URL` from generated `.env` | Mapped to migration `DI_MIGRATION_DATABASE_URL` only |
 | `DI_REDIS_URL` | `redis://redis:6379/0` in containers | Internal Redis; overrides the host CLI value |
 | `DI_S3_ENDPOINT` | `http://minio:9000` in containers | Internal MinIO; overrides the host CLI value |
 | `DI_S3_USE_SSL` | `false` in containers | Local internal network uses HTTP; MinIO encrypts stored objects |
 | `DI_S3_REGION`, `DI_S3_BUCKET` | `us-east-1`, `documents` | Object storage location |
-| `DI_S3_ACCESS_KEY`, `DI_S3_SECRET_KEY` | `minioadmin`, `minioadmin` | Public development defaults; replace outside local development |
+| `DI_S3_ACCESS_KEY`, `DI_S3_SECRET_KEY` | Generated in `.env` | Required, independent credentials for each installation |
 | `DI_OTEL_ENDPOINT` | `http://otel-collector:4318` in containers | OTLP/HTTP collector |
 | `DI_ENV` | `development` | Telemetry environment |
 | `DI_MODEL_CACHE`, `HF_HUB_OFFLINE` | `/home/di/.cache/doc-insight/models`, `1` | Image model cache and offline Hub loading |
