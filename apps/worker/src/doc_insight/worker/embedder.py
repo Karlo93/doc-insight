@@ -4,15 +4,21 @@ from dataclasses import dataclass
 from functools import cache
 from math import sqrt
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from doc_insight.worker.providers import HfTokenizer
 from doc_insight.worker.settings import Settings
-from fastembed import TextEmbedding
 from huggingface_hub import snapshot_download
+
+if TYPE_CHECKING:
+    from fastembed import TextEmbedding
 
 
 @cache
-def _model(model: str, repo: str, revision: str, cache_dir: Path) -> TextEmbedding:
+def _model(model: str, repo: str, revision: str, cache_dir: Path) -> "TextEmbedding":
+    # Importing ONNX probes hardware; text-only commands must not initialize it.
+    from fastembed import TextEmbedding
+
     path = snapshot_download(
         repo,
         revision=revision,

@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,20 @@ from doc_insight.worker import cli
 from doc_insight.worker.cli import main
 
 FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def test_text_cli_does_not_import_the_embedding_runtime() -> None:
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; import doc_insight.worker.cli; assert 'onnxruntime' not in sys.modules",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
 
 
 def test_cli_summary(

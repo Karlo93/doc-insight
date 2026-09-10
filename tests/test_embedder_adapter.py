@@ -20,7 +20,7 @@ def test_adapter_pins_downloads_reuses_model_and_passes_batch_size(
     model.embed.return_value = [np.ones(384)]
     factory = Mock(return_value=model)
     monkeypatch.setattr(embedder, "snapshot_download", download)
-    monkeypatch.setattr(embedder, "TextEmbedding", factory)
+    monkeypatch.setattr("fastembed.TextEmbedding", factory)
     monkeypatch.setattr(embedder, "HfTokenizer", lambda settings: FakeTokenizer())
     settings = Settings(model_cache=tmp_path, embed_batch=7)
     for _ in range(2):
@@ -38,7 +38,7 @@ def test_entire_batch_is_checked_before_loading_or_embedding(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     factory = Mock()
-    monkeypatch.setattr(embedder, "TextEmbedding", factory)
+    monkeypatch.setattr("fastembed.TextEmbedding", factory)
     monkeypatch.setattr(embedder, "HfTokenizer", lambda settings: FakeTokenizer())
     adapter = FastEmbedEmbedder(Settings())
     assert adapter.embed_passages([]) == []
