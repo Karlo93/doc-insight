@@ -27,8 +27,8 @@ class Settings(BaseSettings):
         "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     ] = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     embed_batch: int = Field(default=32, gt=0)
-    embed_onnx_repo: Literal["qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q"] = (
-        "qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q"
+    embed_onnx_repo: Literal["Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q"] = (
+        "Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q"
     )
     embed_revision: str = "faf4aa4225822f3bc6376869cb1164e8e3feedd0"
     tokenizer_revision: str = "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"

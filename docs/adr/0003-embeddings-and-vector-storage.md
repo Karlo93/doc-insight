@@ -10,7 +10,7 @@ two special tokens complete the published 128-token sentence input. MiniLM requi
 query/passage prefixes. A shared Embedder Protocol keeps inference out of the pure pipeline.
 
 Pin both the original tokenizer revision and the
-[quantized ONNX artifact](https://huggingface.co/qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/tree/faf4aa4225822f3bc6376869cb1164e8e3feedd0).
+[quantized ONNX artifact](https://huggingface.co/Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/tree/faf4aa4225822f3bc6376869cb1164e8e3feedd0).
 Download the snapshot into `DI_MODEL_CACHE` and pass its directory explicitly to FastEmbed,
 so its normal download path cannot choose a different revision. Load once per configuration.
 Tests compare both artifacts' tokenizer IDs and verify the input limit with the real model.
@@ -21,6 +21,13 @@ pipeline never used. Pipeline version 5 records the new output; `uv.lock` fixes 
 The runtime accepts the selected MiniLM model/repository pairing only, and derives dimension
 384 from that choice. An arbitrary model name must not relabel incompatible pinned weights.
 Model, tokenizer, weight revisions, prefixes and input budget change together after evaluation.
+`DI_EMBED_MODEL` and `DI_EMBED_ONNX_REPO` are a fixed profile, not interchangeable env options.
+The canonical `Qdrant` repository ID avoids relying on a redirect; the revision is unchanged.
+
+For the M4 container, warm both tokenizer and ONNX snapshots in the mounted cache, then set
+`HF_HUB_OFFLINE=1` before starting the process. A pinned revision alone still allows a network
+attempt before cache fallback. The later query service must report overlong questions as a
+clear HTTP 400; the adapter's refusal to truncate must not become an HTTP 500.
 
 ## Evaluation and upgrade criterion
 
@@ -34,6 +41,12 @@ With 64/8 evaluation windows, the keyword baseline gives recall@5 0.875 and MRR 
 30 whitespace-tokenized chunks. MiniLM gives 1.000 and 0.938 over 42 subword-tokenized chunks.
 These are regression checks, not a controlled comparison or evidence of Croatian retrieval
 quality: the chunk sets differ, the corpus is tiny, and questions reuse distinctive words.
+
+At the shipped 120/24 defaults, MiniLM gives recall@5 1.000 and MRR 0.917 over 24 chunks.
+Reproduce with `uv run --locked --all-packages python scripts/eval_retrieval.py --provider fastembed --production`.
+Top five covers roughly a fifth of this corpus, so this only catches gross regressions.
+A separate bilingual-evaluation PR before M4 will add a generated Croatian multi-topic fixture
+and questions; the current single-chunk Croatian fixture does not establish retrieval quality.
 
 Keep MiniLM while it passes the 0.8 recall@5 gate. If a separate representative English/Croatian
 holdout falls below 0.8, benchmark [multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)

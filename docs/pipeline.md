@@ -96,7 +96,7 @@ Labels remain model-native (`PERSON` in English, `PER` in Croatian), avoiding a 
 | `DI_NER_MODELS` | `{"en":"en_core_web_sm","hr":"hr_core_news_sm"}` | JSON map of languages to installed spaCy models |
 | `DI_CHUNK_TOKENS` | `120` | Maximum content tokens; at most 126 for MiniLM plus two special tokens |
 | `DI_CHUNK_OVERLAP` | `24` | Maximum overlap tokens, rounded down to whole words; must be smaller than the window |
-| `DI_EMBED_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Selected model whose tokenizer defines the windows; other profiles require a reviewed change |
+| `DI_EMBED_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Fixed profile: only this value is accepted; another model requires a reviewed change |
 | `DI_TOKENIZER_REVISION` | `e8f8c211226b894fcb81acc59f3b34ba3efd5f42` | Immutable tokenizer revision; change together with the model and pipeline version |
 | `DI_MODEL_CACHE` | `~/.cache/doc-insight/models` | Shared cache independent of the working directory; use an absolute override for containers |
 
@@ -132,10 +132,13 @@ the angle between vectors and rejects zero/nonfinite or mismatched inputs.
 | Environment variable | Default | Purpose |
 | --- | --- | --- |
 | `DI_EMBED_BATCH` | `32` | Number of texts processed per inference batch; must be positive |
-| `DI_EMBED_ONNX_REPO` | `qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q` | Selected ONNX export paired with MiniLM |
+| `DI_EMBED_ONNX_REPO` | `Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q` | Fixed profile: only this canonical ONNX repository is accepted |
 | `DI_EMBED_REVISION` | `faf4aa4225822f3bc6376869cb1164e8e3feedd0` | Immutable ONNX snapshot revision; changing it requires a version bump |
 
 The model loads once per configuration. Weights and tokenizer share `DI_MODEL_CACHE`.
+For offline containers in M4, warm both snapshots there, then set `HF_HUB_OFFLINE=1` before
+startup; a commit pin alone does not prevent a network attempt. Future query services must
+translate rejection of overlong questions into a clear HTTP 400 response.
 The first `--embed` run downloads roughly 0.22 GB; without that flag only the tokenizer is needed.
 FastEmbed emits an upstream warning comparing mean pooling to its historical CLS behavior;
 the locked runtime intentionally uses mean pooling. Model tests exercise that actual path.
@@ -149,6 +152,7 @@ Both accept another dimension for contract tests; the production profile is deli
 uv run --locked --all-packages di analyze tests/fixtures/text_hr.pdf --embed
 uv run --locked --all-packages python scripts/eval_retrieval.py
 uv run --locked --all-packages python scripts/eval_retrieval.py --provider fastembed
+uv run --locked --all-packages python scripts/eval_retrieval.py --provider fastembed --production
 uv run --locked --all-packages python scripts/make_eval_fixture.py
 ```
 
@@ -157,6 +161,7 @@ The generated `eval.jsonl` contains eight fixed questions over `text_long.pdf`. 
 reciprocal first-answer rank across the full ranking; absent answers score zero).
 The offline keyword run uses 30 whitespace-tokenized chunks: recall@5 0.875, MRR 0.745.
 The model run uses 42 subword-tokenized chunks: recall@5 1.000, MRR 0.938.
+`--production` uses configured chunk sizes (120/24 by default): 24 chunks, recall@5 1.000, MRR 0.917.
 Different chunk sets and eight English questions make this a regression fixture, not a general
 quality claim. See [ADR-0003](adr/0003-embeddings-and-vector-storage.md) for the upgrade criterion,
 e5's tokenizer/input changes, migration cost, and the pgvector decision for M4.

@@ -20,8 +20,15 @@ def main() -> None:
     parser.add_argument(
         "--provider", choices=["keyword", "fastembed"], default="keyword"
     )
+    parser.add_argument(
+        "--production",
+        action="store_true",
+        help="Use configured chunk sizes instead of 64/8",
+    )
     args = parser.parse_args()
-    settings = Settings(chunk_tokens=64, chunk_overlap=8)
+    settings = (
+        Settings() if args.production else Settings(chunk_tokens=64, chunk_overlap=8)
+    )
     embedder: Embedder = KeywordEmbedder(settings.embed_dim)
     tokenizer: Tokenizer = FakeTokenizer()
     if args.provider == "fastembed":
