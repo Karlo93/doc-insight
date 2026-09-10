@@ -1,8 +1,9 @@
-# Pipeline: extraction and structure
+# Pipeline: extraction, structure and embeddings
 
 `di extract` is the file-to-text edge of the worker. It reads local PDF, PNG,
 JPEG and TIFF files; it does not contact a service or persist a document.
 `di analyze` adds page languages, named entities and chunks with exact page offsets.
+`di analyze --embed` adds one vector per chunk; results still live only in memory/CLI output.
 
 ```mermaid
 flowchart LR
@@ -19,6 +20,8 @@ flowchart LR
     language --> ner[NER within document budget]
     ner --> chunks[Token windows within each page]
     chunks --> document[Document + entities + chunks]
+    document -->|--embed| embed[Validate input budget + FastEmbed]
+    embed --> vectors[384-dimensional vectors per chunk]
 ```
 
 `ExtractedDocument` contains `pipeline_version`, `sha256`, `media_type`, `pages`
@@ -42,7 +45,7 @@ setting is process-global. A future queue adapter must respect that constraint.
 | `DI_TESSERACT_CMD` | `tesseract` | Binary on PATH, or its full path |
 
 One cached Pydantic-settings object reads the environment on first use.
-Change environment values before starting `di`. `PIPELINE_VERSION = "4"` lives
+Change environment values before starting `di`. `PIPELINE_VERSION = "5"` lives
 in the extraction contracts; bump it whenever pipeline output changes, including models.
 OCR text may vary across Tesseract/language-data versions; tests assert known
 words, not byte-identical OCR output. Dependencies and fixture tooling use uv.lock.
@@ -93,7 +96,7 @@ Labels remain model-native (`PERSON` in English, `PER` in Croatian), avoiding a 
 | `DI_NER_MODELS` | `{"en":"en_core_web_sm","hr":"hr_core_news_sm"}` | JSON map of languages to installed spaCy models |
 | `DI_CHUNK_TOKENS` | `120` | Maximum content tokens; at most 126 for MiniLM plus two special tokens |
 | `DI_CHUNK_OVERLAP` | `24` | Maximum overlap tokens, rounded down to whole words; must be smaller than the window |
-| `DI_EMBED_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Model whose tokenizer defines the windows; embeddings arrive in M3 |
+| `DI_EMBED_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Selected model whose tokenizer defines the windows; other profiles require a reviewed change |
 | `DI_TOKENIZER_REVISION` | `e8f8c211226b894fcb81acc59f3b34ba3efd5f42` | Immutable tokenizer revision; change together with the model and pipeline version |
 | `DI_MODEL_CACHE` | `~/.cache/doc-insight/models` | Shared cache independent of the working directory; use an absolute override for containers |
 
@@ -109,9 +112,54 @@ The first `di analyze` downloads the pinned tokenizer into `DI_MODEL_CACHE`; lat
 reuse it. No embedding weights are needed in M2.
 MiniLM's pinned `sentence_bert_config.json` specifies 128 input tokens. The 120/24 defaults
 leave room for special tokens without relying on the underlying BERT's larger position table.
-M3 must preserve this limit in the embedding adapter and reject overlong inputs rather than truncate.
+The embedding adapter preserves this limit and rejects overlong inputs rather than truncating them.
 Changing the embedding model also changes tokenizer/chunking and requires a pipeline-version bump.
 An explicitly relative cache override is resolved from the startup directory; the default is absolute.
+
+## Embeddings (M3)
+
+`Embedder` exposes `embed_passages`, `embed_query`, `dimension` and `model_id`.
+`embed_document` copies the structured document, attaching each returned vector to its chunk's
+`embedding` and setting document `embed_model`/`embed_dimension`. These fields remain `null`
+without `--embed`. It rejects wrong counts/dimensions, nonfinite values and zero vectors.
+Text, offsets and the input document stay unchanged. Pipeline version is 5.
+
+FastEmbed runs the quantized ONNX model on CPU, with no PyTorch dependency. Before loading it,
+the adapter checks the entire batch against the 126-content-token limit, including queries.
+MiniLM uses no prefixes. Its mean-pooled output is normalized to unit length; cosine measures
+the angle between vectors and rejects zero/nonfinite or mismatched inputs.
+
+| Environment variable | Default | Purpose |
+| --- | --- | --- |
+| `DI_EMBED_BATCH` | `32` | Number of texts processed per inference batch; must be positive |
+| `DI_EMBED_ONNX_REPO` | `qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q` | Selected ONNX export paired with MiniLM |
+| `DI_EMBED_REVISION` | `faf4aa4225822f3bc6376869cb1164e8e3feedd0` | Immutable ONNX snapshot revision; changing it requires a version bump |
+
+The model loads once per configuration. Weights and tokenizer share `DI_MODEL_CACHE`.
+The first `--embed` run downloads roughly 0.22 GB; without that flag only the tokenizer is needed.
+FastEmbed emits an upstream warning comparing mean pooling to its historical CLS behavior;
+the locked runtime intentionally uses mean pooling. Model tests exercise that actual path.
+
+`FakeEmbedder` creates deterministic hash-derived unit vectors. `KeywordEmbedder` hashes
+case-folded words into 384 counters and normalizes them; empty lexical input uses a fixed unit
+vector. It tests retrieval without a model but cannot recognize paraphrases without shared words.
+Both accept another dimension for contract tests; the production profile is deliberately MiniLM-only.
+
+```text
+uv run --locked --all-packages di analyze tests/fixtures/text_hr.pdf --embed
+uv run --locked --all-packages python scripts/eval_retrieval.py
+uv run --locked --all-packages python scripts/eval_retrieval.py --provider fastembed
+uv run --locked --all-packages python scripts/make_eval_fixture.py
+```
+
+The generated `eval.jsonl` contains eight fixed questions over `text_long.pdf`. Evaluation uses
+64/8 windows and reports recall@5 (any expected answer in the first five chunks) and MRR (mean
+reciprocal first-answer rank across the full ranking; absent answers score zero).
+The offline keyword run uses 30 whitespace-tokenized chunks: recall@5 0.875, MRR 0.745.
+The model run uses 42 subword-tokenized chunks: recall@5 1.000, MRR 0.938.
+Different chunk sets and eight English questions make this a regression fixture, not a general
+quality claim. See [ADR-0003](adr/0003-embeddings-and-vector-storage.md) for the upgrade criterion,
+e5's tokenizer/input changes, migration cost, and the pgvector decision for M4.
 
 ## Run it: WSL2/Linux
 
@@ -150,8 +198,9 @@ is logged. Treat redirected output as document data, and keep it under ignored
 the Croatian fixture reports `hr`. Its JSON includes full pages, entity positions and chunks.
 `make test` uses fakes plus installed Lingua/spaCy models and blocks Python socket connections.
 It checks chunk slices, whole-word boundaries, token budgets, weighted language, entity counts and NER limits.
-`make test-models` exercises the real tokenizer, readable boundaries and the 128-token limit
-including special tokens against the pinned model configuration; it may download files.
+`make test-models` exercises the real tokenizer, embeddings, readable boundaries and the 128-token
+limit including special tokens, and enforces model recall@5 ≥ 0.8; it may download files.
+`make test` also enforces keyword recall@5 ≥ 0.75 without network or database access.
 That small subset disables coverage reporting; the full default suite enforces the 70% floor.
 
 Fixtures use a committed font subset, a fixed PDF creation date and twelve fixed
@@ -160,7 +209,7 @@ See [font provenance](../scripts/fonts/readme.md) and [ADR-0001](adr/0001-text-e
 
 ## Not yet
 
-M3 adds embeddings; M4 adds tenant-filtered persistence, transactions and vector search.
+M4 adds tenant-filtered persistence, transactions and vector search.
 There are no provider stubs for those stages before their first use.
 Extraction and analysis have no tenant state or database; their CLIs need no tenant yet.
 Multi-frame TIFF traversal, mixed text/image regions within one page, encrypted

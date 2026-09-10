@@ -19,6 +19,7 @@ class Chunk(BaseModel):
     char_start: int
     char_end: int
     token_count: int
+    embedding: list[float] | None = None
 
 
 class Entity(BaseModel):
@@ -33,6 +34,8 @@ class Entity(BaseModel):
 class Document(ExtractedDocument):
     chunks: list[Chunk]
     entities: list[Entity]
+    embed_model: str | None = None
+    embed_dimension: int | None = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property

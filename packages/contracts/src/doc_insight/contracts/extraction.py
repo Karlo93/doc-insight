@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, computed_field
 
 MediaType = Literal["application/pdf", "image/png", "image/jpeg", "image/tiff"]
-PIPELINE_VERSION = "4"
+PIPELINE_VERSION = "5"
 
 
 class Page(BaseModel):

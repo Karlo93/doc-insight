@@ -5,6 +5,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "doc-insight-contracts",
     "en-core-web-sm",
+    "fastembed>=0.8.0",
     "hr-core-news-sm",
     "huggingface-hub>=1.30.0",
     "lingua-language-detector>=2.2.0",

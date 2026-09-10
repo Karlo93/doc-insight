@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 
 from doc_insight.contracts.structure import Document
+from doc_insight.worker.embedder import FastEmbedEmbedder
+from doc_insight.worker.embedding import embed_document
 from doc_insight.worker.extraction import extract
 from doc_insight.worker.providers import (
     HfTokenizer,
@@ -28,6 +30,26 @@ def print_analysis(document: Document) -> None:
     print(
         f"Chunks: {len(sizes)} | Tokens min/max: {min(sizes, default=0)}/{max(sizes, default=0)}"
     )
+    if document.embed_model:
+        print(
+            f"Embeddings: {document.embed_dimension} dimensions | {document.embed_model}"
+        )
+
+
+def analyze_file(path: Path, with_embeddings: bool) -> Document:
+    settings = get_settings()
+    document = analyze(
+        extract(path),
+        LinguaLanguageDetector(settings),
+        SpacyNerExtractor(settings),
+        HfTokenizer(settings),
+        settings,
+    )
+    return (
+        embed_document(document, FastEmbedEmbedder(settings))
+        if with_embeddings
+        else document
+    )
 
 
 def main() -> None:
@@ -40,25 +62,22 @@ def main() -> None:
         subcommand = commands.add_parser(command, help=help_text)
         subcommand.add_argument("path", type=Path)
         subcommand.add_argument("--json", action="store_true")
+        if command == "analyze":
+            subcommand.add_argument(
+                "--embed", action="store_true", help="Generate chunk vectors"
+            )
     args = parser.parse_args()
     # Redirected Windows stdout may otherwise reject Croatian characters.
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    document = extract(args.path)
     if args.command == "analyze":
-        settings = get_settings()
-        structured = analyze(
-            document,
-            LinguaLanguageDetector(settings),
-            SpacyNerExtractor(settings),
-            HfTokenizer(settings),
-            settings,
-        )
+        structured = analyze_file(args.path, args.embed)
         if args.json:
             print(structured.model_dump_json(indent=2))
         else:
             print_analysis(structured)
         return
+    document = extract(args.path)
     if args.json:
         print(document.model_dump_json(indent=2))
     else:
