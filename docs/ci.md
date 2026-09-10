@@ -1,4 +1,4 @@
-# Phase 0 CI
+# CI gates
 
 Every PR and push to `main` runs three independent jobs; superseded runs are cancelled.
 
@@ -17,7 +17,8 @@ flowchart LR
 | --- | --- | --- | --- |
 | Setup | Sync every workspace member from uv.lock | Reproduce the same environment | Lockfile, download or installation failed |
 | quality | `make lint` + `make typecheck` | Catch style defects and type errors | Fix the reported code or formatting |
-| test | `make test`; upload coverage.xml for 7 days | Check behavior and enforce 70% coverage | Tests failed, coverage fell below 70%, or upload failed |
+| test | `make test`, then `make test-integration`; upload coverage.xml for 7 days | Enforce 70% unit coverage and prove the real storage contract | Behavior, migration, isolation or coverage failed |
+| Postgres | Healthy pgvector/Postgres 16 service | Exercise transactions, tenant constraints and vector retrieval | Service startup or database assertions failed |
 | OCR binary | Install Tesseract and Croatian data in the test job | Exercise actual scan extraction on Ubuntu without model downloads | Installation failed or required language data is unavailable |
 | security | `make audit`: bandit, pip-audit, gitleaks | Catch unsafe Python, vulnerable dependencies and exposed secrets | Review and fix the reported finding or tool failure |
 
@@ -32,6 +33,8 @@ Gitleaks uses a pinned upstream Go module and scans current files, including sta
 it excludes dependencies/caches, and does not scan deleted secrets in Git history.
 pip-audit skips editable workspace stubs; their installed third-party dependencies are audited.
 Tests cover extraction/OCR, structure, provider contracts and CLI output; Python socket access is blocked.
+`make db-up`, then `make test-integration` exercises temporary databases; it never downloads models.
+The integration target leaves unit coverage.xml intact; it runs alongside unit tests in the `test` job.
 Lingua/spaCy models install with dependencies; runtime downloads run separately with `make test-models`, outside CI.
 Local `make test` needs Tesseract with `eng` and `hrv`, as described in [pipeline setup](pipeline.md).
 
@@ -51,7 +54,7 @@ while this repository is private on the free plan, defer it until publication.
 
 | Work | Milestone |
 | --- | --- |
-| Image build/publish; SBOM and provenance; service-backed integration tests | Chunk 6 — Tests and CI hardening |
+| Image build/publish; SBOM and provenance; HTTP service integration tests | Chunk 6 — Tests and CI hardening |
 | Kubernetes deployment and autoscaling | Chunk 8 — Kubernetes, autoscaling, benchmark |
 
 Only checkout, setup-uv and upload-artifact actions are allowed, with read-only contents permission.

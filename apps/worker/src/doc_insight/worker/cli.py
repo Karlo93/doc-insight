@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from doc_insight.contracts.structure import Document
+from doc_insight.worker import store_cli
 from doc_insight.worker.embedder import FastEmbedEmbedder
 from doc_insight.worker.embedding import embed_document
 from doc_insight.worker.extraction import extract
@@ -55,6 +56,7 @@ def analyze_file(path: Path, with_embeddings: bool) -> Document:
 def main() -> None:
     parser = argparse.ArgumentParser(prog="di")
     commands = parser.add_subparsers(dest="command", required=True)
+    store_cli.add_commands(commands)
     for command, help_text in {
         "extract": "Extract text with OCR fallback",
         "analyze": "Detect language, entities and chunks",
@@ -70,6 +72,9 @@ def main() -> None:
     # Redirected Windows stdout may otherwise reject Croatian characters.
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
+    if args.command in {"index", "show", "search"}:
+        store_cli.run(args, parser)
+        return
     if args.command == "analyze":
         structured = analyze_file(args.path, args.embed)
         if args.json:

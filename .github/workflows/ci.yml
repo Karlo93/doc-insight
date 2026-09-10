@@ -21,6 +21,17 @@ jobs:
       - run: make typecheck
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: di
+          POSTGRES_PASSWORD: di
+          POSTGRES_DB: di
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U di -d di"
+          --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
@@ -29,6 +40,7 @@ jobs:
       - run: make setup
       - run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-hrv
       - run: make test
+      - run: make test-integration
       - uses: actions/upload-artifact@v7
         with:
           name: coverage

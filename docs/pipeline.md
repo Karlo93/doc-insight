@@ -1,9 +1,11 @@
-# Pipeline: extraction, structure and embeddings
+# Pipeline: files to searchable documents
 
 `di extract` is the file-to-text edge of the worker. It reads local PDF, PNG,
 JPEG and TIFF files; it does not contact a service or persist a document.
 `di analyze` adds page languages, named entities and chunks with exact page offsets.
 `di analyze --embed` adds one vector per chunk; results still live only in memory/CLI output.
+`di index` runs those stages and stores their output atomically; `di show` and `di search`
+read only the requested tenant's rows. Start with the M4 section below for the complete slice.
 
 ```mermaid
 flowchart LR
@@ -22,6 +24,11 @@ flowchart LR
     chunks --> document[Document + entities + chunks]
     document -->|--embed| embed[Validate input budget + FastEmbed]
     embed --> vectors[384-dimensional vectors per chunk]
+    vectors --> store[One transaction: document + chunks + entities]
+    store --> db[(Postgres + pgvector)]
+    question[Question + tenant] --> query[Embed question]
+    query --> db
+    db --> results[Tenant-filtered passages + page + cosine score]
 ```
 
 `ExtractedDocument` contains `pipeline_version`, `sha256`, `media_type`, `pages`
@@ -45,7 +52,7 @@ setting is process-global. A future queue adapter must respect that constraint.
 | `DI_TESSERACT_CMD` | `tesseract` | Binary on PATH, or its full path |
 
 One cached Pydantic-settings object reads the environment on first use.
-Change environment values before starting `di`. `PIPELINE_VERSION = "5"` lives
+Change environment values before starting `di`. `PIPELINE_VERSION = "6"` lives
 in the extraction contracts; bump it whenever pipeline output changes, including models.
 OCR text may vary across Tesseract/language-data versions; tests assert known
 words, not byte-identical OCR output. Dependencies and fixture tooling use uv.lock.
@@ -60,7 +67,7 @@ including images inside PDFs, still need orientation detection, which M1 does no
 | --- | --- |
 | `Document` | Extraction metadata plus `pages`, `entities`, `chunks`; derived `language` requires more than half the text characters to share a language, otherwise `und` |
 | `Page` | Extraction fields plus `language` and `confidence`; extraction alone leaves these at `und` and `0` |
-| `Chunk` | `text`, one-based `page`, zero-based document-wide `ord`, `char_start`, `char_end`, `token_count` |
+| `Chunk` | `text`, page `language`, one-based `page`, zero-based document-wide `ord`, `char_start`, `char_end`, `token_count` |
 | `Entity` | Original `text`, model's `label`, first occurrence's `page`, `char_start`, `char_end`, and document-wide `count` |
 
 Offsets are zero-based Python character positions, with an exclusive end:
@@ -166,6 +173,80 @@ Different chunk sets and eight English questions make this a regression fixture,
 quality claim. See [ADR-0003](adr/0003-embeddings-and-vector-storage.md) for the upgrade criterion,
 e5's tokenizer/input changes, migration cost, and the pgvector decision for M4.
 
+## Storage and search (M4)
+
+```mermaid
+erDiagram
+    documents ||--o{ chunks : owns
+    documents ||--o{ entities : owns
+    documents {
+        uuid id PK
+        text tenant_id "NOT NULL; indexed"
+        text sha256 "unique with tenant_id"
+        text pipeline_version
+        text embed_model
+        timestamptz processed_at
+    }
+    chunks {
+        uuid document_id FK
+        text tenant_id "NOT NULL; indexed"
+        int page
+        int char_start
+        int char_end
+        vector embedding "384 dimensions; HNSW cosine index"
+    }
+    entities {
+        uuid document_id FK
+        text tenant_id "NOT NULL; indexed"
+        text label
+        int count
+    }
+```
+
+The [migration](../migrations/versions/0001_core_tables.py) lists every column.
+Composite foreign keys include `tenant_id`: the database rejects children owned by another tenant.
+Every repository read/write also filters by tenant. This is application isolation, not RLS;
+the CLI's caller supplies a trusted tenant until authenticated services arrive.
+
+`upsert_document` writes metadata and replaces all chunks/entities in one transaction.
+The unique `(tenant_id, sha256)` conflict locks the row, serializing concurrent replays.
+Any failure rolls everything back; readers use one consistent snapshot. Re-indexing preserves
+the document ID, creation time and deterministic child IDs, while refreshing `processed_at`.
+A new pipeline version replaces the old output. Processing still runs on every replay;
+"effectively once" describes the stored result, not the CPU work. Version 6 adds chunk language.
+Standalone child replacement also locks its parent and commits both child sets together.
+
+Search orders tenant-owned chunks by pgvector cosine distance and returns `1 - distance` as
+the score (similarity, not confidence). The HNSW index supports approximate search as data grows;
+Postgres may choose an exact scan for small datasets. Filtered approximate recall needs a larger
+tenant-specific benchmark before tuning. No full-text or hybrid ranking is present.
+`di show` returns metadata, chunks and entities; original files and full page text are not stored.
+Offsets refer to the normalized extracted page, so retain the original file for page reconstruction.
+
+From the repository root, with Docker running:
+
+```text
+make db-up
+make migrate
+uv run --locked --all-packages di index tests/fixtures/text_hr.pdf --tenant demo
+uv run --locked --all-packages di show <document-id> --tenant demo
+uv run --locked --all-packages di search "Gdje se nalazi Zagreb?" --tenant demo -k 5
+make test-integration
+make db-down
+```
+
+Index output includes four stage durations, a document UUID and chunk count; search includes
+the document UUID, page, cosine score and passage. Repeat indexing: the UUID stays unchanged.
+Search with another tenant returns no passages; showing another tenant's ID exits with an error.
+`db-down` keeps the named volume. The Compose service publishes only to the local machine.
+Copy `.env.example` to `.env` to change Compose credentials/port; export `DI_DATABASE_URL`
+separately for Python. Its default is `postgresql+psycopg://di:di@localhost:5432/di`.
+If 5432 is occupied, set `POSTGRES_PORT=55432` for Compose and the matching URL for Python:
+PowerShell: `$env:DI_DATABASE_URL = 'postgresql+psycopg://di:di@127.0.0.1:55432/di'`;
+WSL/Linux: `export DI_DATABASE_URL='postgresql+psycopg://di:di@localhost:55432/di'`.
+`make test-integration` needs database-creation permission: tests create and drop only their
+randomly named databases, never the configured development database's tables.
+
 ## Run it: WSL2/Linux
 
 - Enable WSL2 and Docker Desktop's WSL integration; clone inside `~/src`, not `/mnt/c`.
@@ -214,8 +295,10 @@ See [font provenance](../scripts/fonts/readme.md) and [ADR-0001](adr/0001-text-e
 
 ## Not yet
 
-M4 adds tenant-filtered persistence, transactions and vector search.
-There are no provider stubs for those stages before their first use.
-Extraction and analysis have no tenant state or database; their CLIs need no tenant yet.
+Queue, HTTP services, gateway/JWT, LLM answers, RLS, hybrid retrieval, telemetry and application
+containers remain later work. `DOCKER_DEV=no`: only Postgres runs in Docker here.
+The bilingual retrieval evaluation and M2 performance follow-ups are still pending;
+the real Croatian smoke test is not a retrieval-quality benchmark.
+Extraction and analysis remain stateless; only index/show/search require a tenant.
 Multi-frame TIFF traversal, mixed text/image regions within one page, encrypted
 PDF passwords and parallel extraction are not implemented in M1.

@@ -56,14 +56,13 @@ def chunk_page(
                 break
             last, count = last + 1, size
         if last == first:
-            raise ValueError(
-                f"chunk_tokens cannot hold one token on page {page.number}"
-            )
+            raise ValueError(f"chunk_tokens too small on page {page.number}")
         end = units[last - 1][1]
         if not chunks or end > chunks[-1].char_end:
             chunks.append(
                 Chunk(
                     text=page.text[start:end],
+                    language=page.language,
                     page=page.number,
                     ord=start_ord + len(chunks),
                     char_start=start,

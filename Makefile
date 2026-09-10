@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test test-models audit check
+.PHONY: setup lint typecheck test test-models test-integration db-up db-down migrate audit check
 
 setup:
 	uv sync --locked --all-packages
@@ -15,6 +15,18 @@ test:
 
 test-models:
 	uv run --locked --all-packages pytest -m models --no-cov
+
+test-integration:
+	uv run --locked --all-packages pytest -m integration --no-cov
+
+db-up:
+	uv run --locked docker compose up -d --wait db
+
+db-down:
+	uv run --locked docker compose down
+
+migrate:
+	uv run --locked --all-packages alembic upgrade head
 
 audit:
 	uv run --locked --all-packages bandit -c pyproject.toml -r apps packages && uv run --locked --all-packages pip-audit --skip-editable
