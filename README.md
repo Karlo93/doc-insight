@@ -80,20 +80,21 @@ the UUID and replaces the stored output atomically; it still runs extraction and
 
 Compose runs infrastructure only, all bound to loopback: Postgres, Redis and MinIO in `infra`,
 and the OpenTelemetry collector, Prometheus, Tempo and Grafana in `telemetry`
-(`make telemetry-up`). There are no application images, Caddy configuration or Kubernetes
-manifests yet (they land with lane 5).
+(`make telemetry-up`). The optional [gateway overlay](docs/gateway.md#try-it-yourself)
+adds a development application image. Caddy and Kubernetes deployment remain pending.
 
 ## API status and examples
 
 The [query service](docs/query.md) implements `POST /query` on port 8002, with offline
 extractive answers, citations and abstention. Start it with `di-query serve` after indexing
-a fixture. The [ingest service](docs/ingest.md) accepts uploads and serves status on port 8001;
-the gateway package remains a workspace shell.
-The planned sequence is mint a development token → `POST /ingest` →
+a fixture. The [ingest service](docs/ingest.md) accepts uploads and serves status on port 8001.
+The [gateway](docs/gateway.md) implements RS256/JWKS authentication, Redis rate limits,
+streaming proxy routes and development token tooling.
+The full service sequence is mint a development token → `POST /ingest` →
 `GET /documents/{id}` until processed → `POST /query`.
 See the [API contract](docs/api.md) for payloads, status codes and planned curl calls.
-Token commands and real HTTP responses will be added after the services merge and run together;
-the contract examples are not recorded server responses.
+The gateway runbook includes token commands and an optional development Compose overlay.
+Full pipeline examples still depend on the upstream services running together.
 
 ## CLI
 
@@ -157,7 +158,7 @@ See [architecture and trade-offs](docs/architecture.md) for the planned service 
 | `apps/worker` | Extraction, analysis, embedding, storage and CLI |
 | `apps/query` | Internal hybrid retrieval and grounded answers |
 | `apps/ingest` | Upload validation, object storage, outbox relay and status reads |
-| `apps/gateway` | Reserved service package |
+| `apps/gateway` | Public authentication, rate limits and streaming proxy |
 | `packages/{contracts,testing}` | Shared types, Protocols and fakes |
 | `packages/observability` | OpenTelemetry setup, stage spans, request metrics and trace propagation |
 | `packages/domain` | Reserved shared package |

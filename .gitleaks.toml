@@ -4,3 +4,7 @@ useDefault = true
 [[allowlists]]
 description = "Scan our sources, excluding installed dependencies and generated caches."
 paths = ['''(^|[/\\])(\.venv|__pycache__|\.[^/\\]*_cache)([/\\]|$)''']
+
+[[allowlists]]
+description = "Locally generated demo issuer material in the git-ignored default directory."
+paths = ['''(^|[/\\])\.dev-keys[/\\](private\.pem|public\.pem|jwks\.json)$''']
