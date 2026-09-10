@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     embed_revision: str = "faf4aa4225822f3bc6376869cb1164e8e3feedd0"
     tokenizer_revision: str = "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
     model_cache: Path = Path.home() / ".cache" / "doc-insight" / "models"
+    database_url: str = "postgresql+psycopg://di:di@localhost:5432/di"
 
     @property
     def embed_dim(self) -> int:

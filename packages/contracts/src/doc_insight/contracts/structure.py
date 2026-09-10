@@ -14,6 +14,7 @@ class LanguageGuess(BaseModel):
 
 class Chunk(BaseModel):
     text: str
+    language: str = "und"
     page: int
     ord: int
     char_start: int
