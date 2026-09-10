@@ -32,6 +32,23 @@ See [deployment](docs/deploy.md) for startup details and
 [private hosting](docs/private-deployment.md) for protected server access.
 `make local-stop` stops the stack while preserving data volumes.
 
+## API calls
+
+The same workflow is available over HTTPS through the gateway. With the stack running:
+
+```sh
+TOKEN=$(make -s dev-token)
+curl -fkSs -H "Authorization: Bearer $TOKEN" -F file=@tests/fixtures/text_hr.pdf https://localhost/ingest
+curl -fkSs -H "Authorization: Bearer $TOKEN" https://localhost/documents/REPLACE_WITH_DOCUMENT_ID
+curl -fkSs -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"question":"Gdje živi Marko Marić?","top_k":3}' https://localhost/query
+```
+
+`-k` accepts the local development certificate. Poll the status until it is
+`processed`, then ask. `GET /documents` lists the tenant's library and `GET /usage`
+reports the day's token accounting. See the [API contract](docs/api.md) for payloads,
+status codes and error envelopes.
+
 ## Answer generation
 
 OCR, embeddings, search and extractive answers run without paid API credentials.
