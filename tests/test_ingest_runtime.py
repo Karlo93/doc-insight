@@ -143,11 +143,24 @@ def test_cli_requires_valid_tenant(monkeypatch, args):
 
 def test_cli_serve_and_sanitized_failures(monkeypatch, capsys):
     monkeypatch.setattr("sys.argv", ["di-ingest", "serve"])
-    monkeypatch.setattr(cli, "get_settings", lambda: Mock())
+    settings = Settings(s3_access_key="test", s3_secret_key="test")
+    monkeypatch.setattr(cli, "get_settings", lambda: settings)
     run = Mock()
     monkeypatch.setattr(cli.uvicorn, "run", run)
     cli.main()
+    assert run.call_args.kwargs["host"] == "127.0.0.1"
     assert run.call_args.kwargs["port"] == 8001
+    # Containers override the loopback default through the environment.
+    monkeypatch.setenv("DI_HTTP_HOST", "0.0.0.0")
+    monkeypatch.setenv("DI_HTTP_PORT", "9001")
+    monkeypatch.setattr(
+        cli,
+        "get_settings",
+        lambda: Settings(s3_access_key="test", s3_secret_key="test"),
+    )
+    cli.main()
+    assert run.call_args.kwargs["host"] == "0.0.0.0"
+    assert run.call_args.kwargs["port"] == 9001
     run.side_effect = OSError("private content")
     with pytest.raises(SystemExit) as caught:
         cli.main()

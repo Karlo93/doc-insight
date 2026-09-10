@@ -1,5 +1,6 @@
 """Internal tenant-scoped HTTP API; credentials are verified by the gateway."""
 
+import logging
 import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -19,6 +20,8 @@ from fastapi.responses import JSONResponse
 from python_multipart.exceptions import MultipartParseError
 from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+logger = logging.getLogger(__name__)
 
 
 def tenant(request: Request) -> str:
@@ -93,6 +96,13 @@ async def error_response(request: Request, error: Exception) -> JSONResponse:
         status, message = 400, "Invalid multipart upload"
     elif isinstance(error, RequestValidationError):
         status, message = 422, "Invalid request"
+    if status == 503:
+        # Class and route template only; the message may carry document data.
+        logger.warning(
+            "request failed route=%s error=%s",
+            getattr(request.scope.get("route"), "path", "unmatched"),
+            type(error).__name__,
+        )
     return JSONResponse(
         status_code=status,
         content={

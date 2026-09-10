@@ -54,12 +54,12 @@ def main() -> None:
     ):
         parser.error("Invalid tenant")
     try:
-        get_settings()
+        settings = get_settings()
         if args.command == "serve":
             uvicorn.run(
                 "doc_insight.ingest.main:app",
-                host="127.0.0.1",
-                port=8001,
+                host=settings.http_host,
+                port=settings.http_port,
                 access_log=False,
                 log_level="critical",
             )

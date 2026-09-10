@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     max_upload_bytes: int = Field(default=50 * 1024 * 1024, gt=0)
     relay_poll_seconds: float = Field(default=1, gt=0)
     relay_batch: int = Field(default=100, ge=1, le=10000)
+    # Containers bind every interface; the local default stays loopback-only.
+    http_host: str = Field(default="127.0.0.1", min_length=1)
+    http_port: int = Field(default=8001, ge=1, le=65535)
 
 
 @cache

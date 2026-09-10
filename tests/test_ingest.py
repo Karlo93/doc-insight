@@ -98,7 +98,7 @@ def test_missing_header(clients):
 
 
 @pytest.mark.parametrize("target", ["storage", "transaction"])
-def test_failure_order_and_sanitized_error(clients, monkeypatch, target):
+def test_failure_order_and_sanitized_error(clients, monkeypatch, caplog, target):
     client, repository, objects = clients
 
     def fail(*args):
@@ -109,9 +109,13 @@ def test_failure_order_and_sanitized_error(clients, monkeypatch, target):
         "put" if target == "storage" else "register_upload",
         fail,
     )
-    response = post(client)
+    with caplog.at_level("WARNING", logger="doc_insight.ingest.main"):
+        response = post(client)
     assert response.status_code == 503
     assert "private" not in response.text
+    # Operators see the class and route; the message never reaches the log.
+    assert "error=OSError" in caplog.text and "route=/ingest" in caplog.text
+    assert "private" not in caplog.text
     assert not repository.documents and not repository.events
     assert bool(objects.objects) == (target == "transaction")
 

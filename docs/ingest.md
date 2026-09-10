@@ -94,6 +94,8 @@ explicitly archive those rows and drain the outbox before downgrading.
 | `DI_MAX_UPLOAD_BYTES` | `52428800` (50 MiB) | Positive file byte limit |
 | `DI_RELAY_POLL_SECONDS` | `1` | Positive pause between relay passes |
 | `DI_RELAY_BATCH` | `100` | Maximum events locked per pass, 1–10000 |
+| `DI_HTTP_HOST` | `127.0.0.1` | Bind address for `di-ingest serve`; containers set `0.0.0.0` |
+| `DI_HTTP_PORT` | `8001` | Listen port for `di-ingest serve` |
 
 Settings and clients are created once per process. S3 operations use bounded network
 timeouts and retries; Redis uses five-second connection and operation timeouts.
