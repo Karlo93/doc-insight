@@ -2,6 +2,7 @@
 
 import re
 
+from doc_insight.contracts.query import Generation, GenerationInfo
 from doc_insight.contracts.storage import SearchHit
 
 STOP_WORDS = frozenset(
@@ -36,6 +37,14 @@ STOP_WORDS = frozenset(
         "that",
         "through",
         "during",
+        "with",
+        "about",
+        "can",
+        "could",
+        "please",
+        "explain",
+        "tell",
+        "me",
         "gdje",
         "što",
         "kako",
@@ -51,15 +60,30 @@ STOP_WORDS = frozenset(
         "za",
     ]
 )
+OPERATORS = frozenset(["and", "or"])
 
 
 def words(text: str) -> set[str]:
-    return set(re.findall(r"[^\W_]+", text.casefold())) - STOP_WORDS
+    """Casefold content words; an all-caps token such as CAN is a term, not a stop word."""
+    found = set()
+    for token in re.findall(r"[^\W_]+", text):
+        folded = token.casefold()
+        # Search operators typed in capitals are not acronyms.
+        acronym = len(token) > 1 and token.isupper() and folded not in OPERATORS
+        if folded not in STOP_WORDS or acronym:
+            found.add(folded)
+    return found
 
 
 def overlap(text: str, evidence: str) -> float:
     tokens = words(text)
     return len(tokens & words(evidence)) / len(tokens) if tokens else 0.0
+
+
+def lexical_query(question: str) -> str:
+    """Search content terms without requiring every word of a natural-language question."""
+    # Only tokenizer-produced words enter the grammar; user operators stay inert.
+    return " OR ".join(f'"{term}"' for term in sorted(words(question)))
 
 
 def fuse(rankings: list[list[SearchHit]], k: int = 60) -> list[SearchHit]:
@@ -102,5 +126,37 @@ def confidence(
     return min(1.0, max(0.0, (0.7 + 0.3 * margin) * grounding))
 
 
-def should_abstain(value: float, threshold: float, supported: bool) -> bool:
-    return not supported or value <= 0 or value < threshold
+def should_abstain(
+    value: float, threshold: float, supported: bool, *, generated: bool = False
+) -> bool:
+    """Use lexical thresholds for extraction, not for a hosted model's paraphrase."""
+    # Citation validation and explicit lack of support still reject hosted output.
+    return not supported or (not generated and (value <= 0 or value < threshold))
+
+
+def assess_generation(
+    generation: Generation,
+    provider: GenerationInfo,
+    hits: list[SearchHit],
+    threshold: float,
+) -> tuple[float, bool, list[SearchHit]]:
+    """Validate citation structure, then apply the provider-appropriate support rule."""
+    indexes = list(dict.fromkeys(generation.cited_passage_indexes))
+    # One invalid citation invalidates the whole answer, including hosted output.
+    valid = bool(indexes and generation.answer.strip()) and all(
+        0 <= i < len(hits) for i in indexes
+    )
+    cited = [hits[i] for i in indexes] if valid else []
+    value = confidence(
+        [h.score for h in hits],
+        generation.supported and valid,
+        generation.answer,
+        [h.chunk.text for h in cited],
+    )
+    abstained = should_abstain(
+        value,
+        threshold,
+        generation.supported and valid,
+        generated=provider.provider == "openai",
+    )
+    return value, abstained, cited

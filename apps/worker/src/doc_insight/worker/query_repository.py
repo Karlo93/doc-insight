@@ -60,6 +60,15 @@ class PostgresQueryReader:
             for row in self.connection.execute(statement.limit(k)).mappings()
         ]
 
+    def document_names(self, tenant_id: str) -> list[tuple[UUID, str]]:
+        """Read only names for scope resolution; RLS and an explicit tenant filter apply."""
+        rows = self.connection.execute(
+            select(self.docs.c.id, self.docs.c.filename).where(
+                self.docs.c.tenant_id == tenant_id
+            )
+        )
+        return [(row.id, row.filename) for row in rows]
+
     def nearest_chunks(
         self,
         tenant_id: str,

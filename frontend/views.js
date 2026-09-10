@@ -54,7 +54,7 @@ export function renderAnswer(data, documents) {
     header.append(
         element(
             "small",
-            `${Math.round(data.confidence * 100)}% evidence score · ${(data.latency_ms / 1000).toFixed(1)}s`,
+            `${data.sources.length} ${data.abstained ? "retrieved" : "cited"} passages · ${(data.latency_ms / 1000).toFixed(1)}s`,
         ),
     );
     box.append(header);
@@ -62,7 +62,7 @@ export function renderAnswer(data, documents) {
         element(
             "div",
             data.answer ||
-                "The available sources do not support an answer. Try a more specific question or add another document.",
+                "The retrieved passages did not provide enough support. Select a document in Search in, or try a more specific question.",
             "answer-text",
         ),
     );

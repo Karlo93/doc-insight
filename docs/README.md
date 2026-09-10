@@ -41,6 +41,7 @@ The service runbooks above describe the implemented stack. The assignment review
 
 - [Private deployment](private-deployment.md)
 - [OpenAI/private delivery decision](adr/0012-openai-private-delivery.md)
+- [Hosted support and document context](adr/0013-query-grounding-and-document-context.md)
 
 - [Release evidence and assignment closure](evidence/README.md)
 - [Measured load-test report](../benchmark/README.md)
