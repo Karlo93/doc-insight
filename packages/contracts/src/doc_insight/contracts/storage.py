@@ -67,6 +67,9 @@ def prepare_document(
 
 
 class DocumentRepository(Protocol):
+    def list_documents(
+        self, tenant_id: str, limit: int = 50, offset: int = 0
+    ) -> list[StoredDocument]: ...
     def register_upload(
         self,
         tenant_id: str,

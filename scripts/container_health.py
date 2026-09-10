@@ -22,7 +22,8 @@ def check() -> None:
             raise RuntimeError("Relay process is absent")
     else:
         port = {"gateway": 8000, "ingest": 8001, "query": 8002}[app]
-        with urlopen(f"http://127.0.0.1:{port}/healthz", timeout=3) as response:  # nosec B310
+        route = "readyz" if app == "query" else "healthz"
+        with urlopen(f"http://127.0.0.1:{port}/{route}", timeout=3) as response:  # nosec B310
             if response.status != 200:
                 raise RuntimeError("HTTP process is unhealthy")
 

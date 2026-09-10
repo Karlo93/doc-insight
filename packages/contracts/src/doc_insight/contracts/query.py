@@ -5,6 +5,7 @@ from typing import Annotated, Literal, Protocol
 from uuid import UUID
 
 from doc_insight.contracts.storage import QueryFilter, SearchHit, StoredDocument
+from doc_insight.contracts.usage import TokenUsage
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 __all__ = ["QueryFilter"]
@@ -21,6 +22,7 @@ class Generation(BaseModel):
     answer: str
     supported: bool
     cited_passage_indexes: list[int] = Field(default_factory=list)
+    usage: TokenUsage | None = None
 
 
 class Generator(Protocol):
@@ -75,8 +77,10 @@ class RetrievalInfo(BaseModel):
 
 
 class GenerationInfo(BaseModel):
-    provider: Literal["mistral", "extractive"]
+    provider: Literal["openai", "extractive"]
     model: str
+    usage: TokenUsage | None = None
+    fallback_reason: str | None = None
 
 
 class QueryResponse(BaseModel):

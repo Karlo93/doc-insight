@@ -21,6 +21,23 @@ class UploadRepository:
     docs: Table
     outbox: Table
 
+    def list_documents(
+        self, tenant_id: str, limit: int = 50, offset: int = 0
+    ) -> list[StoredDocument]:
+        """Return metadata only, in stable newest-first order under tenant RLS."""
+        if not 1 <= limit <= 100 or offset < 0:
+            raise ValueError("Invalid pagination")
+        with self.engine.begin() as connection:
+            set_tenant(connection, tenant_id)
+            rows = connection.execute(
+                select(self.docs)
+                .where(self.docs.c.tenant_id == tenant_id)
+                .order_by(self.docs.c.created_at.desc(), self.docs.c.id)
+                .limit(limit)
+                .offset(offset)
+            ).mappings()
+            return [StoredDocument.model_validate(row) for row in rows]
+
     def find_by_sha256(self, tenant_id: str, sha256: str) -> StoredDocument | None:
         with self.engine.begin() as connection:
             set_tenant(connection, tenant_id)

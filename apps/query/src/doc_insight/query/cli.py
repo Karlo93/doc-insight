@@ -12,4 +12,6 @@ def main() -> None:
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8002)
     args = parser.parse_args()
-    uvicorn.run("doc_insight.query.main:app", host=args.host, port=args.port)
+    uvicorn.run(
+        "doc_insight.query.main:app", host=args.host, port=args.port, access_log=False
+    )

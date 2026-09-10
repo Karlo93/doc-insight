@@ -17,6 +17,11 @@ def cosine(a: list[float], b: list[float]) -> float:
 
 
 def embed_document(document: Document, embedder: Embedder) -> Document:
+    """Copy output with one finite, nonzero vector per chunk and provider metadata.
+
+    Reject count/dimension violations before anything can be persisted. The input
+    document stays unchanged; stored output uses the current pipeline version.
+    """
     vectors = embedder.embed_passages([chunk.text for chunk in document.chunks])
     if len(vectors) != len(document.chunks) or any(
         len(vector) != embedder.dimension

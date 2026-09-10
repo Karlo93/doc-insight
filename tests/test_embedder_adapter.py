@@ -31,6 +31,7 @@ def test_adapter_pins_downloads_reuses_model_and_passes_batch_size(
     assert download.call_args.kwargs["cache_dir"] == tmp_path
     assert factory.call_args.kwargs["specific_model_path"] == str(tmp_path)
     assert factory.call_args.kwargs["providers"] == ["CPUExecutionProvider"]
+    assert factory.call_args.kwargs["threads"] == 2
     model.embed.assert_called_with(["hello"], batch_size=7)
 
 

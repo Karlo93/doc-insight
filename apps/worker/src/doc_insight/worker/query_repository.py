@@ -18,6 +18,12 @@ from sqlalchemy import (
 
 
 class PostgresQueryReader:
+    """Read through a caller-owned transaction with tenant context already bound.
+
+    Methods also apply tenant/document/language filters. The repository snapshot
+    context owns the connection lifetime and transaction boundaries.
+    """
+
     def __init__(
         self,
         connection: Connection,

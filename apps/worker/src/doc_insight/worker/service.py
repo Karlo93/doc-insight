@@ -21,6 +21,13 @@ logger = logging.getLogger(__name__)
 
 
 class Worker:
+    """Process stream deliveries sequentially and acknowledge durable outcomes.
+
+    Transient storage failures stay pending for reclaim. Invalid/terminal work
+    uses the dead-letter path; current-version completed documents are replay-safe.
+    Heartbeats signal progress at loop boundaries, not from a background thread.
+    """
+
     def __init__(
         self,
         stream: StreamConsumer,

@@ -15,7 +15,7 @@ from doc_insight.gateway.rate_limit import RedisRateLimiter
 from doc_insight.gateway.responses import error
 from doc_insight.gateway.settings import get_settings
 from doc_insight.observability import configure, instrument_app
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from redis.asyncio import Redis
 from starlette.exceptions import HTTPException
@@ -94,6 +94,20 @@ async def query(request: Request) -> Response:
     return await gateway.proxy(request, "/query", False)
 
 
+async def documents(
+    request: Request, limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0)
+) -> Response:
+    gateway: Gateway = request.app.state.gateway
+    return await gateway.proxy(
+        request, f"/documents?limit={limit}&offset={offset}", True
+    )
+
+
+async def usage(request: Request) -> Response:
+    gateway: Gateway = request.app.state.gateway
+    return await gateway.proxy(request, "/usage", False)
+
+
 async def validation_error(request: Request, exc: Exception) -> Response:
     return error(422, "validation_error", "invalid request")
 
@@ -126,6 +140,8 @@ def create_app(gateway: Gateway | None = None) -> FastAPI:
     app.add_api_route("/.well-known/jwks.json", jwks, methods=["GET"])
     app.add_api_route("/ingest", ingest, methods=["POST"])
     app.add_api_route("/documents/{document_id}", document, methods=["GET"])
+    app.add_api_route("/documents", documents, methods=["GET"])
+    app.add_api_route("/usage", usage, methods=["GET"])
     app.add_api_route("/query", query, methods=["POST"])
     app.add_exception_handler(RequestValidationError, validation_error)
     app.add_exception_handler(HTTPException, http_error)

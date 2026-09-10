@@ -1,0 +1,24 @@
+# Requires Docker Compose 2.24.4+. Keep infrastructure inside the project network.
+services:
+  query:
+    cpus: 4.0
+    mem_limit: 2g
+  worker:
+    cpus: 4.0
+    mem_limit: 3g
+  db:
+    ports: !reset []
+  redis:
+    ports: !reset []
+  minio:
+    ports: !reset []
+  otel-collector:
+    ports: !reset []
+  prometheus:
+    ports: !reset []
+  tempo:
+    ports: !reset []
+  grafana:
+    ports: !override ["127.0.0.1:${GRAFANA_PORT:-9300}:3000"]
+  caddy:
+    ports: !override ["127.0.0.1:${CADDY_HTTP_PORT:-9080}:80"]

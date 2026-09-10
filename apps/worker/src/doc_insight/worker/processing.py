@@ -48,6 +48,12 @@ def download(store: ObjectStore, event: WorkerEvent, path: Path) -> None:
 
 
 class DocumentProcessor:
+    """Validate event identity and original bytes before invoking the pipeline.
+
+    Temporary downloads are scoped to one attempt. This layer updates document
+    status; the consumer owns acknowledgement, retry and dead-letter policy.
+    """
+
     def __init__(
         self, repository: DocumentRepository, objects: ObjectStore, pipeline: Pipeline
     ) -> None:

@@ -28,6 +28,13 @@ def _set_tenant(connection: Connection, tenant_id: str) -> None:
 
 
 class PostgresRepository(UploadRepository):
+    """Tenant-scoped SQL adapter over migration-owned, reflected tables.
+
+    Use a restricted runtime role: transactions bind the RLS tenant context, while
+    explicit filters and composite foreign keys preserve ownership. Upserts replace
+    metadata and derived rows together; snapshots keep multi-query reads consistent.
+    """
+
     def __init__(self, engine: Engine) -> None:
         self.engine = engine
         metadata = MetaData()

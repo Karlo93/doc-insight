@@ -31,7 +31,7 @@ key pair into the private `dev-issuer` volume on first start and copies only
 `jwks.json` into the `dev-jwks` volume, which the gateway mounts read-only at
 `/run/dev`. The private key never enters the gateway container or the host checkout.
 `make dev-token` (variables `TENANT`, `SUBJECT`, `TTL`) mints a token through the same
-job. The relay serves one tenant's outbox under row-level security, `DI_DEMO_TENANT`
+job. The relay serves each provisioned tenant under separate row-level-security transactions, `DI_TENANTS`
 (default `demo`); uploads for other tenants are stored but not processed until a relay
 for that tenant runs. The HTTP services bind to `0.0.0.0` on their contracted internal
 ports (8000, 8001, 8002); only Caddy's ports are published, on loopback.
@@ -88,7 +88,7 @@ in [local stack](local-stack.md). Internal application ports are not published.
 | `DI_MODEL_CACHE`, `HF_HUB_OFFLINE` | `/home/di/.cache/doc-insight/models`, `1` | Image model cache and offline Hub loading |
 | `DI_INGEST_URL`, `DI_QUERY_URL` | `http://ingest:8001`, `http://query:8002` | Gateway upstreams |
 | `DI_JWKS_URL` | `http://127.0.0.1:8000/.well-known/jwks.json` | Gateway's development public key endpoint |
-| `DI_DEMO_TENANT` | `demo` | Tenant whose outbox the relay serves; `dev-token` default |
+| `DI_TENANTS` | `demo,other` | Gateway allowlist and relay tenant set |
 | `DI_DEV_JWKS_PATH` | `/run/dev/jwks.json` | Container public JWKS path |
 | `DI_JWT_ISSUER`, `DI_JWT_AUDIENCE` | `doc-insight-dev`, `doc-insight` | Must match development token claims |
 | `CADDY_HTTP_PORT`, `CADDY_HTTPS_PORT` | `80`, `443` | Loopback-only public ports |
@@ -113,7 +113,19 @@ For production, replace `localhost` with a real domain, remove `tls internal`,
 and configure public DNS/reachability for Caddy's ACME certificates, or terminate
 TLS at managed ingress. Use HTTPS for external storage and a real identity
 provider; remove the development JWKS mount/endpoint. Kubernetes manifests and
-ingress are wave B; see [ADR-0008](adr/0008-compose-service-images.md).
+ingress are deferred; see [ADR-0011](adr/0011-compose-service-images.md).
+
+## Optional hosted answers
+
+Compose maps `DI_OPENAI_API_KEY`, `DI_OPENAI_MODEL`, `DI_LLM_TIMEOUT_SECONDS`,
+`DI_LLM_BREAKER_FAILURES`, `DI_LLM_BREAKER_SECONDS`, `DI_ABSTAIN_THRESHOLD`,
+`DI_RRF_K` and `DI_QUERY_TOP_K_MAX` from the shell or `.env` into query only.
+Defaults match [query settings](query.md#settings). An empty key selects extractive
+answers; adding it enables outbound OpenAI requests with question/passage content.
+Recreate query after changing these values; a container restart retains its old environment.
+See [credential setup and remaining deployment work](online-readiness.md).
+
+## API smoke calls
 
 Mint a token with `TOKEN=$(make -s dev-token)` (tenant `demo`, user `alice`, one hour).
 These are the three public API calls:

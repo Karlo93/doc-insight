@@ -1,0 +1,207 @@
+{
+  "ramp": [
+    {
+      "mode": "documents",
+      "offered_rps": 10,
+      "duration_seconds": 30,
+      "elapsed_with_drain": 29.92,
+      "completed_rps": 10.03,
+      "statuses": {
+        "200": 300
+      },
+      "success_percent": 100.0,
+      "p50_ms": 9.31,
+      "p95_ms": 24.85,
+      "p99_ms": 26.56,
+      "dispatch_p99_ms": 1.74
+    },
+    {
+      "mode": "documents",
+      "offered_rps": 25,
+      "duration_seconds": 30,
+      "elapsed_with_drain": 29.97,
+      "completed_rps": 25.02,
+      "statuses": {
+        "200": 750
+      },
+      "success_percent": 100.0,
+      "p50_ms": 8.63,
+      "p95_ms": 24.03,
+      "p99_ms": 25.17,
+      "dispatch_p99_ms": 2.27
+    },
+    {
+      "mode": "documents",
+      "offered_rps": 50,
+      "duration_seconds": 30,
+      "elapsed_with_drain": 29.99,
+      "completed_rps": 50.02,
+      "statuses": {
+        "200": 1500
+      },
+      "success_percent": 100.0,
+      "p50_ms": 7.59,
+      "p95_ms": 23.13,
+      "p99_ms": 26.29,
+      "dispatch_p99_ms": 3.2
+    },
+    {
+      "mode": "documents",
+      "offered_rps": 100,
+      "duration_seconds": 30,
+      "elapsed_with_drain": 30.0,
+      "completed_rps": 100.01,
+      "statuses": {
+        "200": 3000
+      },
+      "success_percent": 100.0,
+      "p50_ms": 6.38,
+      "p95_ms": 11.23,
+      "p99_ms": 17.41,
+      "dispatch_p99_ms": 1.77
+    },
+    {
+      "mode": "query",
+      "offered_rps": 10,
+      "duration_seconds": 30,
+      "elapsed_with_drain": 29.95,
+      "completed_rps": 10.02,
+      "statuses": {
+        "200": 300
+      },
+      "success_percent": 100.0,
+      "p50_ms": 58.7,
+      "p95_ms": 83.2,
+      "p99_ms": 87.54,
+      "dispatch_p99_ms": 1.96
+    },
+    {
+      "mode": "query",
+      "offered_rps": 25,
+      "duration_seconds": 30,
+      "elapsed_with_drain": 30.01,
+      "completed_rps": 24.99,
+      "statuses": {
+        "200": 750
+      },
+      "success_percent": 100.0,
+      "p50_ms": 64.08,
+      "p95_ms": 102.5,
+      "p99_ms": 110.06,
+      "dispatch_p99_ms": 2.1
+    },
+    {
+      "mode": "query",
+      "offered_rps": 50,
+      "duration_seconds": 30,
+      "elapsed_with_drain": 38.92,
+      "completed_rps": 23.05,
+      "statuses": {
+        "200": 897,
+        "client_dropped": 603
+      },
+      "success_percent": 59.8,
+      "p50_ms": 10642.29,
+      "p95_ms": 11580.96,
+      "p99_ms": 11901.52,
+      "dispatch_p99_ms": 3.42
+    },
+    {
+      "mode": "query",
+      "offered_rps": 100,
+      "duration_seconds": 30,
+      "elapsed_with_drain": 38.59,
+      "completed_rps": 22.96,
+      "statuses": {
+        "200": 886,
+        "client_dropped": 2114
+      },
+      "success_percent": 29.53,
+      "p50_ms": 10569.32,
+      "p95_ms": 11521.71,
+      "p99_ms": 11754.04,
+      "dispatch_p99_ms": 3.81
+    }
+  ],
+  "confirmation": [
+    {
+      "mode": "documents",
+      "offered_rps": 25,
+      "duration_seconds": 120,
+      "elapsed_with_drain": 119.97,
+      "completed_rps": 25.01,
+      "statuses": {
+        "200": 3000
+      },
+      "success_percent": 100.0,
+      "p50_ms": 7.08,
+      "p95_ms": 11.2,
+      "p99_ms": 22.26,
+      "dispatch_p99_ms": 1.26
+    },
+    {
+      "mode": "documents",
+      "offered_rps": 100,
+      "duration_seconds": 120,
+      "elapsed_with_drain": 120.0,
+      "completed_rps": 100.0,
+      "statuses": {
+        "200": 12000
+      },
+      "success_percent": 100.0,
+      "p50_ms": 6.51,
+      "p95_ms": 11.32,
+      "p99_ms": 20.18,
+      "dispatch_p99_ms": 1.85
+    },
+    {
+      "mode": "query",
+      "offered_rps": 25,
+      "duration_seconds": 120,
+      "elapsed_with_drain": 120.01,
+      "completed_rps": 25.0,
+      "statuses": {
+        "200": 3000
+      },
+      "success_percent": 100.0,
+      "p50_ms": 63.13,
+      "p95_ms": 103.58,
+      "p99_ms": 113.72,
+      "dispatch_p99_ms": 2.1
+    },
+    {
+      "mode": "query",
+      "offered_rps": 100,
+      "duration_seconds": 120,
+      "elapsed_with_drain": 129.54,
+      "completed_rps": 23.74,
+      "statuses": {
+        "200": 3075,
+        "client_dropped": 8925
+      },
+      "success_percent": 25.62,
+      "p50_ms": 10539.11,
+      "p95_ms": 11858.59,
+      "p99_ms": 12211.62,
+      "dispatch_p99_ms": 2.92
+    }
+  ],
+  "soak": [
+    {
+      "mode": "query",
+      "offered_rps": 20,
+      "duration_seconds": 600,
+      "elapsed_with_drain": 600.0,
+      "completed_rps": 20.0,
+      "statuses": {
+        "200": 11999,
+        "502": 1
+      },
+      "success_percent": 99.99,
+      "p50_ms": 60.36,
+      "p95_ms": 95.71,
+      "p99_ms": 106.38,
+      "dispatch_p99_ms": 2.07
+    }
+  ]
+}

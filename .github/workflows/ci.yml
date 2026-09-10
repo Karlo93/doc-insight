@@ -2,7 +2,6 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
 permissions:
   contents: read
 concurrency:
@@ -20,7 +19,11 @@ jobs:
       - run: make lint
       - run: make typecheck
       - name: compose
-        run: docker compose --profile '*' config --quiet
+        run: |
+          docker compose --profile '*' config --quiet
+          docker compose -f docker-compose.yml -f deploy/compose.private.yml --profile '*' config --quiet
+      - name: Browser modules
+        run: for file in frontend/*.js; do node --check "$file"; done
   test:
     runs-on: ubuntu-latest
     env:

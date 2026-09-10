@@ -75,7 +75,7 @@ Query response contract:
 | `sources` | List of `{document_id, page, chunk_ord, char_start, char_end, text, score}` |
 | `entities` | List of `{text, label, count, document_id}` |
 | `retrieval` | `{top_k, hits, hybrid}`; `hybrid` is boolean |
-| `generation` | `{provider, model}`; provider is `mistral` or `extractive` |
+| `generation` | `{provider, model, usage, fallback_reason}`; provider is `openai` or `extractive` |
 | `latency_ms` | Integer |
 
 Citation offsets refer to normalized extracted page text, not PDF byte offsets.
@@ -87,7 +87,7 @@ remain pending verification against the merged services.
 Originals use bucket `documents`, key `{tenant_id}/{sha256}`, with SSE-S3 on MinIO.
 The document and outbox row commit together. Outbox columns are `id` (UUID primary key),
 `tenant_id`, `aggregate_id` (UUID), `type`, `payload` (JSONB), `created_at`, and nullable
-`published_at`. `di-ingest relay` is the planned relay entry point.
+`published_at`. `di-ingest relay --tenant demo` is the implemented relay entry point.
 
 The relay publishes `document.uploaded` to Redis Stream `di:documents`. All message
 values are strings: `event_id`, `type`, `tenant_id`, `document_id`, `sha256`, `object_key`,
@@ -95,3 +95,17 @@ values are strings: `event_id`, `type`, `tenant_id`, `document_id`, `sha256`, `o
 Consumer group: `worker`. Dead-letter stream: `di:documents:dlq`, containing the original
 fields plus `error` and `attempts`. Delivery is at least once; consumers must be idempotent.
 See [reliability](architecture.md#reliability) for transaction and acknowledgment boundaries.
+
+## Browser support endpoints
+
+`GET /documents?limit=50&offset=0` lists only the authenticated tenant's metadata,
+newest first with an ID tie-breaker. Limit is 1–100 and offset is nonnegative.
+The response has `items`, `limit`, and `offset`; each item contains `id`, `filename`,
+`status`, `page_count`, `language`, `created_at`, `processed_at`, `error`, `size_bytes`.
+Text, embeddings, original object keys, and other tenants are omitted.
+
+`GET /usage` returns today's UTC `daily_limit`, `charged_tokens`, `reserved_tokens`,
+`requests`, `input_tokens`, `output_tokens`, and `cached_input_tokens`. Unknown usage
+can make charged tokens exceed known measured tokens. Cache tokens are already
+part of input tokens and must not be added twice. All browser APIs use `/api/` as
+a same-origin alias; the original gateway paths remain available.

@@ -29,7 +29,7 @@ def test_cli_serve(monkeypatch):
     monkeypatch.setattr("sys.argv", ["di-query", "serve"])
     main()
     run.assert_called_once_with(
-        "doc_insight.query.main:app", host="127.0.0.1", port=8002
+        "doc_insight.query.main:app", host="127.0.0.1", port=8002, access_log=False
     )
 
 
@@ -52,7 +52,7 @@ def test_runtime_reuses_clients_and_retries_repository_initialization(monkeypatc
     )
     factory = Mock(side_effect=[OSError("unavailable"), repository])
     monkeypatch.setattr("doc_insight.query.runtime.PostgresRepository", factory)
-    runtime = Runtime(Settings(llm_api_key="test"))
+    runtime = Runtime(Settings(openai_api_key="test"))
     with pytest.raises(OSError):
         runtime.get_service()
     service = runtime.get_service()
@@ -80,7 +80,7 @@ def test_actual_token_limit_maps_to_400_before_database_access():
     from doc_insight.query.service import QueryService
     from doc_insight.worker.embedder import FastEmbedEmbedder
 
-    settings = Settings(llm_api_key="")
+    settings = Settings(openai_api_key="")
     repository = Mock()
     service = QueryService(
         repository, FastEmbedEmbedder(settings), FallbackGenerator(), settings

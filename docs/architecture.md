@@ -2,29 +2,29 @@
 
 doc-insight turns PDF and image bytes into tenant-scoped, searchable passages with page
 citations and extracted entities. The implemented processing slice is the worker CLI, Redis
-consumer and transactional Postgres/pgvector storage, pipeline version 6. The target service layer accepts authenticated
+consumer and transactional Postgres/pgvector storage, pipeline version 6. The service layer accepts authenticated
 uploads, processes them asynchronously, and answers questions using retrieved passages.
-This document records both the current boundaries and the contracts that remain to land.
+Docker Compose runs the services locally; [online readiness](online-readiness.md) records the private release configuration.
 
 ## System diagram
 
 This Mermaid transcription preserves the supplied architecture diagram's component boxes
-and data paths. It is a **target architecture**, not a deployment inventory. Solid arrows
+and data paths. Solid arrows
 denote requests/writes; dashed arrows denote reads, asynchronous delivery or telemetry.
-The component table below identifies what is implemented. The reference PNG is not committed.
+The component table below identifies what is implemented. The browser UI is deployed; general-purpose audit storage remains outside this release.
 
 ```mermaid
 flowchart TB
-    client["Client / SDK<br/>Browser, service, Streamlit demo"]
-    caddy["Caddy — TLS"]
+    client["Browser UI<br/>Upload, library, questions, citations"]
+    caddy["Caddy — UI and API proxy"]
     gateway["Gateway / BFF<br/>RS256 JWT via JWKS<br/>Tenant/user headers; token bucket"]
     ingest["Ingest service<br/>Magic bytes; SHA-256; outbox; status"]
     query["Query service<br/>Hybrid retrieval; RRF; answer; confidence; abstention"]
     worker["Worker<br/>PDFium / Tesseract → Lingua / spaCy<br/>Chunk → FastEmbed → atomic store<br/>Reclaim; DLQ"]
     objects["Object storage<br/>MinIO / S3; tenant prefix; SSE"]
     redis["Redis<br/>Streams; consumer group; DLQ<br/>Rate-limit token bucket"]
-    db["Database + vectors<br/>Postgres + pgvector HNSW; tsvector<br/>Documents; chunks; entities; outbox; audit_events<br/>Forced row-level security"]
-    llm["LLM — answers<br/>Mistral API; timeout; circuit breaker<br/>Offline extractive fallback"]
+    db["Database + vectors<br/>Postgres + pgvector HNSW; tsvector expression<br/>Documents; chunks; entities; outbox; token usage<br/>Forced row-level security"]
+    llm["LLM — answers<br/>OpenAI API; timeout; circuit breaker<br/>Offline extractive fallback"]
     collector["OTel Collector"]
     prometheus["Prometheus"]
     tempo["Tempo"]
@@ -54,10 +54,10 @@ flowchart TB
 
 ## Component responsibilities and delivery status
 
-| Component | Responsibility | Status on main |
+| Component | Responsibility | Release implementation |
 | --- | --- | --- |
-| Client / SDK | Upload files and ask questions | CLI exists; browser/SDK/Streamlit box is a target interface, no shipped client |
-| Caddy | Public TLS termination | Implemented in Compose with an internal CA for localhost, proxying to the gateway ([deployment](deploy.md)) |
+| Client / SDK | Upload files and ask questions | Static browser UI with upload progress, document status, filters, citations and usage; CLI remains available |
+| Caddy | Static frontend and private API proxy | Implemented in Compose with an internal CA for localhost, proxying to the gateway ([deployment](deploy.md)) |
 | Gateway, port 8000 | Validate RS256 JWT against JWKS; derive tenant/user; rate-limit and proxy | Implemented; [runbook](gateway.md) |
 | Ingest, port 8001 | Stream validated uploads to objects; create document/outbox transaction; status reads and relay | Implemented; [upload, status and relay](ingest.md) |
 | Query, port 8002 | Retrieve tenant-owned evidence; generate cited answer or abstain | Implemented; [operation and confidence](query.md) |
@@ -65,18 +65,19 @@ flowchart TB
 | Object storage, ports 9000/9001 | Original bytes in `documents`, at `{tenant_id}/{sha256}` | MinIO with mandatory SSE-S3 runs in the Compose `infra` profile; the ingest adapter streams originals into it |
 | Redis, port 6379 | Event stream, worker group, DLQ and rate-limit buckets | Redis runs in the Compose `infra` profile; the ingest relay publishes `di:documents` and `di worker run` consumes it; the gateway keeps its token buckets there |
 | Postgres, port 5432 | Relational metadata and 384-dimensional pgvector HNSW index | Implemented, including forced row-level security ([ADR-0005](adr/0005-tenant-row-level-security.md)); outbox implemented ([ADR-0007](adr/0007-transactional-outbox.md)); full-text expression retrieval implemented; `audit_events` delivery unassigned |
-| LLM | Mistral answer generation behind a provider boundary; extractive fallback | Implemented; hosted calls are opt-in, offline fallback validated |
-| Collector, port 4318; Prometheus; Tempo; Grafana | OTLP/HTTP ingestion, metrics, traces and dashboards | Runs in the Compose `telemetry` profile with a provisioned dashboard; the `doc_insight.observability` helper is implemented ([ADR-0004](adr/0004-opentelemetry.md)) and the CLI emits stage spans; services adopt it as they land |
+| LLM | OpenAI answer generation behind a provider boundary; extractive fallback | Implemented; hosted calls are opt-in, offline fallback validated |
+| Collector, port 4318; Prometheus; Tempo; Grafana | OTLP/HTTP ingestion, metrics, traces and dashboards | Implemented with HTTP and processing spans; active trace context propagates through HTTP and outbox/worker paths (see [evidence](evidence/README.md)) |
 
 Ports above are internal contracts. The Compose `infra` and `telemetry` profiles publish every
-service on loopback with configurable host ports (see [local stack](local-stack.md)); no
-application image is built yet. A target diagram does not imply public access to its internal
-services or automatic deployment of every component.
-`audit_events` is retained from the reference diagram, but no implementation or migration
-is assigned yet. Full-text retrieval uses a `tsvector` expression; a persisted
-search column or GIN index is not part of the initial query-service contract.
+service on loopback with configurable host ports (see [local stack](local-stack.md)).
+The `app` profile runs four application images plus relay, migration, development issuer
+and Caddy. Only Caddy publishes application ports, also on loopback. These are local
+services, not a deployed public website. `audit_events` has no implementation or migration.
+Full-text retrieval uses a `tsvector` expression with a GIN index in migration 0004.
+Tenant-scoped token reservations and usage events share the forced-RLS database.
+The private deployment removes infrastructure host ports and serves HTTPS through Tailscale.
 
-## Upload and processing path — ingest and worker implemented; gateway and TLS land with lanes 4 and 5
+## Upload and processing path
 
 ```mermaid
 sequenceDiagram
@@ -119,7 +120,7 @@ does not make object storage and Postgres one atomic resource. A failed insert a
 object write leaves an orphan that a later identical upload overwrites
 ([ADR-0007](adr/0007-transactional-outbox.md)).
 
-## Question and answer path — lands with lanes 3, 4 and 5
+## Question and answer path
 
 ```mermaid
 sequenceDiagram
@@ -136,23 +137,24 @@ sequenceDiagram
     Q->>D: Tenant-filtered vector + full-text retrieval
     D-->>Q: Candidate passages and entities
     Q->>Q: Reciprocal rank fusion and top-k evidence
-    alt Evidence sufficient
+    alt Retrieved passages available
         Q->>L: Question + retrieved passages
-        alt Mistral available within timeout and breaker closed
+        alt OpenAI available within timeout and breaker closed
             L-->>Q: Generated answer
         else Offline, provider failure or breaker open
             L-->>Q: Extractive fallback
         end
-    else Evidence insufficient
-        Q->>Q: Abstain
+    else No retrieved passages
+        Q->>Q: Produce unsupported empty generation
     end
+    Q->>Q: Validate citations and score grounding; answer or abstain
     Q-->>G: answer, confidence, abstained, sources, entities, retrieval, generation, latency_ms
     G-->>C: Forward answer response
 ```
 
 Current `di search` only embeds a question and returns tenant-filtered cosine neighbors.
 It has no full-text ranking, generation, confidence or abstention. Similarity is not confidence.
-The future provider receives question/passage content; this is a data-transfer boundary
+The optional hosted provider receives question/passage content; this is a data-transfer boundary
 even though operational logs must exclude that content.
 
 ## Tenancy and security
@@ -174,8 +176,9 @@ trust it only on the internal network. Tenant IDs are 1–64 characters from `[A
 the local stack already requires SSE-S3 for the `documents` bucket, so originals are encrypted
 at rest there. This does not assert encryption of every database, cache or telemetry volume.
 
-**Implemented:** Caddy terminates public HTTPS using a local internal CA in front of
-the gateway. Gateway-to-service and local MinIO traffic use HTTP inside the Compose
+**Implemented:** Caddy serves the frontend and proxies the gateway, with a local
+internal CA for development HTTPS. The private server uses Tailscale Serve HTTPS
+and encrypted host storage; its infrastructure ports are not published. Gateway-to-service and local MinIO traffic use HTTP inside the Compose
 network; end-to-end internal TLS is not a guarantee. See [deployment](deploy.md) for
 TLS, development keys and the production boundary.
 
@@ -198,22 +201,23 @@ reclaims pending work and sends exhausted failures to `di:documents:dlq` with or
 plus `error` and `attempts` ([worker runbook](worker.md)). Retry/reclaim thresholds are worker
 settings; no timing guarantee is asserted here.
 
-**Implemented:** timeouts and a circuit breaker bound Mistral failures; extractive fallback
+**Implemented:** timeouts and a circuit breaker bound OpenAI failures; extractive fallback
 avoids a provider dependency for every answer. Abstention handles insufficient evidence;
 breaker thresholds and evidence rules are in [query.md](query.md) and
 [ADR-0008](adr/0008-hybrid-query.md).
 
 **Implemented in ingest, query and the gateway:** HTTP services expose
 dependency-free `GET /healthz` and dependency-checking `GET /readyz` (503 when unavailable). **Implemented:** the worker writes
-`di:worker:{hostname}-{pid}` in Redis with a 30-second TTL at loop/message boundaries
-([ADR-0009](adr/0009-worker-heartbeat-identity.md)); long stages can outlast the TTL. **Implemented:** the
-`doc_insight.observability` helper emits stage durations and request spans and propagates
-`traceparent` through HTTP and stream carriers ([ADR-0004](adr/0004-opentelemetry.md)); the
-local telemetry profile receives them. Services adopt the helper as they land.
+`di:worker:{hostname}-{pid}` in Redis at loop/message boundaries. Its settings default
+is 30 seconds; Compose explicitly uses a 600-second heartbeat TTL and 900-second
+reclaim delay to tolerate long native stages. There is no hard processing deadline.
+The observability helper emits stage durations and request spans. The gateway and
+relay inject their active context, connecting downstream services and asynchronous
+processing. [Captured traces](evidence/README.md) demonstrate both upload and query.
 
 ## Trade-offs
 
-Planned rows state design intent, not measured outcomes or completed infrastructure decisions.
+These decisions describe the implemented design; [the load report](../benchmark/README.md) records measured capacity and saturation.
 
 | Decision | Alternative | Why | When to revisit |
 | --- | --- | --- | --- |
@@ -227,7 +231,7 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 ## Further reading
 
 - [Pipeline and worker settings](pipeline.md): implemented stages, storage semantics and limits.
-- [API contract](api.md): planned HTTP and stream payloads.
+- [API contract](api.md): HTTP and stream payloads.
 - [Configuration index](configuration.md): current environment settings and their scope.
 - [CI](ci.md): gates and test tiers.
 - [ADR-0001](adr/0001-text-extraction.md): extraction and OCR alternatives.
@@ -240,5 +244,5 @@ Planned rows state design intent, not measured outcomes or completed infrastruct
 - [Local stack](local-stack.md): Compose profiles, ports, encryption and Grafana.
 
 The [query guide](query.md), [ingest guide](ingest.md), [worker runbook](worker.md) and
-[gateway runbook](gateway.md) are implemented; `deploy.md` lands with the deployment lane. Add
-its link to the [index](README.md) when merged; pipeline details stay in `pipeline.md`.
+[gateway runbook](gateway.md) describe implemented services. [Deployment](deploy.md) covers
+local startup; [online readiness](online-readiness.md) covers private operation and remaining scale/identity limitations.

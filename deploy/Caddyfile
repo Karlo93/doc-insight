@@ -1,8 +1,50 @@
 {
-	skip_install_trust
+    skip_install_trust
+    auto_https disable_redirects
+    log default {
+        format filter {
+            wrap json
+            fields {
+                request delete
+            }
+        }
+    }
+}
+
+(application) {
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        Cache-Control "no-store"
+    }
+    handle_path /api/* {
+        reverse_proxy gateway:8000 {
+            # Retire idle sockets before Uvicorn's five-second timeout.
+            transport http {
+                keepalive 4s
+            }
+        }
+    }
+    @backend path /healthz /readyz /ingest* /query /documents* /usage /.well-known/*
+    handle @backend {
+        reverse_proxy gateway:8000 {
+            transport http {
+                keepalive 4s
+            }
+        }
+    }
+    handle {
+        root * /srv
+        file_server
+    }
+}
+
+http://:80 {
+    import application
 }
 
 https://localhost {
-	tls internal
-	reverse_proxy gateway:8000
+    tls internal
+    import application
 }

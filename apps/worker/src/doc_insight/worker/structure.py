@@ -111,6 +111,7 @@ def _overlap_start(
 def chunk_page(
     page: Page, tokenizer: Tokenizer, settings: Settings, start_ord: int
 ) -> list[Chunk]:
+    """Overlap whole-word windows with half-open offsets and document-wide ordinals."""
     if _requires_reference(page.text):
         return _reference_chunk_page(page, tokenizer, settings, start_ord)
     tokens = _PageTokens(page.text, tokenizer)
@@ -144,6 +145,7 @@ def chunk_page(
 
 
 def deduplicate(entities: list[Entity]) -> list[Entity]:
+    """Group normalized spelling/label pairs, keeping first offsets and total count."""
     unique: dict[tuple[str, str], Entity] = {}
     for entity in sorted(entities, key=lambda item: (item.page, item.char_start)):
         key = (
@@ -164,6 +166,7 @@ def analyze(
     tokenizer: Tokenizer,
     settings: Settings,
 ) -> Document:
+    """Detect per-page language; cap document-wide NER while chunking every page."""
     pages: list[Page] = []
     chunks: list[Chunk] = []
     entities: list[Entity] = []

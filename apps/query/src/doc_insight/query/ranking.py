@@ -63,6 +63,11 @@ def overlap(text: str, evidence: str) -> float:
 
 
 def fuse(rankings: list[list[SearchHit]], k: int = 60) -> list[SearchHit]:
+    """Sum reciprocal ranks by document/chunk, deduplicating within each ranking.
+
+    Returned fusion scores replace cosine/full-text scores. Ties sort by document
+    ID and ordinal to keep candidate ordering reproducible.
+    """
     if k < 1:
         raise ValueError("RRF k must be positive")
     scores: dict[tuple[str, int], float] = {}
@@ -85,6 +90,7 @@ def fuse(rankings: list[list[SearchHit]], k: int = 60) -> list[SearchHit]:
 def confidence(
     scores: list[float], supported: bool, answer: str, cited_passages: list[str]
 ) -> float:
+    """Score lexical grounding and rank separation, not correctness probability."""
     if not supported or not scores or not answer.strip() or not cited_passages:
         return 0.0
     # A singleton has no competing observation; never invent a perfect margin.

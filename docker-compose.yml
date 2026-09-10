@@ -45,6 +45,9 @@ services:
       DI_DEV_JWKS_PATH: /run/dev/jwks.json
       DI_JWT_ISSUER: ${DI_JWT_ISSUER:-doc-insight-dev}
       DI_JWT_AUDIENCE: ${DI_JWT_AUDIENCE:-doc-insight}
+      DI_TENANTS: ${DI_TENANTS:-demo,other}
+      DI_RATE_LIMIT_RPS: ${DI_RATE_LIMIT_RPS:-5}
+      DI_RATE_LIMIT_BURST: ${DI_RATE_LIMIT_BURST:-10}
     volumes:
       - dev-jwks:/run/dev:ro
     depends_on:
@@ -91,8 +94,8 @@ services:
     build:
       context: .
       args: {APP: ingest}
-    # The relay reads one tenant's outbox under row-level security.
-    command: [di-ingest, relay, --tenant, "${DI_DEMO_TENANT:-demo}"]
+    # Each tenant is processed in its own transaction under row-level security.
+    command: [di-ingest, relay, --tenant, "${DI_TENANTS:-demo,other}"]
     environment:
       <<: *app-environment
       DI_CONTAINER_ROLE: relay
@@ -103,8 +106,25 @@ services:
       context: .
       args: {APP: query}
     command: [di-query, serve, --host, 0.0.0.0]
+    environment:
+      <<: *app-environment
+      DI_OPENAI_API_KEY: ${DI_OPENAI_API_KEY:-}
+      DI_OPENAI_MODEL: ${DI_OPENAI_MODEL:-gpt-4.1-mini-2025-04-14}
+      DI_LLM_DAILY_TOKENS: ${DI_LLM_DAILY_TOKENS:-250000}
+      DI_LLM_MAX_OUTPUT_TOKENS: ${DI_LLM_MAX_OUTPUT_TOKENS:-700}
+      DI_LLM_CONCURRENCY: ${DI_LLM_CONCURRENCY:-4}
+      DI_LLM_TIMEOUT_SECONDS: ${DI_LLM_TIMEOUT_SECONDS:-10}
+      DI_LLM_BREAKER_FAILURES: ${DI_LLM_BREAKER_FAILURES:-3}
+      DI_LLM_BREAKER_SECONDS: ${DI_LLM_BREAKER_SECONDS:-30}
+      DI_ABSTAIN_THRESHOLD: ${DI_ABSTAIN_THRESHOLD:-0.6}
+      DI_RRF_K: ${DI_RRF_K:-60}
+      DI_QUERY_TOP_K_MAX: ${DI_QUERY_TOP_K_MAX:-20}
   worker:
     <<: *app
+    environment:
+      <<: *app-environment
+      DI_WORKER_HEARTBEAT_SECONDS: ${DI_WORKER_HEARTBEAT_SECONDS:-600}
+      DI_WORKER_CLAIM_MIN_IDLE_MS: ${DI_WORKER_CLAIM_MIN_IDLE_MS:-900000}
     image: ghcr.io/karlo93/doc-insight-worker:${IMAGE_TAG:-local}
     build:
       context: .
@@ -136,6 +156,7 @@ services:
       - "127.0.0.1:${CADDY_HTTPS_PORT:-443}:443"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./frontend:/srv:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:
@@ -153,12 +174,13 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-di}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-di}
       POSTGRES_DB: ${POSTGRES_DB:-di}
+      DI_DB_RUNTIME_PASSWORD: ${DI_DB_RUNTIME_PASSWORD:-di_app}
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
       # Runs once on a fresh volume: creates the restricted di_app runtime login.
-      - ./deploy/postgres/init-runtime-role.sql:/docker-entrypoint-initdb.d/10-runtime-role.sql:ro
+      - ./deploy/postgres/init-runtime-role.sh:/docker-entrypoint-initdb.d/10-runtime-role.sh:ro
     healthcheck:
       test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
       interval: 5s

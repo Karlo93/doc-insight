@@ -45,7 +45,7 @@ def service():
     repository = InMemoryRepository(384)
     repository.upsert_document("demo", "fixture.pdf", document)
     return QueryService(
-        repository, embedder, FallbackGenerator(), Settings(llm_api_key="")
+        repository, embedder, FallbackGenerator(), Settings(openai_api_key="")
     )
 
 

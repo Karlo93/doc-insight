@@ -16,7 +16,10 @@ def isolated_settings(monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRe
             key == "DI_REDIS_URL" or key.startswith("DI_S3_")
         ):
             continue
-        if key == "DI_LLM_API_KEY" and request.node.get_closest_marker("external"):
+        if key in {
+            "DI_OPENAI_API_KEY",
+            "DI_OPENAI_API_KEY_FILE",
+        } and request.node.get_closest_marker("external"):
             continue
         if key.startswith("DI_") and key not in {
             "DI_TESSERACT_CMD",

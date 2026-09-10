@@ -67,7 +67,7 @@ def build_worker(settings: Settings, stack: ExitStack) -> Worker:
     )
     processor = DocumentProcessor(PostgresRepository(engine), objects, pipeline)
     return Worker(
-        RedisStreamConsumer(client),
+        RedisStreamConsumer(client, settings.worker_heartbeat_seconds),
         processor,
         settings,
         f"{socket.gethostname()}-{os.getpid()}",

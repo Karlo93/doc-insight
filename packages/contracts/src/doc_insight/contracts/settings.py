@@ -14,6 +14,7 @@ class EmbeddingSettings(BaseSettings):
         "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     ] = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     embed_batch: int = Field(default=32, gt=0)
+    embed_threads: int = Field(default=2, ge=1, le=16)
     embed_onnx_repo: Literal["Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q"] = (
         "Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q"
     )

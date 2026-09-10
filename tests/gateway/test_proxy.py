@@ -29,6 +29,24 @@ def auth(token):
     return {"authorization": "Bearer " + token()}
 
 
+@pytest.mark.parametrize(
+    "tenant,expected", [("demo", 200), ("other", 200), ("third", 403)]
+)
+async def test_only_provisioned_tenants_reach_upstream(
+    gateway, token, tenant, expected
+):
+    gateway.settings.tenants = "demo,other"
+    async with client_for(gateway) as client:
+        response = await client.get(
+            "/documents",
+            headers={"authorization": "Bearer " + token({"tenant": tenant})},
+        )
+    assert response.status_code == expected
+    if expected == 403:
+        assert response.json()["error"]["code"] == "tenant_unavailable"
+        assert not gateway.ingest.requests
+
+
 async def test_forged_headers_stripped_with_real_asgi_upstream(gateway, token):
     upstream = FastAPI()
     captured = []

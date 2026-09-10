@@ -31,6 +31,7 @@ class Settings(EmbeddingSettings):
     worker_batch: int = Field(default=1, gt=0, le=100)
     worker_reclaim_seconds: float = Field(default=30, gt=0)
     worker_claim_min_idle_ms: int = Field(default=300000, gt=0)
+    worker_heartbeat_seconds: int = Field(default=30, ge=15, le=3600)
     worker_max_attempts: int = Field(default=5, gt=0)
     s3_endpoint: str = "http://127.0.0.1:9000"
     s3_region: str = "us-east-1"

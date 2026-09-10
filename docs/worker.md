@@ -71,10 +71,10 @@ The first SIGTERM or SIGINT finishes the in-flight message and exits successfull
 Remaining entries in a fetched batch stay pending for reclaim. A second signal
 exits immediately. Signal handlers are restored and clients close on normal exit.
 
-Each loop and message boundary refreshes `di:worker:{hostname}-{pid}` with a 30 s
-TTL ([ADR-0009](adr/0009-worker-heartbeat-identity.md)). The key contains `ready`.
+Each loop and message boundary refreshes `di:worker:{hostname}-{pid}` with a configurable
+TTL (30 s settings default, 600 s in Compose) ([ADR-0009](adr/0009-worker-heartbeat-identity.md)). The key contains `ready`.
 Blocking reads are capped at 10 s. This heartbeat
-reports recent progress; a stage taking longer than 30 s can expire it until the
+reports recent progress; a stage taking longer than the configured TTL can expire it until the
 next boundary. Do not use it alone to kill a process performing a long OCR job.
 
 The worker attaches the event's `traceparent`, creates a `process` span and four
@@ -90,11 +90,12 @@ variables before launching; `.env` is used by Compose and is not loaded by the C
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `DI_REDIS_URL` | `redis://127.0.0.1:6379/0` | Stream and heartbeat connection |
+| `DI_WORKER_HEARTBEAT_SECONDS` | `30` (Compose: `600`) | Progress heartbeat TTL; increase with long native stages |
 | `DI_WORKER_GROUP` | `worker` | Nonempty consumer group, without whitespace |
 | `DI_WORKER_BLOCK_MS` | `1000` | Blocking read timeout, 1–10000 ms |
 | `DI_WORKER_BATCH` | `1` | Entries fetched per read/reclaim, 1–100 |
 | `DI_WORKER_RECLAIM_SECONDS` | `30` | Positive interval between full pending scans |
-| `DI_WORKER_CLAIM_MIN_IDLE_MS` | `300000` | Positive idle lease before reclaim |
+| `DI_WORKER_CLAIM_MIN_IDLE_MS` | `300000` (Compose: `900000`) | Positive idle lease before reclaim |
 | `DI_WORKER_MAX_ATTEMPTS` | `5` | Positive number of permitted processing deliveries |
 | `DI_DATABASE_URL` | `postgresql+psycopg://di_app:di_app@localhost:5432/di` | Restricted runtime DB login |
 | `DI_MIGRATION_DATABASE_URL` | `postgresql+psycopg://di:di@localhost:5432/di` | Migration/test administrator login |

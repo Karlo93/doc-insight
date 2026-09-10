@@ -7,6 +7,17 @@ under a version and an ISO date when a release is cut.
 
 ### Added
 
+- Ship a private browser workspace for uploads, processing status, filtered questions,
+  citations and token usage; add tenant-scoped document listing and usage APIs.
+- Replace hosted generation with OpenAI Responses and structured citations, bounded
+  concurrency, circuit breaking and durable daily token reservations/accounting.
+- Add a private-server Compose overlay, file-mounted provider credentials, encrypted
+  backup/isolated restore scripts, HTTP acceptance and reproducible load-test evidence.
+- Connect gateway, ingest, relay, worker and OpenAI traces; capture real dashboard evidence.
+
+- Add a code walkthrough, assignment deliverable review and online-readiness guide;
+  document service/pipeline boundaries with docstrings and correct stale delivery claims.
+- Keep provider credentials scoped to query; an empty key selects local extractive answers.
 - Document the current CLI setup, target architecture and planned API contracts.
 - Add locked service images, offline worker models and OCR, migration-first local
   startup behind Caddy TLS (`make local-run`, `make dev-token`) and main-only GHCR
@@ -29,6 +40,10 @@ under a version and an ISO date when a release is cut.
 
 - Speed up chunking with one page encoding and a Unicode guard that preserves the original
   chunker for unsafe pages; chunk output and pipeline version 6 remain unchanged.
+- Run validation on every push; wait for model readiness before admitting queries.
+- Provision all configured tenants in the outbox relay and reject unprovisioned identities.
+- Add a GIN full-text index and cap native embedding threads; document measured capacity.
+
 - Pipeline version 6 carries each page's language on its chunks.
 
 [Unreleased]: https://github.com/Karlo93/doc-insight/commits/main

@@ -14,7 +14,7 @@ from doc_insight.ingest.settings import Settings, get_settings
 from doc_insight.ingest.upload import UploadBody
 from doc_insight.observability import configure, instrument_app
 from doc_insight.worker.extraction import UnsupportedMediaType
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from python_multipart.exceptions import MultipartParseError
@@ -81,6 +81,30 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+async def documents(
+    request: Request, limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0)
+) -> dict[str, object]:
+    rows = await run_in_threadpool(
+        resources(request).repository.list_documents, tenant(request), limit, offset
+    )
+    fields = {
+        "id",
+        "filename",
+        "status",
+        "page_count",
+        "language",
+        "created_at",
+        "processed_at",
+        "error",
+        "size_bytes",
+    }
+    return {
+        "items": [row.model_dump(mode="json", include=fields) for row in rows],
+        "limit": limit,
+        "offset": offset,
+    }
+
+
 async def ready(request: Request) -> dict[str, str]:
     await run_in_threadpool(resources(request).ready)
     return {"status": "ok"}
@@ -129,6 +153,7 @@ def create_app(
     app = FastAPI(lifespan=lifespan)
     app.add_api_route("/ingest", ingest, methods=["POST"], status_code=202)
     app.add_api_route("/documents/{document_id}", document, methods=["GET"])
+    app.add_api_route("/documents", documents, methods=["GET"])
     app.add_api_route("/healthz", health, methods=["GET"])
     app.add_api_route("/readyz", ready, methods=["GET"])
     for exception in (

@@ -66,6 +66,12 @@ class QuestionTooLong(ValueError):
 
 
 class QueryService:
+    """Retrieve under one tenant snapshot, then generate and validate an answer.
+
+    The database transaction ends before provider I/O. Final citation/grounding
+    checks may abstain after generation, including after a billable hosted call.
+    """
+
     def __init__(
         self,
         repository: QueryRepository,
@@ -98,7 +104,9 @@ class QueryService:
             ]
         with stage("query.generate"):
             generation, provider = self.generator.generate(
-                request.question, [h.chunk.text for h in hits]
+                request.question,
+                [h.chunk.text for h in hits],
+                tenant=tenant,
             )
         return self._response(request, hits, documents, generation, provider, started)
 

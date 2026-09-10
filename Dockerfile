@@ -26,11 +26,16 @@ COPY packages packages
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable --package doc-insight-${APP}
 COPY scripts/warm_models.py /tmp/warm_models.py
-# Query warms the same cache when its real worker dependency replaces the stub.
-RUN mkdir -p "$DI_MODEL_CACHE" && \
-    if [ "$APP" = worker ]; then python /tmp/warm_models.py; \
-    elif [ "$APP" = query ] && python -c 'import doc_insight.worker'; then \
-    python /tmp/warm_models.py; fi
+# Reuse pinned downloads across code edits and both inference images. The final
+# image receives its own copy, so runtime never depends on this build cache.
+RUN --mount=type=cache,id=doc-insight-models,target=/model-download-cache,sharing=locked \
+    mkdir -p "$DI_MODEL_CACHE" && \
+    if [ "$APP" = worker ] || [ "$APP" = query ]; then \
+      if ! HF_HUB_OFFLINE=1 DI_MODEL_CACHE=/model-download-cache python /tmp/warm_models.py; then \
+        DI_MODEL_CACHE=/model-download-cache python /tmp/warm_models.py; \
+      fi; \
+      cp -a /model-download-cache/. "$DI_MODEL_CACHE/"; \
+    fi
 
 FROM base AS runtime
 ARG APP
