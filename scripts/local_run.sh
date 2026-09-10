@@ -2,7 +2,16 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export MSYS_NO_PATHCONV=1
-python3 scripts/configure_local.py
+# Windows installs Python as `python`, and its `python3` alias may be a Store stub.
+python=python3
+if ! python3 -c 'import sys' > /dev/null 2>&1; then
+    python=python
+fi
+if ! "$python" -c 'import sys' > /dev/null 2>&1; then
+    echo "Python 3 is required to generate local credentials (scripts/configure_local.py)." >&2
+    exit 1
+fi
+"$python" scripts/configure_local.py
 compose=(docker compose --profile infra --profile telemetry --profile app)
 docker compose --profile '*' build gateway ingest query worker
 "${compose[@]}" up -d

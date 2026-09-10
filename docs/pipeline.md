@@ -266,7 +266,7 @@ make migrate
 # (deploy/postgres/init-runtime-role.sh). For a volume created before that script
 # existed, run the same two statements once, or recreate the volume with `make db-down`
 # followed by `docker compose down -v`:
-docker compose exec db psql -U di -d di -c "CREATE ROLE di_app LOGIN NOSUPERUSER NOBYPASSRLS NOINHERIT PASSWORD 'di_app'"
+docker compose exec db psql -U di -d di -c "CREATE ROLE di_app LOGIN NOSUPERUSER NOBYPASSRLS NOINHERIT PASSWORD '<DI_DB_RUNTIME_PASSWORD from .env>'"
 docker compose exec db psql -U di -d di -c "GRANT USAGE ON SCHEMA public TO di_app; GRANT SELECT, INSERT, UPDATE, DELETE ON documents, chunks, entities TO di_app"
 uv run --env-file .env --locked --all-packages di index tests/fixtures/text_hr.pdf --tenant demo
 uv run --env-file .env --locked --all-packages di show <document-id> --tenant demo

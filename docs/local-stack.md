@@ -49,7 +49,7 @@ If another database already owns 5432, choose a free `POSTGRES_PORT` before star
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | `di` each | Local database initialization |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | `di`, generated password in `.env`, `di` | Local database initialization |
 | `DI_DATABASE_URL` | `DI_DATABASE_URL` from generated `.env` | Host Python restricted runtime connection |
 | `DI_MIGRATION_DATABASE_URL` | `DI_MIGRATION_DATABASE_URL` from generated `.env` | Migration and disposable integration database connection |
 | `DI_REDIS_URL` | `redis://127.0.0.1:6379/0` | Host queue connection |
