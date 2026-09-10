@@ -15,6 +15,7 @@ from tokenizers import Tokenizer
 def test_adapter_pins_downloads_reuses_model_and_passes_batch_size(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # Pinned downloads and a reused model make repeated embedding calls reproducible and bounded.
     download = Mock(return_value=str(tmp_path))
     model = Mock()
     model.embed.return_value = [np.ones(384)]

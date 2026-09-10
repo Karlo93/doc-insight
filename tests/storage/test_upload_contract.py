@@ -4,6 +4,7 @@ import pytest
 
 
 def test_upload_registration_status_and_processing(repository, document):
+    # Registration and processing are separate states; an accepted upload is not yet searchable.
     tenant = uuid4().hex
     record = repository.register_upload(
         tenant,

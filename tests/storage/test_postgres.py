@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 
 @pytest.mark.integration
 def test_migration_from_empty_and_downgrade(empty_database, migrate_schema):
+    # Round-trip migrations expose downgrade failures that an upgrade-only smoke check misses.
     engine = empty_database
     assert inspect(engine).get_table_names() == []
     migrate_schema(engine, "head")

@@ -16,6 +16,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def test_default_suite_blocks_native_postgres_connections():
+    # libpq can bypass Python socket mocks, so native database connections need their own guard.
     engine = create_engine("postgresql+psycopg://di:di@127.0.0.1/di")
     with pytest.raises(AssertionError, match="Network access"):
         engine.connect()

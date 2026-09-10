@@ -31,6 +31,7 @@ async def limiter(request):
 
 
 async def test_bucket_contract_atomic_and_scoped(limiter):
+    # Concurrent contenders share one bucket; separate read/write operations could admit too many.
     provider, identity = limiter
     results = await asyncio.gather(*[provider.consume(identity) for _ in range(50)])
     assert sum(result.allowed for result in results) == 7

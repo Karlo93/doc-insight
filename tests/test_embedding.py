@@ -22,6 +22,7 @@ def document() -> Document:
 
 
 def test_embedding_attaches_vectors_and_metadata_without_mutation() -> None:
+    # Embedding returns enriched output without mutating the caller's validated document.
     source = document()
     embedder = FakeEmbedder()
     result = embed_document(source, embedder)

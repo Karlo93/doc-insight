@@ -27,6 +27,7 @@ def object_store(request):
 
 
 def test_object_store_contract(object_store):
+    # The fake and real object stores must agree on existence, streaming and object identity.
     key = f"test-{uuid4().hex}/{'a' * 64}"
     assert not object_store.exists(key)
     data = b"%PDF-1.7\ncontract"

@@ -35,6 +35,7 @@ def auth(token):
 async def test_only_provisioned_tenants_reach_upstream(
     gateway, token, tenant, expected
 ):
+    # Provisioning is checked before proxying so unknown tenants cannot reach internal services.
     gateway.settings.tenants = "demo,other"
     async with client_for(gateway) as client:
         response = await client.get(

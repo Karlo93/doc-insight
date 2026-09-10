@@ -15,6 +15,7 @@ from scripts.eval_query import fixture, measure
 
 @pytest.mark.integration
 def test_question_search_finds_diagram_label_without_function_words(database, document):
+    # The full question must not turn lexical search into a conjunction of every function word.
     from doc_insight.query.ranking import lexical_query
 
     repository = PostgresRepository(database)

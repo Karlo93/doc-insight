@@ -29,6 +29,7 @@ def hit(ordinal, score=0.45):
 
 
 def test_rrf_hand_rankings_and_ties():
+    # Hand-calculated ranks isolate fusion arithmetic from model quality and vector distances.
     a, b, c = hit(0), hit(1), hit(2)
     result = fuse([[a, b], [b, a, c]])
     assert [h.chunk.ord for h in result] == [0, 1, 2]

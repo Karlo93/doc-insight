@@ -24,6 +24,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 )
 @pytest.mark.parametrize("language", ["en", "hr"])
 def test_retrieval_recall_on_fixed_questions(provider: str, language: str) -> None:
+    # Frozen questions make recall changes attributable to retrieval rather than a moving test corpus.
     settings = Settings(chunk_tokens=64, chunk_overlap=8)
     tokenizer = HfTokenizer(settings) if provider == "fastembed" else FakeTokenizer()
     embedder = (

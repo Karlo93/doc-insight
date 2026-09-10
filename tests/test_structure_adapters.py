@@ -29,6 +29,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
     "filename,language", [("text_en.pdf", "en"), ("text_hr.pdf", "hr")]
 )
 def test_real_language_and_ner_on_fixtures(filename: str, language: str) -> None:
+    # These installed-model checks use fixed language fixtures rather than network model downloads.
     settings = Settings()
     result = analyze(
         extract(FIXTURES / filename),

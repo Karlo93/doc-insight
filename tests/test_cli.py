@@ -13,6 +13,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def test_text_cli_does_not_import_the_embedding_runtime() -> None:
+    # Plain extraction must stay usable without importing or initializing the embedding runtime.
     subprocess.run(
         [
             sys.executable,

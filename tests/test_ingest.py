@@ -33,6 +33,7 @@ def post(client, data=PDF, tenant="demo"):
 
 
 def test_upload_duplicate_and_tenant_read(clients, monkeypatch):
+    # Duplicate bytes identify the same tenant-owned upload, not a second processing job.
     client, repository, objects = clients
     response = post(client)
     assert response.status_code == 202

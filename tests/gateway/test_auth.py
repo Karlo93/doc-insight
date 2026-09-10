@@ -15,6 +15,7 @@ pytestmark = pytest.mark.anyio
 
 
 async def test_valid_and_cached(gateway, token):
+    # Repeated verification must reuse signing keys instead of turning each request into a JWKS fetch.
     for _ in range(2):
         assert await gateway.auth.authenticate("Bearer " + token()) == Identity(
             "demo", "alice"

@@ -50,6 +50,7 @@ def response(answer="Vaccines stay in refrigerators.", indexes=None, supported=T
 
 @pytest.mark.parametrize("generator", [FakeGenerator(), ExtractiveGenerator()])
 def test_local_generator_contract(generator):
+    # Local and fake generators share the same citation contract used by hosted answers.
     result = generator.generate(
         "Where does the pharmacy store vaccines?",
         ["The pharmacy stores vaccines in monitored refrigerators."],

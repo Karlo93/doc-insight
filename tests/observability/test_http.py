@@ -59,6 +59,7 @@ def request(app, path, headers):
     ],
 )
 def test_requests_are_counted_once_and_sanitized(telemetry, path, status, route):
+    # Raw paths and request headers must not become high-cardinality or sensitive telemetry.
     app = FastAPI()
 
     @app.get("/documents/{document_id}")

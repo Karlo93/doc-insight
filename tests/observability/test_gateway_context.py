@@ -6,6 +6,7 @@ from starlette.requests import Request
 
 
 def test_gateway_injects_active_span_and_discards_caller_baggage(telemetry):
+    # The downstream span must be the gateway's child, not merely share the caller's trace ID.
     request = Request(
         {
             "type": "http",

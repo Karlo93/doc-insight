@@ -15,6 +15,7 @@ SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "dev_issuer.py"
 def test_ensure_is_idempotent_and_mint_matches_published_keys(
     tmp_path, monkeypatch, capsys
 ):
+    # Restarting the issuer must preserve keys so existing workspace tokens remain valid.
     functions = runpy.run_path(str(SCRIPT))
     # run_path returns a copy; the functions read their own globals.
     module = functions["ensure"].__globals__

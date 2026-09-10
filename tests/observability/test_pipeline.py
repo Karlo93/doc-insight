@@ -11,6 +11,7 @@ from .conftest import measurements
 def test_index_telemetry_preserves_pipeline_order_and_cli_durations(
     telemetry, monkeypatch, capsys, failure
 ):
+    # Instrumentation must preserve processing order and the CLI's existing timing contract.
     operations = [Mock() for _ in range(4)]
     if failure:
         operations[
