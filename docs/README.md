@@ -5,12 +5,17 @@
 - [API contract](api.md): planned upload, status, question and stream payloads; delivery status is explicit.
 - [Configuration](configuration.md): current settings tables, defaults and Compose versus Python environment handling.
 - [Pipeline](pipeline.md): implemented extraction, OCR, structure, embeddings, storage and retrieval.
+- [Local stack](local-stack.md): Compose `infra` and `telemetry` profiles, ports, encryption and Grafana.
+- [Observability](observability.md): the shared OpenTelemetry helper, emitted signals and attribute policy.
 - [CI](ci.md): lint, types, tests, security checks and repository protection setup.
 - [Engineering journal](journal.md): implementation notes by milestone.
 - [Lessons](lessons.md): concise observations from implementation and failure cases.
 - [ADR-0001](adr/0001-text-extraction.md): PDFium/Tesseract extraction and alternatives.
 - [ADR-0002](adr/0002-structured-representation.md): language, entities, chunk budgets and exact offsets.
 - [ADR-0003](adr/0003-embeddings-and-vector-storage.md): MiniLM, ONNX, pgvector and upgrade criteria.
+- [ADR-0004](adr/0004-opentelemetry.md): OpenTelemetry with OTLP export to a collector.
+- [ADR-0005](adr/0005-tenant-row-level-security.md): forced row-level security and separate runtime/migration roles.
+- [ADR-0006](adr/0006-local-infrastructure.md): independent infrastructure and telemetry Compose profiles.
 - [Changelog](../CHANGELOG.md): changes awaiting release.
 - [Fixture font provenance](../scripts/fonts/readme.md): generated fixture font and its license.
 
