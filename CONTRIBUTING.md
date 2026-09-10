@@ -1,7 +1,7 @@
 # Contributing
 
 Keep each PR focused on one behavior or documentation change. Read [the pipeline](docs/pipeline.md),
-[CI gates](docs/ci.md) and the [three existing ADRs](docs/README.md)
+[CI gates](docs/ci.md) and the [existing ADRs](docs/README.md)
 before changing the processing/storage boundaries. Read the contracts, worker settings and the
 default/integration test harness before introducing an adapter.
 

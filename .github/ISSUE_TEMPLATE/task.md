@@ -2,8 +2,8 @@
 name: Task
 about: Define a bounded change with acceptance criteria
 title: ""
-labels: ""
-assignees: ""
+labels: []
+assignees: []
 ---
 
 ## Problem and intended result

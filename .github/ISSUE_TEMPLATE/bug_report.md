@@ -2,8 +2,8 @@
 name: Bug report
 about: Report a reproducible behavior defect
 title: ""
-labels: ""
-assignees: ""
+labels: []
+assignees: []
 ---
 
 ## Expected and actual behavior
