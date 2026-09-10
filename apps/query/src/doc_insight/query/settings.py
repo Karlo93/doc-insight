@@ -8,7 +8,7 @@ from pydantic import Field, SecretStr
 
 
 class Settings(EmbeddingSettings):
-    database_url: str = "postgresql+psycopg://di_app:di_app@localhost:5432/di"
+    database_url: str = "postgresql+psycopg://di_app@localhost:5432/di"
     openai_model: str = Field(default="gpt-4.1-mini-2025-04-14", min_length=1)
     openai_api_key: SecretStr = SecretStr("")
     openai_api_key_file: Path | None = None

@@ -22,8 +22,8 @@ class Settings(EmbeddingSettings):
     # MiniLM's 128-token sentence input includes two special tokens.
     chunk_tokens: int = Field(default=120, gt=0, le=126)
     chunk_overlap: int = Field(default=24, ge=0)
-    database_url: str = "postgresql+psycopg://di_app:di_app@localhost:5432/di"
-    migration_database_url: str = "postgresql+psycopg://di:di@localhost:5432/di"
+    database_url: str = "postgresql+psycopg://di_app@localhost:5432/di"
+    migration_database_url: str = "postgresql+psycopg://di@localhost:5432/di"
 
     redis_url: str = "redis://127.0.0.1:6379/0"
     worker_group: str = Field(default="worker", min_length=1, pattern=r"^\S+$")

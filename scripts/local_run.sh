@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export MSYS_NO_PATHCONV=1
+python3 scripts/configure_local.py
 compose=(docker compose --profile infra --profile telemetry --profile app)
 docker compose --profile '*' build gateway ingest query worker
 "${compose[@]}" up -d
@@ -17,7 +18,7 @@ for _ in $(seq 1 30); do
     sleep 2
 done
 curl -fkSs "$url/readyz"
-printf '\nPublic URL: %s\n' "$url"
+printf '\nLocal HTTPS URL: %s\n' "$url"
 printf 'Health:   curl -fkSs %s/healthz\n' "$url"
 printf 'Token:    TOKEN=$(make -s dev-token)   # tenant demo, user alice\n'
 printf 'Upload:   curl -fkSs -H "Authorization: Bearer $TOKEN" -F file=@tests/fixtures/text_hr.pdf %s/ingest\n' "$url"

@@ -30,9 +30,10 @@ test-models:
 	uv run --locked --all-packages pytest -m models --no-cov
 
 test-integration:
-	uv run --locked --all-packages pytest -m integration --no-cov
+	uv run --env-file .env --locked --all-packages pytest -m integration --no-cov
 
 infra-up:
+	uv run --locked python scripts/configure_local.py
 	docker compose --profile infra up -d
 	bash scripts/smoke_infra.sh
 
@@ -40,6 +41,7 @@ infra-down:
 	docker compose --profile infra down
 
 telemetry-up:
+	uv run --locked python scripts/configure_local.py
 	docker compose --profile telemetry up -d --wait --wait-timeout 120
 
 telemetry-down:
@@ -50,10 +52,10 @@ db-up: infra-up
 db-down: infra-down
 
 migrate:
-	uv run --locked --all-packages alembic upgrade head
+	uv run --env-file .env --locked --all-packages alembic upgrade head
 
 audit:
 	uv run --locked --all-packages bandit -c pyproject.toml -r apps packages && uv run --locked --all-packages pip-audit --skip-editable
-	uv run --locked --all-packages go run github.com/zricethezav/gitleaks/v8@v8.30.1 dir --redact .
+	uv run --locked --all-packages go run github.com/zricethezav/gitleaks/v8@v8.30.1 git --redact --log-opts=--all
 
 check: lint typecheck test audit

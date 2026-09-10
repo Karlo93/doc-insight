@@ -1,4 +1,5 @@
 import { uploadFile } from "./upload.js";
+import { requireSecureTransport } from "./transport.mjs";
 // No persistent browser storage: credentials and document content die with this page.
 import { $ } from "./dom.js";
 import { renderDocuments, renderAnswer } from "./views.js";
@@ -35,6 +36,7 @@ function disconnect() {
 }
 /** Call the same-origin gateway with the current token and safe user-facing errors. */
 async function api(path, options = {}) {
+    requireSecureTransport();
     const response = await fetch(`/api${path}`, {
         ...options,
         headers: { Authorization: `Bearer ${token}`, ...options.headers },
@@ -81,6 +83,12 @@ async function refresh() {
 }
 $("auth-form").addEventListener("submit", async (event) => {
     event.preventDefault();
+    try {
+        requireSecureTransport();
+    } catch (error) {
+        notice(error.message);
+        return;
+    }
     token = $("token").value.trim();
     notice();
     offset = 0;
@@ -101,6 +109,14 @@ $("auth-form").addEventListener("submit", async (event) => {
         notice(error.message);
     }
 });
+
+// Block token entry immediately, before a user submits credentials over network HTTP.
+try {
+    requireSecureTransport();
+} catch (error) {
+    $("token").disabled = true;
+    notice(error.message);
+}
 $("signout").addEventListener("click", () => {
     disconnect();
     notice("Disconnected. Your session has been cleared.");

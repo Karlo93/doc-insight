@@ -1,7 +1,9 @@
 import { $ } from "./dom.js";
+import { requireSecureTransport } from "./transport.mjs";
 /** Resolve when ingestion accepts the file; processing finishes asynchronously. */
 export function uploadFile(file, token, onExpired) {
     return new Promise((resolve, reject) => {
+        requireSecureTransport();
         // XHR exposes upload progress; fetch does not provide this browser callback.
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/api/ingest");
