@@ -48,7 +48,6 @@ def main() -> None:
         )
     axes[1].set_ylim(1, 40000)
     fig.savefig(ROOT / "capacity.png", dpi=180)
-    fig.savefig(ROOT / "capacity.svg")
 
 
 if __name__ == "__main__":
