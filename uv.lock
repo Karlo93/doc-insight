@@ -685,7 +685,7 @@ requires-dist = [
     { name = "opentelemetry-api", specifier = ">=1.40,<2" },
     { name = "pgvector", specifier = ">=0.4,<1" },
     { name = "pillow", specifier = ">=12.3.0" },
-    { name = "psycopg", extras = ["binary"], specifier = ">=3,<4" },
+    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.5,<4" },
     { name = "pydantic-settings", specifier = ">=2.15.0" },
     { name = "pypdfium2", specifier = ">=5.13.0" },
     { name = "pytesseract", specifier = ">=0.3.13" },
