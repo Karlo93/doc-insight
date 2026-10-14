@@ -3,7 +3,7 @@ name = "doc-insight-gateway"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "cryptography>=50,<51",
+    "cryptography>=50.0.2,<51",
     "doc-insight-contracts",
     "doc-insight-observability",
     "fastapi>=0.141.1,<1",
