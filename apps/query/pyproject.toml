@@ -4,7 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "doc-insight-contracts", "doc-insight-worker", "doc-insight-observability",
-    "fastapi>=0.115,<1", "httpx>=0.28,<1", "uvicorn>=0.34,<1",
+    "fastapi>=0.146.0,<1", "httpx>=0.28,<1", "uvicorn>=0.34,<1",
     "pydantic-settings>=2.15,<3", "sqlalchemy>=2,<3",
 ]
 
